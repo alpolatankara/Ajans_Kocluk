@@ -344,6 +344,7 @@ body{display:flex;flex-direction:column}
 .side-nav .tab[data-tab="kariyer"]{--c:var(--nc-kariyer)}
 .side-nav .tab[data-tab="takip"]{--c:var(--nc-takip)}
 .side-nav .tab[data-tab="seans"]{--c:var(--nc-seans)}
+.side-nav .tab[data-tab="gonder"]{--c:var(--nc-veli)}
 .side-nav .tab[data-tab="veli"]{--c:var(--nc-veli)}
 .side-nav .tab[data-tab="formlar"]{--c:var(--nc-formlar)}
 .side-nav .tab[data-tab="ajanda"]{--c:var(--nc-ajanda)}
@@ -397,6 +398,62 @@ body{display:flex;flex-direction:column}
   .side-backdrop{top:54px}
 }
 
+
+/* ---------- v3.6: gruplu menü + sabit öğrenci çubuğu ---------- */
+.ngrp{margin-top:2px}
+.ghead{--c:var(--gc,var(--ink-3));display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-left:3px solid transparent;background:none;border-radius:0 7px 7px 0;padding:9px 10px;cursor:pointer;color:var(--ink);font:inherit;font-weight:600}
+.ghead .tabicon{font-size:15px;width:20px;text-align:center;flex:0 0 auto}
+.ghead .tablabel{flex:1}
+.ghead .gcv{font-size:11px;color:var(--ink-3);transition:transform .15s}
+.ghead[aria-expanded="true"] .gcv{transform:rotate(90deg)}
+.ghead:hover{background:var(--paper);border-left-color:var(--c)}
+.ngrp.has-active>.ghead{border-left-color:var(--c)}
+.ngrp.has-active>.ghead .tablabel::after{content:" ●";font-size:8px;color:var(--c);vertical-align:middle}
+.ghead.alert .tabicon{position:relative}
+.ghead.alert .tabicon::after{content:"";position:absolute;top:-2px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--redpen);box-shadow:0 0 0 2px var(--paper-2)}
+.gsub{margin:1px 0 6px 18px;border-left:1px solid var(--line);padding-left:2px}
+.gsub[hidden]{display:none}
+.side-nav .gsub .tab{padding:7px 10px;font-size:13px}
+.side-nav .gsub .tab .tabicon{font-size:13px;width:18px}
+.ngrp .tab{--c:var(--gc,var(--ink-3))}
+.side-nav .ngrp .tab[data-tab]{--c:var(--gc)}
+.ctxbar{position:sticky;top:-18px;z-index:40;margin:-18px -22px 14px;padding:8px 22px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.ctx-stu{display:flex;align-items:center;gap:4px;flex:1 1 260px;max-width:420px;min-width:0}
+.ctx-stu select{flex:1;min-width:0;font-weight:600}
+.ctx-ic{font-size:15px}
+.ctx-nav{padding:6px 10px;min-height:36px}
+.ctxbar>select{max-width:150px}
+.ctxbar .weeknav .wk{min-width:0;font-size:12px}
+.ctxbar .weeknav .wk b{font-size:13.5px}
+.ctx-crumb{margin-left:auto;font-size:12px;color:var(--ink-3);white-space:nowrap}
+@media (max-width:980px){.ctxbar{top:-16px;margin:-16px -14px 12px;padding:6px 14px}}
+@media (max-width:640px){.ctx-stu{flex:1 1 100%;max-width:none}.ctxbar>select{flex:1}.ctx-crumb{display:none}.ctxbar .weeknav{flex:1 1 auto;justify-content:flex-end}}
+@media print{.ctxbar{display:none!important}}
+.yk-kart{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--paper)}
+.yk-kart .yk-d{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.yk-kart .yk-d.g{background:#2e8b57}.yk-kart .yk-d.y{background:#d9a21b}.yk-kart .yk-d.r{background:var(--redpen,#b8432f)}
+.yk-kart .yk-t{flex:1 1 220px;min-width:0}.yk-kart .yk-t small{display:block;color:var(--ink-3)}
+
+.od-ozet{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:0 0 12px}
+.od-kart{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--paper)}
+.od-kart small{display:block;color:var(--ink-3);font-size:11.5px}.od-kart b{font-size:17px}
+.od-kart b.od-g{color:#2e8b57}.od-kart b.od-r{color:var(--redpen,#b8432f)}
+.od-d{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600}
+.od-d.g{background:#dff3e6;color:#1d6b40}.od-d.y{background:#fff1cf;color:#8a6410}.od-d.r{background:#fbe1dc;color:#a13322}
+.od-act{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}
+.od-h{margin:14px 0 4px;font-size:13.5px}
+.od-gun input[type=text],.od-gun input[type=date],.od-gun input[type=number]{width:100%;min-height:34px}
+.ank{max-width:640px;margin:0 auto}
+.ank-bar{height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;border:1px solid var(--line)}.ank-bar i{display:block;height:100%;background:var(--ink);transition:width .2s}
+.ank-say{font-size:12px;color:var(--ink-3);margin:6px 0 2px}.ank-q{font-size:20px;line-height:1.3;margin:6px 0}.ank-n{color:var(--ink-3);font-size:13.5px;margin:0 0 10px}
+.ank-os{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.ank-o{min-height:50px;text-align:left;padding:10px 14px;border:2px solid var(--line-2);border-radius:12px;background:var(--paper);font:inherit;font-size:15.5px;cursor:pointer;color:var(--ink)}
+.ank-o[aria-checked="true"],.ank-o[aria-pressed="true"]{border-color:var(--ink);background:var(--paper-2);font-weight:600}
+.ank-o[aria-checked="true"]::before,.ank-o[aria-pressed="true"]::before{content:"✓ "}
+.ank-net{text-align:center;margin:10px 0}.ank-netv{font-size:44px;font-weight:650}.ank-net input[type=range]{width:100%;height:36px}
+.ank-netu{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)}.ank-netl{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink-3)}.ank-net input[type=number]{width:140px;text-align:center;font-size:18px}
+.ank-btn{display:flex;justify-content:space-between;gap:10px;margin-top:16px}.ank-btn .btn{min-height:48px;min-width:110px}
+.ank textarea{width:100%}
 /* Analiz grafikleri */
 .viz{--v1:#2a78d6;--v2:#eb6834;--v3:#1baf7a}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .viz{--v1:#3987e5;--v2:#d95926;--v3:#199e70}}
@@ -452,55 +509,59 @@ body{display:flex;flex-direction:column}
       </div>
     </div>
 
-    <div class="side-controls">
-      <div class="field"><label for="selStudent">Öğrenci</label><select id="selStudent"></select></div>
-      <div class="field"><label for="selGrade">Sınıf</label><select id="selGrade"></select></div>
-      <div class="field" id="alanField"><label for="selAlan">Alan</label>
-        <select id="selAlan"><option value="SAY">Sayısal</option><option value="EA">Eşit ağırlık</option><option value="SOZ">Sözel</option><option value="DIL">Dil</option></select></div>
-      <div class="weeknav" aria-label="Hafta seçimi">
-        <button class="btn" id="prevW" aria-label="Önceki hafta">‹</button>
-        <div class="wk" id="wkLabel"></div>
-        <button class="btn" id="nextW" aria-label="Sonraki hafta">›</button>
-      </div>
-    </div>
-
     <nav class="side-nav" role="tablist" aria-label="Panel bölümleri">
-            <p class="side-group">Öğrenci</p>
-      <button class="tab" role="tab" data-tab="portfoy" data-tip="Seçili öğrencinin tüm bilgileri, dijital formları, denemeleri ve notları tek yerde" aria-selected="false"><span class="tabicon">📁</span><span class="tablabel">Öğrenci portföyü</span></button>
-      <button class="tab" role="tab" data-tab="ozet" data-tip="Haftalık uyum, net-hedef karşılaştırması, açık hedefler, ödeme ve okuma durumunu tek ekranda özetler" aria-selected="false"><span class="tabicon">📊</span><span class="tablabel">Öğrenci özeti</span></button>
-      <button class="tab" role="tab" data-tab="ogrenci" data-tip="Öğrenci ekleme/düzenleme, iletişim bilgileri, PIN kilidi ve yedekleme" aria-selected="false"><span class="tabicon">🎓</span><span class="tablabel">Öğrenci kaydı ve yedek</span></button>
-      <button class="tab" role="tab" data-tab="genel" data-tip="Tüm öğrencileri tek ekranda karşılaştırır: eksik ödeme, gecikmiş takip, açık hedefler" aria-selected="true"><span class="tabicon">👥</span><span class="tablabel">Tüm öğrencilere genel bakış</span></button>
-
-      <p class="side-group">Görüşme ve takip</p>
-      <button class="tab" role="tab" data-tab="veli" data-tip="Veli ile yapılan görüşmelerin kaydı ve takip edilecek konular" aria-selected="false"><span class="tabicon">👪</span><span class="tablabel">Veli görüşmeleri</span></button>
-      <button class="tab" role="tab" data-tab="takip" data-tip="Deneme net takibi, hedef net karşılaştırması ve D/Y/B girişleri" aria-selected="false"><span class="tabicon">✅</span><span class="tablabel">Haftalık uygulama takibi</span></button>
-      <button class="tab" role="tab" data-tab="seans" data-tip="Koçluk seanslarının günlüğü: gözlemler ve sonraki seans planı" aria-selected="false"><span class="tabicon">💬</span><span class="tablabel">Seans notları</span></button>
-
-      <p class="side-group">Planlama</p>
-      <button class="tab" role="tab" data-tab="ajanda" data-tip="Gün ve saatli görevler, hatırlatmalar ve takvime aktarma" aria-selected="false"><span class="tabicon">📅</span><span class="tablabel">Ajanda</span><span class="tabbadge" id="ajRozet" style="display:none"></span></button>
-      <button class="tab" role="tab" data-tab="asistan" data-tip="Ay ay yol haritası: bu ay ne yapmalı, hangi formlar doldurulmalı" aria-selected="false"><span class="tabicon">🧭</span><span class="tablabel">Koç asistanı</span></button>
-      <button class="tab" role="tab" data-tab="hafta" data-tip="Seçili haftanın ders dağılımı, çalışma blokları ve günlük plan" aria-selected="false"><span class="tabicon">🗓️</span><span class="tablabel">Haftalık plan</span></button>
-      <button class="tab" role="tab" data-tab="yillik" data-tip="Yıl boyunca işlenecek üniteler, kazanımlar ve müfredat durumu" aria-selected="false"><span class="tabicon">📘</span><span class="tablabel">Yıllık plan ve kazanımlar</span></button>
-
-      <p class="side-group">Koçluk</p>
-      <button class="tab" role="tab" data-tab="gelisim" data-tip="Sınıf düzeyine göre gelişim basamağı, pedagojik öneriler ve koç kontrol listesi" aria-selected="false"><span class="tabicon">🌱</span><span class="tablabel">Gelişim ve kariyer</span></button>
-      <button class="tab" role="tab" data-tab="kariyer" data-tip="RIASEC ilgi envanteri, SMART hedefler ve kariyer/bölüm keşfi" aria-selected="false"><span class="tabicon">🧭</span><span class="tablabel">Kariyer planlama</span></button>
-      <button class="tab" role="tab" data-tab="formlar" data-tip="Koçluk sözleşmesi, ön görüşme/tanıma formu ve öğrenci taahhütnamesi — doldurup yazdırabilir, arşivleyebilirsin" aria-selected="false"><span class="tabicon">📋</span><span class="tablabel">Koçluk formları</span></button>
-      <button class="tab" role="tab" data-tab="kutup" data-tip="Sınıfa göre koçluk formları: boş veya dolu yazdır, 20 soruluk ölçekler" aria-selected="false"><span class="tabicon">🗂️</span><span class="tablabel">Form kütüphanesi</span></button>
-
-      <p class="side-group">Yönetim</p>
-      <button class="tab" role="tab" data-tab="odeme" data-tip="Aylık ücret, ödeme durumu ve aile/kardeş gruplaması" aria-selected="false"><span class="tabicon">💳</span><span class="tablabel">Ödeme takibi</span></button>
-      <button class="tab" role="tab" data-tab="okuma" data-tip="Okunan/okunacak kitapların ve okuma hedeflerinin takibi" aria-selected="false"><span class="tabicon">📖</span><span class="tablabel">Okuma takibi</span></button>
-
-      <p class="side-group">Yardım</p>
-      <button class="tab" role="tab" data-tab="surum" data-tip="Otomatik yedekler, geri alma ve sürüm notları" aria-selected="false"><span class="tabicon">🕘</span><span class="tablabel">Sürüm geçmişi</span></button>
-      <button class="tab" role="tab" data-tab="kilavuz" data-tip="Müfredat kaynakları, doğrulama notları ve kullanım rehberi" aria-selected="false"><span class="tabicon">ℹ️</span><span class="tablabel">Kılavuz</span></button>
+      <button class="tab" role="tab" data-tab="genel" data-tip="Tüm öğrencileri tek ekranda karşılaştırır: eksik ödeme, gecikmiş takip, açık hedefler" aria-selected="true"><span class="tabicon">🏠</span><span class="tablabel">Genel bakış (tüm öğrenciler)</span></button>
+      <div class="ngrp" data-g="ogr" style="--gc:#2c5f8a"><button class="ghead" type="button" aria-expanded="false" data-ghead="ogr"><span class="tabicon">🎓</span><span class="tablabel">Öğrenci</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="portfoy" data-tip="Seçili öğrencinin tüm bilgileri, dijital formları, denemeleri ve notları tek yerde" aria-selected="false"><span class="tabicon">📁</span><span class="tablabel">Öğrenci portföyü</span></button>
+        <button class="tab" role="tab" data-tab="ozet" data-tip="Haftalık uyum, net-hedef karşılaştırması, açık hedefler, ödeme ve okuma durumunu tek ekranda özetler" aria-selected="false"><span class="tabicon">📊</span><span class="tablabel">Bu öğrencinin özeti</span></button>
+        <button class="tab" role="tab" data-tab="ogrenci" data-tip="Öğrenci ekleme/düzenleme, iletişim bilgileri, PIN kilidi ve yedekleme" aria-selected="false"><span class="tabicon">🎓</span><span class="tablabel">Öğrenci kaydı</span></button>
+      </div></div>
+      <div class="ngrp" data-g="gor" style="--gc:#3f7d4f"><button class="ghead" type="button" aria-expanded="false" data-ghead="gor"><span class="tabicon">💬</span><span class="tablabel">Görüşme ve takip</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="veli" data-tip="Veli ile yapılan görüşmelerin kaydı ve takip edilecek konular" aria-selected="false"><span class="tabicon">👪</span><span class="tablabel">Veli görüşmeleri</span></button>
+        <button class="tab" role="tab" data-tab="takip" data-tip="Deneme net takibi, hedef net karşılaştırması ve D/Y/B girişleri" aria-selected="false"><span class="tabicon">✅</span><span class="tablabel">Haftalık uygulama takibi</span></button>
+        <button class="tab" role="tab" data-tab="seans" data-tip="Koçluk seanslarının günlüğü: gözlemler ve sonraki seans planı" aria-selected="false"><span class="tabicon">💬</span><span class="tablabel">Seans notları</span></button>
+        <button class="tab" role="tab" data-tab="gonder" data-tip="Seçtiğiniz öğrencilere form, anket, hatırlatma ve teşekkür mesajlarını bağlantılarıyla toplu hazırlayın; cevaplar otomatik sisteme düşer" aria-selected="false"><span class="tabicon">📨</span><span class="tablabel">Toplu gönderim</span></button>
+      </div></div>
+      <div class="ngrp" data-g="pln" style="--gc:#2f6f5e"><button class="ghead" type="button" aria-expanded="false" data-ghead="pln"><span class="tabicon">🗓️</span><span class="tablabel">Planlama</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="hafta" data-tip="Seçili haftanın ders dağılımı, çalışma blokları ve günlük plan" aria-selected="false"><span class="tabicon">🗓️</span><span class="tablabel">Haftalık plan</span></button>
+        <button class="tab" role="tab" data-tab="yillik" data-tip="Yıl boyunca işlenecek üniteler, kazanımlar ve müfredat durumu" aria-selected="false"><span class="tabicon">📘</span><span class="tablabel">Yıllık plan ve kazanımlar</span></button>
+        <button class="tab" role="tab" data-tab="ajanda" data-tip="Gün ve saatli görevler, hatırlatmalar ve takvime aktarma" aria-selected="false"><span class="tabicon">📅</span><span class="tablabel">Ajanda</span><span class="tabbadge" id="ajRozet" style="display:none"></span></button>
+        <button class="tab" role="tab" data-tab="asistan" data-tip="Ay ay yol haritası: bu ay ne yapmalı, hangi formlar doldurulmalı" aria-selected="false"><span class="tabicon">🧭</span><span class="tablabel">Koç asistanı</span></button>
+      </div></div>
+      <div class="ngrp" data-g="koc" style="--gc:#b5651d"><button class="ghead" type="button" aria-expanded="false" data-ghead="koc"><span class="tabicon">🌱</span><span class="tablabel">Koçluk</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="gelisim" data-tip="Sınıf düzeyine göre gelişim basamağı, pedagojik öneriler ve koç kontrol listesi" aria-selected="false"><span class="tabicon">🌱</span><span class="tablabel">Gelişim basamağı</span></button>
+        <button class="tab" role="tab" data-tab="kariyer" data-tip="RIASEC ilgi envanteri, SMART hedefler ve kariyer/bölüm keşfi" aria-selected="false"><span class="tabicon">🧭</span><span class="tablabel">Kariyer planlama</span></button>
+        <button class="tab" role="tab" data-tab="formlar" data-tip="Koçluk sözleşmesi, ön görüşme/tanıma formu ve öğrenci taahhütnamesi — doldurup yazdırabilir, arşivleyebilirsin" aria-selected="false"><span class="tabicon">📋</span><span class="tablabel">Koçluk formları</span></button>
+        <button class="tab" role="tab" data-tab="kutup" data-tip="Sınıfa göre koçluk formları: boş veya dolu yazdır, 20 soruluk ölçekler" aria-selected="false"><span class="tabicon">🗂️</span><span class="tablabel">Form kütüphanesi</span></button>
+        <button class="tab" role="tab" data-tab="analiz" data-tip="Öğrenciye bağlantıyla gönderilen (ya da yüz yüze doldurulan) kısa analiz: ön çalışma planı, ders dağılımı ve ilk yol haritası; arşiv ve PDF rapor" aria-selected="false"><span class="tabicon">🎯</span><span class="tablabel">Öğrenci analiz merkezi</span></button>
+        <button class="tab" role="tab" data-tab="discipline" data-tip="22 maddelik çalışma disiplini öz değerlendirmesi: rutin, erteleme, zorlukla baş etme ve takip" aria-selected="false"><span class="tabicon">🧪</span><span class="tablabel">Çalışma disiplini analizi</span></button>
+      </div></div>
+      <div class="ngrp" data-g="yon" style="--gc:#a1750c"><button class="ghead" type="button" aria-expanded="false" data-ghead="yon"><span class="tabicon">⚙️</span><span class="tablabel">Yönetim</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="odeme" data-tip="Aylık ücret, ödeme durumu ve aile/kardeş gruplaması" aria-selected="false"><span class="tabicon">💳</span><span class="tablabel">Ödeme takibi</span></button>
+        <button class="tab" role="tab" data-tab="okuma" data-tip="Okunan/okunacak kitapların ve okuma hedeflerinin takibi" aria-selected="false"><span class="tabicon">📖</span><span class="tablabel">Okuma takibi</span></button>
+        <button class="tab" role="tab" data-tab="surum" data-tip="Otomatik yedekler, geri alma ve sürüm notları" aria-selected="false"><span class="tabicon">🕘</span><span class="tablabel">Sürüm geçmişi</span></button>
+      </div></div>
+      <div class="ngrp" data-g="yar" style="--gc:#6b8196"><button class="ghead" type="button" aria-expanded="false" data-ghead="yar"><span class="tabicon">❓</span><span class="tablabel">Yardım</span><span class="gcv" aria-hidden="true">▸</span></button><div class="gsub" hidden>
+        <button class="tab" role="tab" data-tab="kilavuz" data-tip="Müfredat kaynakları, doğrulama notları ve kullanım rehberi" aria-selected="false"><span class="tabicon">ℹ️</span><span class="tablabel">Kılavuz</span></button>
+        <button class="tab" role="tab" data-tab="yedek" data-tip="Şifreli yedek indirme/paylaşma, Drive yedeği, öğrenci arşiv paketi ve güvenlik durumu" aria-selected="false"><span class="tabicon">🛡️</span><span class="tablabel">Yedek ve güvenlik</span></button>
+      </div></div>
     </nav>
     <p class="side-foot">Ajans Koçluk ve Kariyer Planlama</p>
   </aside>
   <div class="side-backdrop" id="sideBackdrop"></div>
 
   <div class="main">
+    <div class="ctxbar" id="ctxbar" role="region" aria-label="Seçili öğrenci ve hafta">
+      <div class="ctx-stu"><button class="btn ctx-nav" id="stuPrev" type="button" aria-label="Önceki öğrenci">‹</button><span class="ctx-ic" aria-hidden="true">👤</span><select id="selStudent" aria-label="Öğrenci"></select><button class="btn ctx-nav" id="stuNext" type="button" aria-label="Sonraki öğrenci">›</button></div>
+      <select id="selGrade" aria-label="Sınıf"></select>
+      <span id="alanField"><select id="selAlan" aria-label="Alan"><option value="SAY">Sayısal</option><option value="EA">Eşit ağırlık</option><option value="SOZ">Sözel</option><option value="DIL">Dil</option></select></span>
+      <div class="weeknav" aria-label="Hafta seçimi">
+        <button class="btn" id="prevW" aria-label="Önceki hafta">‹</button>
+        <div class="wk" id="wkLabel"></div>
+        <button class="btn" id="nextW" aria-label="Sonraki hafta">›</button>
+      </div>
+      <span class="ctx-crumb" id="crumb"></span>
+    </div>
     <button class="stripbar" id="stripBtn" type="button" aria-expanded="false" aria-controls="stripBox"><span id="stripTxt"></span><span class="stripcv" id="stripCv">Yıllık takvim ▾</span></button>
     <section class="strip" id="stripBox" aria-label="Yıllık hafta şeridi" hidden>
       <div class="strip-grid" id="strip"></div>
@@ -589,7 +650,7 @@ function varsayilanOgrenci(){
 function dbNormalize(db){
   if(!db || typeof db!=="object") db = {};
   if(!Array.isArray(db.students)) db.students = [];
-  ["weeks","takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay"].forEach(k=>{
+  ["weeks","takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz"].forEach(k=>{
     if(!db[k] || typeof db[k]!=="object" || Array.isArray(db[k])) db[k] = {};
   });
   if(!db.ayar || typeof db.ayar!=="object" || Array.isArray(db.ayar)) db.ayar = {};
@@ -604,7 +665,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.4.0";
+const SURUM = "3.8.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -745,7 +806,8 @@ function depoYaz(){
   });
 }
 function save(){ if(DEPO.kilitli) return; depoYaz(); senkIsaretle(); }
-function stu(){ return DB.students.find(s=>s.id===DB.cur) || DB.students[0]; }
+function aktifler(){ return DB.students.filter(s=>!s.arsiv); }
+function stu(){ return DB.students.find(s=>s.id===DB.cur && !s.arsiv) || aktifler()[0] || DB.students[0]; }
 
 /* =========================================================
    GOOGLE DRIVE EŞİTLEME (kendi Google hesabınız + uçtan uca şifreleme)
@@ -1035,6 +1097,10 @@ function dosya_(ad, olustur) {
 function oku_(ad) { var f = dosya_(ad, false); return f ? f.getBlob().getDataAsString() : null; }
 function yaz_(ad, icerik) { dosya_(ad, true).setContent(icerik); }
 
+function hmacHex_(msg, key) {
+  var b = Utilities.computeHmacSha256Signature(msg, key);
+  return b.map(function (x) { x = x < 0 ? x + 256 : x; return ('0' + x.toString(16)).slice(-2); }).join('');
+}
 function yetkili_(t) {
   var a = props_().getProperty('AUTH');
   if (!a || typeof t !== 'string' || t.length !== a.length) return false;
@@ -1065,17 +1131,31 @@ function doPost(e) {
     if (a === 'okoy') {
       var oid = String(g.i || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48);
       if (!oid || typeof g.c !== 'string' || g.c.length < 1 || g.c.length > 8000) return cevap_({ok: false, hata: 'gecersiz'});
-      if (g.x && Number(g.x) < Date.now()) return cevap_({ok: false, hata: 'sure'});
+      var xs = Number(g.x) || 0, auth0 = p.getProperty('AUTH');
+      if (!auth0 || !xs || typeof g.h !== 'string' || !/^[0-9a-f]{24}$/.test(g.h) || hmacHex_(oid + '|' + xs, auth0).slice(0, 24) !== g.h) return cevap_({ok: false, hata: 'imza'});
+      if (xs < Date.now()) return cevap_({ok: false, hata: 'sure'});
       if (p.getProperty('r_' + oid)) return cevap_({ok: false, hata: 'var'});
-      var eski = Date.now() - 30 * 864e5, hh = p.getProperties();
-      Object.keys(hh).forEach(function (n) { if (n.indexOf('r_') === 0) { try { if (JSON.parse(hh[n]).z < eski) p.deleteProperty(n); } catch (e5) { p.deleteProperty(n); } } });
+      var eski = Date.now() - 30 * 864e5, hh = p.getProperties(), say = 0;
+      Object.keys(hh).forEach(function (n) { if (n.indexOf('r_') === 0) { try { if (JSON.parse(hh[n]).z < eski) p.deleteProperty(n); else say++; } catch (e5) { p.deleteProperty(n); } } });
+      if (say > 400) return cevap_({ok: false, hata: 'dolu'});
       p.setProperty('r_' + oid, JSON.stringify({c: g.c, z: Date.now()}));
       return cevap_({ok: true});
     }
     if (kilitli_()) return cevap_({ok: false, hata: 'kilitli'});
     if (!yetkili_(g.t)) { hataSay_(); return cevap_({ok: false, hata: 'yetkisiz'}); }
     CacheService.getScriptCache().remove('kilit');
-    if (a === 'okping') return cevap_({ok: true});
+    if (a === 'okping') return cevap_({ok: true, s: 3});
+    if (a === 'ydk') {
+      var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
+      if (!/^yedek-[0-9]{8,14}\.json$/.test(yad) || typeof g.veri !== 'string' || g.veri.length < 20 || g.veri.length > 6000000) return cevap_({ok: false, hata: 'gecersiz'});
+      var yf = klasor_(), yit = yf.getFilesByName(yad);
+      if (yit.hasNext()) yit.next().setContent(g.veri); else yf.createFile(yad, g.veri, 'text/plain');
+      var yl = [], yi = yf.getFiles();
+      while (yi.hasNext()) { var yx = yi.next(); if (/^yedek-[0-9]{8,14}\.json$/.test(yx.getName())) yl.push(yx); }
+      yl.sort(function (u, v) { return u.getName() < v.getName() ? 1 : -1; });
+      for (var yk = 10; yk < yl.length; yk++) yl[yk].setTrashed(true);
+      return cevap_({ok: true, ad: yad, adet: Math.min(yl.length, 10)});
+    }
     if (a === 'okal') {
       var ha = p.getProperties(), ka = [];
       Object.keys(ha).forEach(function (n) { if (n.indexOf('r_') === 0) { try { ka.push({i: n.slice(2), c: JSON.parse(ha[n]).c}); } catch (e6) { p.deleteProperty(n); } } });
@@ -1234,7 +1314,7 @@ function autoFill(){
 const $ = id => document.getElementById(id);
 function renderTop(){
   const s = stu();
-  $("selStudent").innerHTML = DB.students.map(x=>`<option value="${x.id}" ${x.id===s.id?"selected":""}>${esc(x.ad)}</option>`).join("");
+  $("selStudent").innerHTML = aktifler().map(x=>`<option value="${x.id}" ${x.id===s.id?"selected":""}>${esc(x.ad)}</option>`).join("");
   $("selGrade").innerHTML = GRADES.map(g=>`<option value="${g}" ${g===s.sinif?"selected":""}>${GLABEL[g]}</option>`).join("");
   $("selAlan").value = s.alan||"SAY";
   $("alanField").style.display = (s.sinif==="11"||s.sinif==="12") ? "" : "none";
@@ -1242,8 +1322,11 @@ function renderTop(){
   $("wkLabel").innerHTML = `<b>${W}. hafta</b>${range(c)}`;
   let lastBk=null; try{ lastBk=localStorage.getItem('akp-last-backup'); }catch(e){}
   const bkDays = lastBk ? Math.floor((new Date(todayIso())-new Date(lastBk))/86400000) : Infinity;
-  const ogrBtn = document.querySelector('.tab[data-tab="ogrenci"]');
+  const ogrBtn = document.querySelector('.tab[data-tab="yedek"]');
   if(ogrBtn) ogrBtn.classList.toggle('alert', bkDays>=7);
+  document.querySelectorAll('.ngrp').forEach(g=>{ const h=g.querySelector('.ghead'); if(h) h.classList.toggle('alert', !!g.querySelector('.tab.alert')); });
+  const ak = aktifler(), ix = ak.findIndex(x=>x.id===s.id);
+  $("stuPrev").disabled = $("stuNext").disabled = ak.length<2;
 }
 function renderStrip(){
   const s = stu(); const g = s.sinif; const subs = subjects(g, s.alan);
@@ -1280,7 +1363,7 @@ function renderStrip(){
 /* ---------- Faz 9: genel bakış (tüm öğrenciler) ---------- */
 function renderGenel(){
   const bugun = todayIso(); const buAy = bugun.slice(0,7);
-  const rows = DB.students.map(s=>{
+  const rows = aktifler().map(s=>{
     const g = s.sinif;
     const T = DB.takip[s.id]||{};
     const pts = CAL.filter(c=>!c.tatil).map(c=>{ const r=T[c.teach]||{}; return {w:c.teach, n:hesaplaNet(r)}; }).filter(p=>p.n!=="");
@@ -1311,9 +1394,9 @@ function renderGenel(){
   const toplamGec = rows.reduce((a,r)=>a+r.gecSayi,0);
   const odemesiz = rows.filter(r=>!r.odemeKayit).length;
   $("panel").innerHTML = `
-    <div class="colhead"><h2>Genel bakış</h2><span class="muted">${DB.students.length} öğrenci</span></div>
+    <div class="colhead"><h2>Genel bakış</h2><span class="muted">${aktifler().length} öğrenci</span></div>
     <div class="pcols-screen">
-      <div class="box"><h3>Bu ay ödeme</h3><p>Kaydı eksik: <b style="color:${odemesiz?'var(--redpen)':'inherit'}">${odemesiz}</b> / ${DB.students.length}</p></div>
+      <div class="box"><h3>Bu ay ödeme</h3><p>Kaydı eksik: <b style="color:${odemesiz?'var(--redpen)':'inherit'}">${odemesiz}</b> / ${aktifler().length}</p></div>
       <div class="box"><h3>Gecikmiş takip</h3><p>Toplam gecikmiş görüşme/seans planı: <b style="color:${toplamGec?'var(--redpen)':'inherit'}">${toplamGec}</b></p></div>
     </div>
     ${DB.students.length?`<table class="stable"><thead><tr><th>Öğrenci</th><th>Sınıf</th><th>Bu ay ödeme</th><th>Son net</th><th>Açık hedef</th><th>Gecikmiş</th></tr></thead><tbody>${rowsHtml}</tbody></table>
@@ -1613,7 +1696,7 @@ function renderTakip(){
 function renderOgrenci(){
   const q = OGR_Q.trim().toLocaleLowerCase('tr');
   const match = s => !q || [s.ad,s.okul,s.veliAd,s.koc,s.aile].some(v=>(v||"").toLocaleLowerCase('tr').includes(q));
-  const filtered = DB.students.filter(match).slice().sort((a,b)=>{
+  const filtered = aktifler().filter(match).slice().sort((a,b)=>{
     const A=(a.aile||"").toLocaleLowerCase('tr'), B=(b.aile||"").toLocaleLowerCase('tr');
     if(A && B) return A<B?-1:A>B?1:0;
     return A?-1:B?1:0;
@@ -1640,14 +1723,13 @@ function renderOgrenci(){
         <div class="field"><label for="fAile">Aile / kardeş etiketi</label><input id="fAile" type="text" placeholder="Örnek: Yılmaz ailesi"></div>
         <div class="field fact"><button class="btn primary" id="fSave">Öğrenciyi kaydet</button> <button class="btn" id="fBosForm">Boş kayıt formu yazdır</button></div>
       </div></div>
-    <div class="colhead"><h3 style="margin:0">Öğrenciler (${filtered.length}/${DB.students.length})</h3>
+    <div class="colhead"><h3 style="margin:0">Öğrenciler (${filtered.length}/${aktifler().length})</h3>
       <input id="ogrSearch" type="text" value="${esc(OGR_Q)}" placeholder="Ad, okul veya veli ara…" aria-label="Öğrenci ara" style="max-width:260px"></div>
     <table class="stable"><thead><tr><th>Öğrenci</th><th>Sınıf</th><th>Okul</th><th>Veli</th><th>Koç</th><th></th></tr></thead><tbody>${rows||emptyMsg}</tbody></table>
-    <div class="box" style="margin-top:18px"><h3>Yedekleme</h3>
-      <p class="hint">Tüm öğrenci, plan ve takip verileri bu tarayıcıda saklanır. Başka bir cihaza taşımak için yedeği dosya olarak indirin ve diğer cihazda yükleyin.</p>
+    <div class="box" style="margin-top:18px"><h3>Yedekleme ve güvenlik</h3>
+      <p class="hint">Şifreli yedek, paylaşma, Drive yedeği, öğrenci arşivi ve şifre ayarları <b>Yardım › Yedek ve güvenlik</b> sayfasında toplandı.</p>
       ${backupNote()}
-      <div class="actions"><button class="btn" id="bkOut">Şifreli yedek indir (.json)</button><button class="btn" id="bkInBtn">Yedeği yükle</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div></div>
-    ${guvenlikHtml()}`;
+      <div class="actions"><button class="btn primary" id="bkGit" type="button">Yedek ve güvenliğe git</button></div></div>`;
   let editing = null;
   $("ogrSearch").addEventListener('input',e=>{ OGR_Q = e.target.value; renderOgrenci(); });
   $("fSave").addEventListener('click',()=>{
@@ -1668,7 +1750,7 @@ function renderOgrenci(){
     $("fSave").textContent = "Değişiklikleri kaydet"; $("fAd").focus();
   }));
   document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
-    if(DB.students.length===1){ toast("En az bir öğrenci kalmalı"); return; }
+    if(aktifler().length===1){ toast("En az bir öğrenci kalmalı"); return; }
     const s = DB.students.find(x=>x.id===b.dataset.del);
     if(b.dataset.arm!=="1"){ b.dataset.arm="1"; b.textContent="Silmeyi onayla"; b.style.borderColor="var(--redpen)"; b.style.color="var(--redpen)";
       setTimeout(()=>{ if(b.isConnected){ b.dataset.arm=""; b.textContent="Sil"; b.style.borderColor=""; b.style.color=""; } },4000); return; }
@@ -1676,13 +1758,13 @@ function renderOgrenci(){
     const backup = {
       student: s, idx,
       weeks: Object.entries(DB.weeks).filter(([k])=>k.startsWith(s.id+":")),
-      takip: DB.takip[s.id], denetim: DB.denetim[s.id], gorusme: DB.gorusme[s.id], kariyer: DB.kariyer[s.id], odeme: DB.odeme[s.id], okuma: DB.okuma[s.id], seans: DB.seans[s.id], olcek: DB.olcek[s.id], fkayit: DB.fkayit[s.id], portfoy: DB.portfoy[s.id], ozel: DB.ozel[s.id], karne: DB.karne[s.id], onay: DB.onay[s.id], sozlesme: DB.sozlesme[s.id], tanima: DB.tanima[s.id], taahhut: DB.taahhut[s.id],
+      takip: DB.takip[s.id], denetim: DB.denetim[s.id], discipline: DB.discipline[s.id], analiz: DB.analiz[s.id], gorusme: DB.gorusme[s.id], kariyer: DB.kariyer[s.id], odeme: DB.odeme[s.id], okuma: DB.okuma[s.id], seans: DB.seans[s.id], olcek: DB.olcek[s.id], fkayit: DB.fkayit[s.id], portfoy: DB.portfoy[s.id], ozel: DB.ozel[s.id], karne: DB.karne[s.id], onay: DB.onay[s.id], sozlesme: DB.sozlesme[s.id], tanima: DB.tanima[s.id], taahhut: DB.taahhut[s.id],
       wasCur: DB.cur===s.id
     };
     DB.students = DB.students.filter(x=>x.id!==s.id);
     Object.keys(DB.weeks).forEach(k=>{ if(k.startsWith(s.id+":")) delete DB.weeks[k]; });
-    delete DB.takip[s.id]; delete DB.denetim[s.id]; delete DB.gorusme[s.id]; delete DB.kariyer[s.id]; delete DB.odeme[s.id]; delete DB.okuma[s.id]; delete DB.seans[s.id]; delete DB.olcek[s.id]; delete DB.fkayit[s.id]; delete DB.portfoy[s.id]; delete DB.ozel[s.id]; delete DB.karne[s.id]; delete DB.onay[s.id]; delete DB.sozlesme[s.id]; delete DB.tanima[s.id]; delete DB.taahhut[s.id];
-    if(DB.cur===s.id) DB.cur = DB.students[0].id;
+    delete DB.takip[s.id]; delete DB.denetim[s.id]; delete DB.discipline[s.id]; delete DB.analiz[s.id]; delete DB.gorusme[s.id]; delete DB.kariyer[s.id]; delete DB.odeme[s.id]; delete DB.okuma[s.id]; delete DB.seans[s.id]; delete DB.olcek[s.id]; delete DB.fkayit[s.id]; delete DB.portfoy[s.id]; delete DB.ozel[s.id]; delete DB.karne[s.id]; delete DB.onay[s.id]; delete DB.sozlesme[s.id]; delete DB.tanima[s.id]; delete DB.taahhut[s.id];
+    if(DB.cur===s.id) DB.cur = (aktifler()[0]||DB.students[0]).id;
     save(); renderAll();
     toast(s.ad+" silindi", {label:"Geri al", duration:6000, onClick:()=>{
       DB.students.splice(Math.min(idx,DB.students.length), 0, backup.student);
@@ -1692,6 +1774,8 @@ function renderOgrenci(){
       if(backup.gorusme) DB.gorusme[s.id]=backup.gorusme;
       if(backup.kariyer) DB.kariyer[s.id]=backup.kariyer;
       if(backup.odeme) DB.odeme[s.id]=backup.odeme;
+      if(backup.discipline) DB.discipline[s.id]=backup.discipline;
+      if(backup.analiz) DB.analiz[s.id]=backup.analiz;
       if(backup.okuma) DB.okuma[s.id]=backup.okuma;
       if(backup.seans) DB.seans[s.id]=backup.seans;
       if(backup.olcek) DB.olcek[s.id]=backup.olcek;
@@ -1707,10 +1791,7 @@ function renderOgrenci(){
       save(); renderAll(); toast("Öğrenci geri getirildi");
     }});
   }));
-  $("bkOut").addEventListener('click',yedekDosyaIndir);
-  $("bkInBtn").addEventListener('click',()=>$("bkFile").click());
-  $("bkFile").addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=""; if(f) yedekDosyaYukle(f); });
-  bindGuvenlik();
+  $("bkGit").addEventListener('click',()=>{ TAB="yedek"; renderTab(); });
 }
 function backupNote(){
   let last=null; try{ last=localStorage.getItem('akp-last-backup'); }catch(e){}
@@ -1791,9 +1872,18 @@ const PPREV_CSS = `
   .ptotal b{font-size:13pt;font-family:var(--serif)}
 `;
 let PPREV_HTML = "";
+let PRINT_AD = null, PRINT_TITLE0 = null, PPREV_TITLE = "";
+function printBaslik(html, ad){
+  const m = /<h1[^>]*>([\s\S]*?)<\/h1>/i.exec(html||""); let t = m ? m[1].replace(/<br\s*\/?>/gi," ").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&[a-z#0-9]+;/gi," ").replace(/\s+/g," ").trim() : "";
+  if(!t) t = "Akademik Koçluk";
+  const p = [t]; if(ad) p.push(ad); p.push(todayIso());
+  return p.join(" - ").replace(/[\\/:*?"<>|]+/g,"-").slice(0,120);
+}
 function doPrint(html, orient){
   setPage(orient);
   PPREV_HTML = html;
+  { const st = stu(); const ad = PRINT_AD!==null ? PRINT_AD : (st&&st.ad||""); PRINT_AD = null; PPREV_TITLE = printBaslik(html, ad);
+    const sp = document.querySelector('#pprev .pprev-bar span'); if(sp) sp.textContent = "Yazdırma önizlemesi · dosya adı: "+PPREV_TITLE; }
   const frame = $("pprevFrame");
   const doc = `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1805,6 +1895,8 @@ function doPrint(html, orient){
 $("pprevClose").addEventListener('click',()=>{ $("pprev").classList.remove("on"); });
 $("pprevGo").addEventListener('click',()=>{
   $("print-root").innerHTML = PPREV_HTML;
+  if(PRINT_TITLE0===null) PRINT_TITLE0 = document.title; document.title = PPREV_TITLE;
+  setTimeout(()=>{ if(PRINT_TITLE0!==null){ document.title = PRINT_TITLE0; PRINT_TITLE0 = null; } }, 60000);
   $("pprev").classList.remove("on");
   setTimeout(()=>{ try{ window.print(); }catch(e){ toast("Yazdırma bu pencerede engellendi. Paneli indirip tarayıcıda açın."); } }, 60);
 });
@@ -1819,6 +1911,7 @@ function pFoot(){ return `<div class="pfoot"><span>Akademik Koçluk ve Kariyer P
 
 /* Öğrenci kayıt formu (logolu): s verilirse dolu, null ise boş form */
 function printKayitFormu(s){
+  PRINT_AD = s ? (s.ad||"") : "";
   const v=(x)=>x?esc(x):'<span style="display:inline-block;min-width:160px;border-bottom:1px solid #999">&nbsp;</span>';
   const o=s||{};
   const sinif = o.sinif?(GLABEL[o.sinif]||o.sinif)+((o.sinif==="11"||o.sinif==="12")&&o.alan?" ("+ALANAD[o.alan]+")":""):"";
@@ -2373,24 +2466,79 @@ function odemeDersTarihleri(x){
   return x.dersTarihleri.split(/[,;\n]/).map(t=>t.trim()).filter(Boolean)
     .sort((a,b)=>a.localeCompare(b));
 }
-let OD_EDIT = null;
+const ODEME_SEKIL = ["Nakit","Havale / EFT","Kredi kartı","Diğer"];
+let OD_EDIT = null, OD_GUN = [], OD_FIL = "hepsi";
+const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
+function odGunlukOku(x){
+  if(Array.isArray(x.gunluk)) return x.gunluk.map(g=>({id:g.id||yeniId("g"), t:g.t||"", sure:g.sure||"", not:g.not||"", rapor:g.rapor!==false}));
+  return odemeDersTarihleri(x).map(t=>({id:yeniId("g"), t, sure:"", not:"", rapor:true}));
+}
+function odTutar(x){ const su=+x.saatUcret||0, sa=+x.saat||0; return x.tutar ? (+x.tutar||0) : (su&&sa ? su*sa : 0); }
+function odOdenen(x){ const t = odTutar(x); if(x.durum==="Ödendi") return t; if(x.durum==="Kısmi"){ const o = +x.odenen||0; return t>0 ? Math.min(o,t) : o; } return 0; }
+function odKalan(x){ return Math.max(0, odTutar(x)-odOdenen(x)); }
+function tlYaz(n){ return (Math.round((+n||0)*100)/100).toLocaleString("tr-TR")+" ₺"; }
+function odDurumSinif(d){ return d==="Ödendi" ? "g" : d==="Kısmi" ? "y" : "r"; }
+function odemeMesajMetni(s, x, tur){
+  const hitap = s.veliAd ? "Merhaba "+s.veliAd+"," : "Merhaba,"; const don = odemeDonemEtiket(x); const kalan = odKalan(x); const koc = (s.koc||"").trim();
+  if(tur==="ozet"){
+    const g = odGunlukOku(x).filter(r=>r.t||r.not).sort((p,q)=>String(p.t).localeCompare(String(q.t)));
+    const dk = g.reduce((a,r)=>a+(+r.sure||0),0);
+    let m = hitap+"\n"+s.ad+" için "+don+" dönemi özeti:\n";
+    if(x.saat) m += "• Yapılan ders: "+x.saat+" saat"+(g.length?" ("+g.length+" ders)":"")+"\n"; else if(g.length) m += "• Yapılan ders: "+g.length+" ders"+(dk?" ("+Math.round(dk/6)/10+" saat)":"")+"\n";
+    if(odTutar(x)) m += "• Toplam tutar: "+tlYaz(odTutar(x))+"\n";
+    m += "• Durum: "+x.durum+(x.durum==="Kısmi" ? " (ödenen "+tlYaz(odOdenen(x))+", kalan "+tlYaz(kalan)+")" : "")+"\n";
+    const nl = g.filter(r=>r.rapor!==false);
+    if(nl.length) m += "\nDers günlüğü:\n"+nl.map(r=>"• "+(ISO_RE.test(r.t)?trDate(r.t).slice(0,5):r.t)+(r.not?" – "+r.not:"")).join("\n")+"\n";
+    return m+"\nİlginiz için teşekkür ederim."+(koc?"\n"+koc:"");
+  }
+  return hitap+"\n"+s.ad+" için "+don+" dönemine ait ders ücretinin"+(x.durum==="Kısmi"&&kalan?" kalan kısmı ("+tlYaz(kalan)+")":(kalan?" ("+tlYaz(kalan)+")":""))+" henüz görünmüyor. Müsait olduğunuzda iletirseniz çok sevinirim; zaten ödediyseniz lütfen dikkate almayın.\nİlginiz için teşekkür ederim."+(koc?"\n"+koc:"");
+}
+function odemeMesajAc(id, tur0){
+  const s = stu(); const x = (DB.odeme[s.id]||[]).find(y=>y.id===id); if(!x) return;
+  let tur = tur0 || (x.durum==="Ödendi" ? "ozet" : "hatirlat"); let metin = odemeMesajMetni(s,x,tur);
+  const bg = modalAc(`<h3 style="margin:0 0 8px">Veliye mesaj · ${esc(odemeDonemEtiket(x))}</h3>
+    <div class="field" style="margin-bottom:8px"><label for="omTur">Mesaj türü</label><select id="omTur"><option value="hatirlat"${tur==="hatirlat"?" selected":""}>Ödeme hatırlatması</option><option value="ozet"${tur==="ozet"?" selected":""}>Dönem / ders özeti</option></select></div>
+    <div class="field" style="margin-bottom:8px"><label for="omKime">Kime</label><select id="omKime"><option value="v">Veli ${s.veliTel?"("+esc(s.veliTel)+")":"(numara yok)"}</option><option value="o">Öğrenci ${s.tel?"("+esc(s.tel)+")":"(numara yok)"}</option></select></div>
+    <div class="field"><label for="omMetin">Mesaj (düzenleyebilirsiniz)</label><textarea id="omMetin" rows="9" style="width:100%">${esc(metin)}</textarea></div>
+    <div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="omWa" type="button">WhatsApp'ta aç</button><button class="btn" id="omSms" type="button">SMS</button><button class="btn" id="omKopya" type="button">Kopyala</button><button class="btn" id="omKapat" type="button">Kapat</button></div>`);
+  const q = i=>bg.querySelector("#"+i);
+  q("omTur").addEventListener('change',()=>{ tur = q("omTur").value; q("omMetin").value = odemeMesajMetni(s,x,tur); });
+  const tel = ()=> q("omKime").value==="o" ? (s.tel||s.veliTel||"") : (s.veliTel||s.tel||"");
+  const kayit = k=>{ x.mesaj = (x.mesaj||[]).concat([{t:tur,k,z:Date.now()}]); save(); };
+  q("omWa").addEventListener('click',()=>{ gnAc(onayWa(tel(), q("omMetin").value)); kayit("wa"); bg.remove(); renderOdeme(); });
+  q("omSms").addEventListener('click',()=>{ gnAc(onaySms(tel(), q("omMetin").value)); kayit("sms"); bg.remove(); renderOdeme(); });
+  q("omKopya").addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText(q("omMetin").value); toast("Mesaj kopyalandı"); }catch(e){ q("omMetin").select(); toast("Metni seçip kopyalayın"); } });
+  q("omKapat").addEventListener('click',()=>bg.remove());
+}
 function renderOdeme(){
   const s=stu(); const L=(DB.odeme[s.id]=DB.odeme[s.id]||[]);
-  const list=L.slice().sort((a,b)=>(b.tarih||b.ay||"").localeCompare(a.tarih||a.ay||""));
   const buAy = todayIso().slice(0,7);
-  const buAyKayit = L.find(x=>x.ay===buAy && (x.periyot||"Aylık")==="Aylık");
   const ed = OD_EDIT ? L.find(x=>x.id===OD_EDIT) : null;
   if(OD_EDIT && !ed) OD_EDIT=null;
-  const rows=list.map(x=>`<tr><td>${esc(odemeDonemEtiket(x))}</td><td>${esc(x.periyot||"Aylık")}</td><td>${x.saatUcret?esc(x.saatUcret)+" ₺/sa":""}</td><td>${x.saat?esc(x.saat)+" sa":""}</td><td>${x.tutar?esc(x.tutar)+" ₺":""}</td><td>${esc(x.durum)}</td><td>${x.tarih?trDate(x.tarih):""}</td>
-    <td class="no" style="text-align:right;white-space:nowrap"><button class="btn small" data-oprint="${x.id}">Rapor</button> <button class="btn small" data-oedit="${x.id}">Düzenle</button> <button class="btn small" data-odel="${x.id}">Sil</button></td></tr>`).join("");
+  if(!OD_GUN.__kimlik || OD_GUN.__kimlik!==(ed?ed.id:"yeni")+"|"+s.id){ OD_GUN = ed ? odGunlukOku(ed) : []; OD_GUN.__kimlik = (ed?ed.id:"yeni")+"|"+s.id; }
+  const buAyKayit = L.find(x=>x.ay===buAy && (x.periyot||"Aylık")==="Aylık");
+  let list=L.slice().sort((a,b)=>(b.tarih||b.ay||"").localeCompare(a.tarih||a.ay||""));
+  if(OD_FIL==="buay") list = list.filter(x=>x.ay===buAy); else if(OD_FIL==="bekleyen") list = list.filter(x=>x.durum!=="Ödendi");
+  const top = L.reduce((a,x)=>a+odTutar(x),0), tah = L.reduce((a,x)=>a+odOdenen(x),0), kal = Math.max(0,top-tah);
+  const saatT = L.reduce((a,x)=>a+(+x.saat||0),0), dersN = L.reduce((a,x)=>a+odGunlukOku(x).filter(g=>g.t).length,0);
+  const kardes = s.aile ? aktifler().filter(o=>o.aile && o.aile===s.aile) : [];
+  const aileKal = kardes.length>1 ? kardes.reduce((a,o)=>a+(DB.odeme[o.id]||[]).reduce((b,x)=>b+odKalan(x),0),0) : null;
+  const rows=list.map(x=>{ const son = (x.mesaj||[]).filter(m=>m.t==="hatirlat").slice(-1)[0];
+    return `<tr><td>${esc(odemeDonemEtiket(x))}</td><td>${x.saat?esc(x.saat)+" sa":""}</td><td>${odTutar(x)?tlYaz(odTutar(x)):""}</td><td>${odOdenen(x)?tlYaz(odOdenen(x)):""}${odKalan(x)?`<br><span class="muted">kalan ${tlYaz(odKalan(x))}</span>`:""}</td>
+    <td><span class="od-d ${odDurumSinif(x.durum)}">${esc(x.durum)}</span>${son?`<br><span class="muted">📨 ${new Date(son.z).toLocaleDateString("tr-TR",{day:"numeric",month:"short"})}</span>`:""}</td><td>${x.tarih?trDate(x.tarih):""}${x.sekil?`<br><span class="muted">${esc(x.sekil)}</span>`:""}</td>
+    <td class="no" style="text-align:right"><div class="od-act">${x.durum!=="Ödendi"?`<button class="btn small primary" data-ook="${x.id}">Ödendi yap</button><button class="btn small" data-ohat="${x.id}">Hatırlat</button>`:`<button class="btn small" data-oozet="${x.id}">Veliye özet</button>`}<button class="btn small" data-oprint="${x.id}">Rapor</button><button class="btn small" data-oedit="${x.id}">Düzenle</button><button class="btn small" data-odel="${x.id}">Sil</button></div></td></tr>`; }).join("");
+  const kart = (t,v,sn)=>`<div class="od-kart"><small>${t}</small><b${sn?` class="${sn}"`:""}>${v}</b></div>`;
   $("panel").innerHTML = `
     <div class="colhead"><h2>${esc(s.ad)}: ödeme takibi</h2>
       <span class="muted">Bu ay (${esc(odemeAyAdi(buAy))}): ${buAyKayit?esc(buAyKayit.durum):"kayıt yok"}</span></div>
+    ${L.length?`<div class="od-ozet no">${kart("Toplam tutar",tlYaz(top))}${kart("Tahsil edilen",tlYaz(tah),"od-g")}${kart("Kalan",tlYaz(kal),kal?"od-r":"")}${kart("Yapılan ders",(saatT?(Math.round(saatT*10)/10+" saat"):"–")+(dersN?" · "+dersN+" ders":""))}</div>
+    ${aileKal!==null?`<p class="hint no" style="margin:-4px 0 10px">Aile toplamı (${kardes.length} kardeş, "${esc(s.aile)}"): kalan <b>${tlYaz(aileKal)}</b></p>`:""}`:""}
     <div class="box no"><div class="row" style="gap:16px;flex-wrap:wrap">
       <div class="field" style="max-width:220px"><label for="ucret">Aylık ücret (₺, isteğe bağlı)</label><input id="ucret" type="number" min="0" value="${esc(s.ucret||"")}"></div>
       <div class="field" style="max-width:220px"><label for="ucretSaat">Ders saat ücreti (₺/saat, isteğe bağlı)</label><input id="ucretSaat" type="number" min="0" value="${esc(s.ucretSaat||"")}"></div>
     </div></div>
     <div class="box"><h3>${ed?"Ödeme kaydını düzenle":"Yeni ödeme kaydı"}</h3>
+      <h4 class="od-h">1 · Ne için</h4>
       <div class="form">
         <div class="field"><label for="oPeriyot">Periyot</label><select id="oPeriyot">${PERIYOT.map(p=>`<option ${p===(ed?ed.periyot||"Aylık":"Aylık")?"selected":""}>${p}</option>`).join("")}</select></div>
         <div class="field"><label for="oAy">Dönem (ay)</label><input id="oAy" type="month" value="${esc(ed?ed.ay:buAy)}"></div>
@@ -2398,22 +2546,49 @@ function renderOdeme(){
         <div class="field"><label for="oSaatUcret">Ders saat ücreti (₺/saat)</label><input id="oSaatUcret" type="number" min="0" value="${esc(ed?ed.saatUcret||"":s.ucretSaat||"")}"></div>
         <div class="field"><label for="oSaat">Yapılan ders saati</label><input id="oSaat" type="number" min="0" step="0.5" value="${esc(ed?ed.saat||"":"")}"></div>
         <div class="field"><label for="oTutar">Toplam tutar (₺)</label><input id="oTutar" type="number" min="0" placeholder="Otomatik hesaplanır" value="${esc(ed?ed.tutar||"":"")}"></div>
+      </div>
+      <h4 class="od-h">2 · Ödeme</h4>
+      <div class="form">
         <div class="field"><label for="oDurum">Durum</label><select id="oDurum">${ODURUM.map(d=>`<option ${ed&&d===ed.durum?"selected":""}>${d}</option>`).join("")}</select></div>
+        <div class="field" id="oOdenenF" style="display:none"><label for="oOdenen">Ödenen tutar (₺)</label><input id="oOdenen" type="number" min="0" value="${esc(ed?ed.odenen||"":"")}"></div>
+        <div class="field"><label for="oSekil">Ödeme şekli</label><select id="oSekil"><option value="">Belirtilmedi</option>${ODEME_SEKIL.map(d=>`<option ${ed&&d===ed.sekil?"selected":""}>${d}</option>`).join("")}</select></div>
         <div class="field"><label for="oTarih">Tarih</label><input id="oTarih" type="date" value="${esc(ed?ed.tarih||todayIso():todayIso())}"></div>
       </div>
-      <div class="field" style="margin-top:8px"><label for="oDersTarihleri">Yapılan ders tarihleri (isteğe bağlı)</label><textarea id="oDersTarihleri" rows="2" placeholder="Her satıra/virgülle bir tarih, örnek: 2026-10-06, 2026-10-08, 2026-10-10">${esc(ed?ed.dersTarihleri||"":"")}</textarea>${s.ozelDers==="evet"?`<div class="actions" style="margin-top:6px"><button class="btn small" id="oOzelGetir" type="button">Özel ders kayıtlarından getir</button></div>`:""}</div>
-      <div class="field" style="margin-top:8px"><label for="oNot">Not (isteğe bağlı)</label><input id="oNot" type="text" placeholder="Örnek: Nakit ödendi" value="${esc(ed?ed.not||"":"")}"></div>
+      <h4 class="od-h">3 · Ders günlüğü <span class="muted" style="font-weight:400">(isteğe bağlı: tarih, süre, kısa not)</span></h4>
+      <div id="oGunBox" class="tscroll"></div>
+      <div class="actions" style="margin-top:6px"><button class="btn small" id="oGunEkle" type="button">＋ Satır ekle</button>${s.ozelDers==="evet"?`<button class="btn small" id="oOzelGetir" type="button">Özel ders kayıtlarından getir</button>`:""}<span class="muted" id="oGunTop"></span></div>
+      <div class="field" style="margin-top:8px"><label for="oNot">Not (isteğe bağlı)</label><input id="oNot" type="text" placeholder="Örnek: Havale gelecek hafta" value="${esc(ed?ed.not||"":"")}"></div>
       <div class="actions"><button class="btn primary" id="oSave">${ed?"Güncelle":"Kaydet"}</button>${ed?`<button class="btn" id="oVazgec">Vazgeç</button>`:""}</div>
     </div>
-    ${list.length?`<div class="tscroll"><table class="ttab"><thead><tr><th>Dönem</th><th>Periyot</th><th>Saat ücreti</th><th>Saat</th><th>Tutar</th><th>Durum</th><th>Tarih</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Bu öğrenci için henüz ödeme kaydı yok.</div>'}`;
+    ${L.length?`<div class="colhead no" style="margin-top:14px"><h3 style="margin:0">Ödeme kayıtları (${list.length}/${L.length})</h3><select id="oFil" aria-label="Süz" style="max-width:180px"><option value="hepsi"${OD_FIL==="hepsi"?" selected":""}>Tüm kayıtlar</option><option value="buay"${OD_FIL==="buay"?" selected":""}>Bu ay</option><option value="bekleyen"${OD_FIL==="bekleyen"?" selected":""}>Bekleyenler</option></select></div>`:""}
+    ${list.length?`<div class="tscroll"><table class="ttab"><thead><tr><th>Dönem</th><th>Saat</th><th>Tutar</th><th>Ödenen</th><th>Durum</th><th>Tarih</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">${L.length?"Bu süzgeçte kayıt yok.":"Bu öğrenci için henüz ödeme kaydı yok."}</div>`}`;
   $("ucret").addEventListener('change',()=>{ s.ucret=$("ucret").value.trim(); save(); });
   $("ucretSaat").addEventListener('change',()=>{ s.ucretSaat=$("ucretSaat").value.trim(); save(); $("oSaatUcret").value=s.ucretSaat; });
-  function periyotDegisti(){
-    const p=$("oPeriyot").value;
-    $("oDonemEtiketF").style.display = p==="Aylık" ? "none" : "";
-  }
+  function periyotDegisti(){ $("oDonemEtiketF").style.display = $("oPeriyot").value==="Aylık" ? "none" : ""; }
   $("oPeriyot").addEventListener('change', periyotDegisti); periyotDegisti();
-  if($("oOzelGetir")) $("oOzelGetir").addEventListener('click', ozAktar);
+  function durumDegisti(){ $("oOdenenF").style.display = $("oDurum").value==="Kısmi" ? "" : "none"; }
+  $("oDurum").addEventListener('change', durumDegisti); durumDegisti();
+  function gunToplam(){ const dk = OD_GUN.reduce((a,g)=>a+(+g.sure||0),0), n = OD_GUN.filter(g=>g.t||g.not).length; $("oGunTop").textContent = n ? n+" ders"+(dk?" · "+(Math.round(dk/6)/10)+" saat":"") : ""; }
+  function gunCiz(){
+    const k = $("oGunBox");
+    k.innerHTML = OD_GUN.length ? `<table class="ttab od-gun"><thead><tr><th>Tarih</th><th>Süre (dk)</th><th>Kısa not</th><th title="Veli raporunda göster">Raporda</th><th></th></tr></thead><tbody>${OD_GUN.map((g,i)=>`<tr><td><input type="${ISO_RE.test(g.t)||!g.t?"date":"text"}" data-gt="${i}" value="${esc(g.t)}" aria-label="Tarih"></td><td style="width:92px"><input type="number" min="0" step="5" data-gs="${i}" value="${esc(g.sure)}" aria-label="Süre (dk)"></td><td><input type="text" data-gn="${i}" placeholder="Örnek: üslü sayılar, ödev verildi" value="${esc(g.not)}" aria-label="Kısa not"></td><td style="text-align:center;width:64px"><input type="checkbox" data-gr="${i}" ${g.rapor!==false?"checked":""} aria-label="Raporda göster"></td><td style="width:44px"><button class="btn small" type="button" data-gx="${i}" aria-label="Satırı sil">✕</button></td></tr>`).join("")}</tbody></table>` : '<p class="muted" style="margin:4px 0">Henüz ders satırı yok. “＋ Satır ekle” ile ekleyin.</p>';
+    k.querySelectorAll('[data-gt]').forEach(e=>e.addEventListener('input',()=>{ OD_GUN[+e.dataset.gt].t = e.value; }));
+    k.querySelectorAll('[data-gs]').forEach(e=>e.addEventListener('input',()=>{ OD_GUN[+e.dataset.gs].sure = e.value; gunToplam(); }));
+    k.querySelectorAll('[data-gn]').forEach(e=>e.addEventListener('input',()=>{ OD_GUN[+e.dataset.gn].not = e.value; }));
+    k.querySelectorAll('[data-gr]').forEach(e=>e.addEventListener('change',()=>{ OD_GUN[+e.dataset.gr].rapor = e.checked; }));
+    k.querySelectorAll('[data-gx]').forEach(e=>e.addEventListener('click',()=>{ OD_GUN.splice(+e.dataset.gx,1); gunCiz(); }));
+    gunToplam();
+  }
+  gunCiz();
+  $("oGunEkle").addEventListener('click',()=>{ OD_GUN.push({id:yeniId("g"), t:todayIso(), sure:"", not:"", rapor:true}); gunCiz(); const n = $("oGunBox").querySelectorAll('[data-gn]'); if(n.length) n[n.length-1].focus(); });
+  if($("oOzelGetir")) $("oOzelGetir").addEventListener('click',()=>{
+    const d = ozData(); const ay = $("oAy").value; if(!ay){ toast("Önce dönemi (ay) seçin"); return; }
+    const gel = d.ders.filter(x=>(x.tarih||"").startsWith(ay)); if(!gel.length){ toast("Bu ay için özel ders kaydı yok"); return; }
+    let yeni = 0; gel.forEach(x=>{ if(OD_GUN.some(g=>g.t===x.tarih)) return; const not = (x.konular&&x.konular.length) ? x.konular.map(k=>String(k.t).split("›").pop().trim()).join(", ") : (x.not||""); OD_GUN.push({id:yeniId("g"), t:x.tarih, sure:x.sure||"", not:not.slice(0,140), rapor:true}); yeni++; });
+    OD_GUN.sort((p,q)=>String(p.t).localeCompare(String(q.t))); gunCiz();
+    const dk = OD_GUN.reduce((a,g)=>a+(+g.sure||0),0); if(!$("oSaat").value && dk){ $("oSaat").value = Math.round(dk/6)/10; $("oSaat").dispatchEvent(new Event('input',{bubbles:true})); }
+    toast(yeni+" ders getirildi");
+  });
   function hesaplaTutar(){
     const su=+$("oSaatUcret").value||0, sa=+$("oSaat").value||0;
     if(su && sa && !$("oTutar").value) $("oTutar").value = (su*sa).toFixed(2).replace(/\.00$/,"").replace(/(\.\d*?)0+$/,"$1").replace(/\.$/,"");
@@ -2424,27 +2599,33 @@ function renderOdeme(){
     const periyot=$("oPeriyot").value, ay=$("oAy").value;
     if(!ay){ toast("Dönemi (ay) seçin"); return; }
     if(periyot==="Aylık" && L.some(x=>x.ay===ay && (x.periyot||"Aylık")==="Aylık" && (!ed||x.id!==ed.id))){ toast("Bu aya ait aylık kayıt zaten var, silip yeniden ekleyin"); return; }
+    if($("oDurum").value==="Kısmi" && !$("oOdenen").value.trim()){ toast("Kısmi ödemede ödenen tutarı yazın"); $("oOdenen").focus(); return; }
+    const gun = OD_GUN.filter(g=>(g.t||"").trim()||(g.not||"").trim()).map(g=>({id:g.id, t:(g.t||"").trim(), sure:g.sure, not:(g.not||"").trim(), rapor:g.rapor!==false})).sort((p,q)=>String(p.t).localeCompare(String(q.t)));
     const veri = {ay, periyot, donemEtiket:$("oDonemEtiket").value.trim(), saatUcret:$("oSaatUcret").value.trim(), saat:$("oSaat").value.trim(),
-      tutar:$("oTutar").value.trim(), durum:$("oDurum").value, tarih:$("oTarih").value, dersTarihleri:$("oDersTarihleri").value.trim(), not:$("oNot").value.trim()};
+      tutar:$("oTutar").value.trim(), durum:$("oDurum").value, odenen:$("oDurum").value==="Kısmi"?$("oOdenen").value.trim():"", sekil:$("oSekil").value, tarih:$("oTarih").value,
+      gunluk:gun, dersTarihleri:gun.map(g=>g.t).filter(Boolean).join(", "), not:$("oNot").value.trim()};
+    OD_GUN = []; 
     if(ed){ Object.assign(ed, veri); OD_EDIT=null; save(); renderOdeme(); toast("Ödeme kaydı güncellendi"); }
     else { L.push(Object.assign({id:yeniId("o")}, veri)); save(); renderOdeme(); toast("Ödeme kaydedildi"); }
   });
-  if($("oVazgec")) $("oVazgec").addEventListener('click',()=>{ OD_EDIT=null; renderOdeme(); });
+  if($("oVazgec")) $("oVazgec").addEventListener('click',()=>{ OD_EDIT=null; OD_GUN=[]; renderOdeme(); });
+  if($("oFil")) $("oFil").addEventListener('change',e=>{ OD_FIL = e.target.value; renderOdeme(); });
   document.querySelectorAll('[data-odel]').forEach(b=>b.addEventListener('click',()=>armDel(b,()=>{
-    DB.odeme[s.id]=L.filter(y=>y.id!==b.dataset.odel); if(OD_EDIT===b.dataset.odel) OD_EDIT=null; save(); renderOdeme(); toast("Kayıt silindi");
+    DB.odeme[s.id]=L.filter(y=>y.id!==b.dataset.odel); if(OD_EDIT===b.dataset.odel){ OD_EDIT=null; OD_GUN=[]; } save(); renderOdeme(); toast("Kayıt silindi");
   })));
   document.querySelectorAll('[data-oprint]').forEach(b=>b.addEventListener('click',()=>printOdeme(b.dataset.oprint)));
-  document.querySelectorAll('[data-oedit]').forEach(b=>b.addEventListener('click',()=>{ OD_EDIT=b.dataset.oedit; renderOdeme(); }));
+  document.querySelectorAll('[data-oedit]').forEach(b=>b.addEventListener('click',()=>{ OD_EDIT=b.dataset.oedit; OD_GUN=[]; renderOdeme(); window.scrollTo(0,0); const m=document.querySelector('.main'); if(m) m.scrollTop=0; }));
+  document.querySelectorAll('[data-ook]').forEach(b=>b.addEventListener('click',()=>{ const x=L.find(y=>y.id===b.dataset.ook); if(!x) return; x.durum="Ödendi"; x.odenen=""; save(); renderOdeme(); toast("Ödendi olarak işaretlendi"); }));
+  document.querySelectorAll('[data-ohat]').forEach(b=>b.addEventListener('click',()=>odemeMesajAc(b.dataset.ohat,"hatirlat")));
+  document.querySelectorAll('[data-oozet]').forEach(b=>b.addEventListener('click',()=>odemeMesajAc(b.dataset.oozet,"ozet")));
 }
 function printOdeme(id){
   const s=stu(); const x=(DB.odeme[s.id]||[]).find(y=>y.id===id); if(!x) return;
   const su=+x.saatUcret||0, sa=+x.saat||0, hesaplanan = su&&sa ? su*sa : null;
-  const tutar = x.tutar ? +x.tutar : hesaplanan;
-  const dersTarihleri = odemeDersTarihleri(x);
-  const dersTarihSatirlari = dersTarihleri.map((t,i)=>{
-    const iso = /^\d{4}-\d{2}-\d{2}$/.test(t);
-    return `<tr><td style="width:10%">${i+1}</td><td>${iso?trDate(t):esc(t)}</td></tr>`;
-  }).join("");
+  const tutar = odTutar(x) || null;
+  const gun = odGunlukOku(x).filter(g=>g.t||g.not).sort((p,q)=>String(p.t).localeCompare(String(q.t)));
+  const dk = gun.reduce((a,g)=>a+(+g.sure||0),0);
+  const gunSatir = gun.map((g,i)=>`<tr><td style="width:7%">${i+1}</td><td style="width:18%">${ISO_RE.test(g.t)?trDate(g.t):esc(g.t)}</td><td style="width:12%">${g.sure?esc(g.sure)+" dk":""}</td><td>${g.rapor!==false?esc(g.not):""}</td></tr>`).join("");
   doPrint(`<div class="pg">${pHead("Ödeme Raporu", trDate(x.tarih||todayIso()))}
     <div class="ps"><h2>Öğrenci bilgileri</h2>
     <table class="pt"><tr><th style="width:28%">Ad Soyad</th><td>${esc(s.ad)}</td></tr>
@@ -2461,11 +2642,14 @@ function printOdeme(id){
     <table class="pt"><tr><th style="width:28%">Ders saat ücreti</th><td>${su?esc(su)+" ₺/saat":"—"}</td></tr>
     <tr><th>Yapılan ders saati</th><td>${sa?esc(sa)+" saat":"—"}</td></tr>
     ${hesaplanan!==null?`<tr><th>Hesaplanan tutar</th><td>${esc(su)} ₺/sa × ${esc(sa)} sa = ${esc(hesaplanan)} ₺</td></tr>`:""}
-    <tr><th>Ödeme durumu</th><td>${esc(x.durum)}</td></tr>
+    <tr><th>Ödeme durumu</th><td>${esc(x.durum)}${x.durum==="Kısmi"?" (ödenen "+tlYaz(odOdenen(x))+", kalan "+tlYaz(odKalan(x))+")":""}</td></tr>
+    ${x.sekil?`<tr><th>Ödeme şekli</th><td>${esc(x.sekil)}</td></tr>`:""}
     </table></div>
-    ${dersTarihSatirlari?`<div class="ps"><h2>Yapılan derslerin tarihleri</h2>
-    <table class="pt"><tr><th style="width:10%">#</th><th>Tarih</th></tr>${dersTarihSatirlari}</table></div>`:""}
-    <div class="ptotal"><span>Toplam tutar</span><b>${tutar!==null?esc(tutar)+" ₺":"—"}</b></div>
+    ${gunSatir?`<div class="ps"><h2>Ders günlüğü</h2>
+    <table class="pt"><tr><th>#</th><th>Tarih</th><th>Süre</th><th>Kısa not</th></tr>${gunSatir}</table>
+    <div style="font-size:9.5pt;margin-top:3pt">${gun.length} ders${dk?" · toplam "+(Math.round(dk/6)/10)+" saat":""}</div></div>`:""}
+    <div class="ptotal"><span>Toplam tutar</span><b>${tutar!==null?tlYaz(tutar):"—"}</b></div>
+    ${odKalan(x)?`<div class="ptotal"><span>Kalan</span><b>${tlYaz(odKalan(x))}</b></div>`:""}
     ${x.not?`<div class="ps"><h2>Not</h2><div class="pbox">${esc(x.not)}</div></div>`:""}
     <div class="sign"><div>Koç imzası</div><div>Veli imzası</div><div>Tarih</div></div>
     ${pFoot()}</div>`, "portrait");
@@ -2796,20 +2980,36 @@ function stripAyarla(){
   if(ac){ const c=box.querySelector(".cell.sel"); if(c) c.scrollIntoView({inline:"center",block:"nearest"}); }
 }
 $("stripBtn").addEventListener('click',()=>{ const ac=!$("stripBox").hidden; STRIPU=!ac; stripAyarla(); });
+let NAV_ACIK = null;
+function navCiz(){
+  document.querySelectorAll('.ngrp').forEach(g=>{
+    const ac = g.dataset.g===NAV_ACIK, h = g.querySelector('.ghead'), sb = g.querySelector('.gsub');
+    h.setAttribute('aria-expanded', ac?"true":"false"); sb.hidden = !ac;
+    g.classList.toggle('has-active', !!g.querySelector('.tab[aria-selected="true"]'));
+  });
+}
+function navYol(){
+  const t = document.querySelector('.side-nav .tab[aria-selected="true"]'); const c = $("crumb"); if(!c) return;
+  const g = t && t.closest('.ngrp'); c.textContent = t ? ((g ? g.querySelector('.ghead .tablabel').textContent+" › " : "")+t.querySelector('.tablabel').textContent) : "";
+}
+document.querySelectorAll('.ghead').forEach(h=>h.addEventListener('click',()=>{ const id=h.dataset.ghead; NAV_ACIK = NAV_ACIK===id ? null : id; navCiz(); }));
 function renderTab(){
   stripAyarla();
   document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===TAB?"true":"false"));
-  ({genel:renderGenel, ozet:renderOzet, hafta:renderHafta, yillik:renderYillik, gelisim:renderGelisim, kariyer:renderKariyer, takip:renderTakip, seans:renderSeans, veli:renderVeli, formlar:renderFormlar, ajanda:renderAjanda, asistan:renderAsistan, kutup:renderKutup, ogrenci:renderOgrenci, odeme:renderOdeme, okuma:renderOkuma, kilavuz:renderKilavuz, surum:renderSurum, portfoy:renderPortfoy, fdoldur:renderFdoldur})[TAB]();
+  { const a = document.querySelector('.side-nav .tab[aria-selected="true"]'); const g = a && a.closest('.ngrp'); NAV_ACIK = g ? g.dataset.g : null; navCiz(); navYol(); }
+  ({genel:renderGenel, ozet:renderOzet, hafta:renderHafta, yillik:renderYillik, gelisim:renderGelisim, kariyer:renderKariyer, takip:renderTakip, seans:renderSeans, veli:renderVeli, formlar:renderFormlar, ajanda:renderAjanda, asistan:renderAsistan, kutup:renderKutup, yedek:renderYedekMerkezi, ogrenci:renderOgrenci, odeme:renderOdeme, okuma:renderOkuma, kilavuz:renderKilavuz, surum:renderSurum, portfoy:renderPortfoy, fdoldur:renderFdoldur, gonder:renderGonder, discipline:renderDiscipline, analiz:renderAnaliz})[TAB]();
 }
 function renderAll(){ renderTop(); renderStrip(); renderTab(); }
 
 $("selStudent").addEventListener('change',e=>{ DB.cur = e.target.value; save(); renderAll(); });
 $("selGrade").addEventListener('change',e=>{ stu().sinif = e.target.value; save(); renderAll(); });
 $("selAlan").addEventListener('change',e=>{ stu().alan = e.target.value; save(); renderAll(); });
+function stuGec(d){ const ak = aktifler(); if(ak.length<2) return; let i = ak.findIndex(x=>x.id===stu().id); i = (i+d+ak.length)%ak.length; DB.cur = ak[i].id; save(); renderAll(); }
+$("stuPrev").addEventListener('click',()=>stuGec(-1)); $("stuNext").addEventListener('click',()=>stuGec(1));
 $("prevW").addEventListener('click',()=>{ if(W>1){ W--; renderAll(); }});
 $("nextW").addEventListener('click',()=>{ if(W<TEACH_N){ W++; renderAll(); }});
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{ TAB=b.dataset.tab; renderTab(); closeSideMenu(); }));
-window.addEventListener('afterprint',()=>{ $("print-root").innerHTML=""; });
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{ TAB=b.dataset.tab; renderTab(); closeSideMenu(); const m=document.querySelector('.main'); if(m) m.scrollTop=0; }));
+window.addEventListener('afterprint',()=>{ $("print-root").innerHTML=""; if(PRINT_TITLE0!==null){ document.title = PRINT_TITLE0; PRINT_TITLE0 = null; } });
 
 /* ---------- Faz 8/10: sol menü (mobil aç/kapat) ---------- */
 function openSideMenu(){
@@ -3075,7 +3275,7 @@ function olcekSonucHtml(o, cevap){
 }
 function olcekYazdir(id, mod, kayit){
   const o = OLCEKLER[id]; if(!o) return;
-  const bos = mod==="bos"; const cev = (kayit&&kayit.cevap)||{};
+  const bos = mod==="bos"; if(bos) PRINT_AD = ""; const cev = (kayit&&kayit.cevap)||{};
   const baslik = ["Ölçek", o.ad].join(": ").replace("Ölçek: ","");
   const satir = o.maddeler.map((m,i)=>{
     const q=i+1;
@@ -3293,12 +3493,18 @@ const FORMLAR = [
    grup:{"12":[3,"Mayıs ve süreç boyunca"],"8":[2,"Aylık"]}, amac:"Yanlış yapılan soruların nedenini sınıflar ve tekrar tarihi verir."},
   {id:"seri_deneme", ad:"Seri Deneme ve Seri Soru Takip Formu", tip:"tablo", orient:"landscape", fn:fmSeriDeneme,
    grup:{"12":[2,"Nisan - Haziran"],"8":[2,"Nisan - Mayıs"]}, amac:"Süre yönetimi, turlama taktiği ve sınav provası takibi."}
+  ,{id:"seans_geri", ad:"Seans / Ders Geri Bildirim Formu", tip:"tablo", orient:"portrait", fn:null,
+   grup:{"12":[3,"Her seans sonrası (isteğe bağlı)"],"11":[3,"Her seans sonrası (isteğe bağlı)"],"8":[3,"Her seans sonrası (isteğe bağlı)"]}, amac:"Online ya da yüz yüze seans/ders sonrası öğrencinin kısa geri bildirimini toplar; bağlantıyla uzaktan doldurulabilir."},
+  {id:"veli_geri", ad:"Veli Memnuniyet ve Geri Bildirim Formu", tip:"tablo", orient:"portrait", fn:null,
+   grup:{"12":[3,"Dönem sonlarında"],"11":[3,"Dönem sonlarında"],"8":[3,"Dönem sonlarında"]}, amac:"Veliden süreçle ilgili memnuniyet ve geri bildirim toplar; bağlantıyla uzaktan doldurulabilir."}
 ];
 function formBul(id){ return FORMLAR.find(f=>f.id===id); }
 function formYazdir(id, bos){
   const f = formBul(id); if(!f) return;
   const g = sinifGrup(stu().sinif);
   if(f.tip==="olcek"){ olcekYazdir(id, bos?"bos":"ogr", null); return; }
+  if(!f.fn){ const sp = fdSpec(id); if(sp) fdYazdir({form:id, veri:fdYeniVeri(sp), tarih:"", hafta:null}); return; }
+  if(bos) PRINT_AD = "";
   doPrint(f.fn(bos, g), f.orient||"portrait");
 }
 
@@ -3533,7 +3739,7 @@ function renderAjanda(){
         <div class="field" style="grid-column:1/-1"><label for="ajBaslik">Başlık</label><input id="ajBaslik" type="text" value="${esc(g("baslik",""))}" placeholder="Örnek: Haftalık program formunu doldur"></div>
         <div class="field"><label for="ajTarih">Tarih</label><input id="ajTarih" type="date" value="${esc(g("tarih",bugun))}"></div>
         <div class="field"><label for="ajSaat">Saat</label><input id="ajSaat" type="time" value="${esc(g("saat","18:00"))}"></div>
-        <div class="field"><label for="ajOgr">Öğrenci</label><select id="ajOgr"><option value="">Genel (öğrenciye bağlı değil)</option>${DB.students.map(o=>`<option value="${o.id}" ${o.id===sidVal?"selected":""}>${esc(o.ad)}</option>`).join("")}</select></div>
+        <div class="field"><label for="ajOgr">Öğrenci</label><select id="ajOgr"><option value="">Genel (öğrenciye bağlı değil)</option>${aktifler().map(o=>`<option value="${o.id}" ${o.id===sidVal?"selected":""}>${esc(o.ad)}</option>`).join("")}</select></div>
         <div class="field"><label for="ajTur">Tür</label><select id="ajTur">${AJ_TUR.map(t=>`<option ${t===g("tur","Diğer")?"selected":""}>${t}</option>`).join("")}</select></div>
         <div class="field"><label for="ajHat">Hatırlat</label><select id="ajHat">${AJ_HAT.map(h=>`<option value="${h[0]}" ${+g("hatirla",15)===h[0]?"selected":""}>${h[1]}</option>`).join("")}</select></div>
         ${ed?"":`<div class="field"><label for="ajTekrar">Tekrar</label><select id="ajTekrar"><option value="0">Tek seferlik</option><option value="4">Her hafta (4 hafta)</option><option value="8">Her hafta (8 hafta)</option><option value="12">Her hafta (12 hafta)</option></select></div>`}
@@ -3754,11 +3960,19 @@ function fdSpec(id){
       {t:"tablo", k:"lise", e:"Hedef liseler", serbest:true, bos:6, col:[fdC("okul","Okul adı","metin"),fdC("tur","Okul türü","metin"),fdC("yuzde","Geçen yıl yüzdelik dilim","metin"),fdC("taban","Taban puan","metin"),fdC("hedef","Bu yıl hedef","metin"),fdC("not","Not","metin")]},
       {t:"tablo", k:"net", e:"Hedef net tablosu", satirlar:()=>LGS_DERS.map(d=>({ders:d[0],soru:d[1]})), col:[fdC("ders","Ders","sabit"),fdC("soru","Soru","sayi"),fdC("hedef","Hedef net","sayi"),fdC("mevcut","Mevcut net","sayi"),fdC("fark","Fark","hesap",r=>(r.hedef===undefined||r.hedef===""||r.mevcut===undefined||r.mevcut==="")?"":Math.round((+r.hedef-+r.mevcut)*100)/100),fdC("oncelik","Öncelik","sec",["Yüksek","Orta","Düşük"])]},
       {t:"metin", k:"neden", e:"Neden bu okul? (öğrencinin kendi cümleleriyle)"}, {t:"metin", k:"adim", e:"Hedefe giden yol: 3 somut adım"}]},
+    seans_geri:{baslik:"Seans / Ders Geri Bildirim Formu", orient:"portrait", bol:[
+      {t:"alan", e:"Seans bilgisi", al:[fdC("tarih","Seans tarihi","tarih"),fdC("tur","Seans türü","sec",["Koçluk seansı","Özel ders","Online ders","Veli görüşmesi"])]},
+      {t:"duzey", k:"deg", e:"Bu seans nasıldı?", satirlar:["Anlatılanları anladım","Seans süresi verimliydi","Kendimi rahat hissettim","Ödev ve plan net"], sec:FD_SEV},
+      {t:"metin", k:"iyi", e:"En çok işe yarayan neydi?"}, {t:"metin", k:"zor", e:"Takıldığım / anlamadığım yerler"}, {t:"metin", k:"istek", e:"Bir sonraki seans için isteğim"}]},
+    veli_geri:{baslik:"Veli Memnuniyet ve Geri Bildirim Formu", orient:"portrait", bol:[
+      {t:"duzey", k:"deg", e:"Süreci nasıl değerlendiriyorsunuz?", satirlar:["Genel memnuniyet","İletişim ve bilgilendirme","Çocuğumdaki gelişim","Seans / ders planı ve düzen"], sec:FD_SEV},
+      {t:"metin", k:"iyi", e:"En çok memnun kaldığınız konular"}, {t:"metin", k:"gelistir", e:"Geliştirilmesini istediğiniz konular"}, {t:"metin", k:"ek", e:"Eklemek istedikleriniz"}]},
     seri_deneme:{baslik:"Seri Deneme ve Seri Soru Takip Formu", orient:"landscape", bol:[
       {t:"tablo", k:"deneme", e:"Seri denemeler", serbest:true, bos:6, topla:["D","Y","B","net"], col:[fdC("tarih","Tarih","tarih"),fdC("kurum","Deneme / kurum","metin"),fdC("tur","Tür","sec",["LGS","TYT","AYT"]),fdC("D","D","sayi"),fdC("Y","Y","sayi"),fdC("B","B","sayi"),fdC("net","Net","hesap",r=>fdNet(r.D,r.Y,(r.tur||(lgs?"LGS":"TYT"))==="LGS"?3:4)),fdC("sure","Süre (dk)","sayi"),fdC("bas","Başlama dersi / turlama","metin"),fdC("not","Not","metin")]},
       {t:"metin", k:"strateji", e:"Sınav stratejisi (sıra, turlama, süre)"}, {t:"metin", k:"hafta", e:"Haftalık değerlendirme / koç notu"}]}
   };
-  return S[id] || null;
+  fdSpec.idler = Object.keys(S);
+  return Object.prototype.hasOwnProperty.call(S,id) ? S[id] : null;
 }
 const FD_YONLENDIR = {haftalik_program:{hedef:"hafta", ad:"Akademik › Haftalık plan"}};
 function fdDijitalMi(id){ const f=formBul(id); return !!f && (f.tip==="olcek" || !!fdSpec(id) || !!FD_YONLENDIR[id]); }
@@ -4231,15 +4445,431 @@ function ozelBagla(){
     (u.kaz||[]).forEach((k,ki)=>{ const key=OZ.ilDers+"|"+ui+"|"+ki; if(tam) delete d.ilerleme[key]; else d.ilerleme[key]=true; }); save(); re();
   }));
 }
-function ozAktar(){
-  const s = stu(); const d = ozData(); const ay = $("oAy").value; if(!ay){ toast("Önce dönemi (ay) seçin"); return; }
-  const gel = d.ders.filter(x=>(x.tarih||"").startsWith(ay)); if(!gel.length){ toast("Bu ay için özel ders kaydı yok"); return; }
-  const mevcut = $("oDersTarihleri").value.split(/[,;\n]/).map(t=>t.trim()).filter(Boolean);
-  const hepsi = Array.from(new Set(mevcut.concat(gel.map(x=>x.tarih)))).sort();
-  $("oDersTarihleri").value = hepsi.join(", ");
-  const dk = gel.reduce((a,x)=>a+(+x.sure||0),0);
-  if(!$("oSaat").value && dk){ $("oSaat").value = Math.round(dk/6)/10; $("oSaat").dispatchEvent(new Event('input',{bubbles:true})); }
-  toast(gel.length+" ders tarihi getirildi · "+Math.round(dk/6)/10+" saat");
+/* =====================================================================
+   ÇALIŞMA DİSİPLİNİ ANALİZİ (22 madde · 3 blok · 5'li Likert)
+   ===================================================================== */
+const DIS_LIKERT = ["Hiç uygun değil","Nadiren","Bazen","Çoğu zaman","Her zaman"];
+const DIS_SURE = "6 dakika";
+const DIS_BLOKLAR = [
+  {ad:"Rutin ve devamlılık", ikon:"🕒", aralik:[1,7],
+   aciklama:"Çalışmanın düzenli bir ritme oturup oturmadığını, kopukluk ve geri dönüş becerisini ölçer."},
+  {ad:"Görev ve erteleme", ikon:"✅", aralik:[8,14],
+   aciklama:"Başladığı işi bitirme, görev tamamlama ve erteleme eğilimini görünür kılar."},
+  {ad:"Zorluk ve takip", ikon:"📈", ikonAd:"", aralik:[15,22],
+   aciklama:"Zorlukla baş etme, yardım isteme, hedef koyma ve ilerlemeyi ölçme davranışını inceler."}
+];
+/* ters puanlanan maddeler (1-5) */
+const DIS_TERS = [3,5,7,10,12,13,16,20];
+const DIS_MADDELER = [
+  "Haftanın çoğu günü aynı saatlerde çalışıyorum.",
+  "Çalışma yerim belli; her seferinde farklı bir yerde çalışmıyorum.",
+  "Çalışmaya ne zaman oturacağım tamamen o günkü ruh hâlime bağlı.",
+  "Son bir ayda haftada en az beş gün çalıştım.",
+  "Çok yoğun çalıştığım günleri hiç çalışmadığım günler takip ediyor.",
+  "Bir hafta aksadığında ertesi hafta normale dönebiliyorum.",
+  "Tatil ve ara dönemlerde çalışma düzenim tamamen bozuluyor.",
+  "Başladığım konuyu yarıda bırakmadan bitiriyorum.",
+  "Gün içinde kendime verdiğim görevlerin çoğunu tamamlıyorum.",
+  "Aynı anda birçok işe başlayıp hiçbirini bitirmiyorum.",
+  "Ödev ve görevlerimi son güne bırakmadan bitiriyorum.",
+  "Zor bulduğum konuyu sürekli sonraya atıyorum.",
+  "\"Yarın daha iyi çalışırım\" diyerek bugünü geçiriyorum.",
+  "Ertelediğim bir işi en geç ertesi gün yapıyorum.",
+  "Anlamadığım bir konuda pes etmeden farklı bir kaynak veya yöntem deniyorum.",
+  "Netim düştüğünde çalışmayı azaltıyorum.",
+  "Zorlandığımda yardım istemekten çekinmiyorum.",
+  "Haftalık bir hedefim var ve hafta sonunda ona ulaşıp ulaşmadığımı biliyorum.",
+  "Çalıştığım süreyi veya çözdüğüm soru sayısını takip ediyorum.",
+  "Ne kadar ilerlediğimi ölçmüyorum; sadece çalışıyorum.",
+  "Hafta sonunda neyin işe yaradığını, neyin yaramadığını değerlendiriyorum.",
+  "Aynı hatayı fark ettiğimde yöntemimi değiştiriyorum."
+];
+const DIS_SINIFLAR = ["5","6","7","8","9","10","11","12","mezun"];
+const DIS_SINIF_AD = {"5":"5. Sınıf","6":"6. Sınıf","7":"7. Sınıf","8":"8. Sınıf","9":"9. Sınıf","10":"10. Sınıf","11":"11. Sınıf","12":"12. Sınıf","mezun":"Mezun"};
+
+/* durum */
+const DIS = {ekran:"giris", cevap:{}, sayfa:0, sinif:"", sid:null, son:null};
+const DIS_SAYFA = 7; // her ekranda en fazla madde sayısı
+
+function disKayitlar(){ const s = stu(); return (DB.discipline[s.id] = DB.discipline[s.id] || []); }
+function disPuan(i, ham){ // i: 1-22
+  const v = +ham || 0; if(v < 1) return 0;
+  return DIS_TERS.includes(i) ? 6 - v : v;
+}
+function disBoyutSkor(aralik, cevap){
+  const [a,b] = aralik; let top = 0, n = 0; const C = cevap || DIS.cevap;
+  for(let i=a;i<=b;i++){ if(C[i]){ top += disPuan(i, C[i]); n++; } }
+  return n ? {top, n, ort:Math.round(top/n*100)/100, maks:5} : null;
+}
+function disToplam(){
+  let top = 0, n = 0;
+  for(let i=1;i<=22;i++){ if(DIS.cevap[i]){ top += disPuan(i, DIS.cevap[i]); n++; } }
+  return {top, n, yuzde:n?Math.round(top/(n*5)*100):0};
+}
+function disDolu(){ return Object.keys(DIS.cevap).filter(k=>+DIS.cevap[k]>0).length; }
+function disHazir(){ return disDolu() === 22; }
+
+function disBasla(sinif){
+  DIS.ekran = "form"; DIS.sayfa = 0; DIS.sinif = sinif || "8";
+  DIS.cevap = {}; DIS.sid = stu().id; DIS.son = null;
+  renderDiscipline();
+}
+
+function renderDiscipline(){
+  const s = stu();
+  if(DIS.sid && DIS.sid!==s.id){ DIS.ekran = "giris"; DIS.cevap = {}; DIS.son = null; DIS.sayfa = 0; }
+  DIS.sid = s.id;
+  const ek = DIS.ekran;
+  let ic = "";
+  if(ek === "giris") ic = disGirisHtml(s);
+  else if(ek === "form") ic = disFormHtml(s);
+  else if(ek === "sonuc") ic = disSonucHtml(s, DIS.son);
+  $("panel").innerHTML = ic;
+  disBagla(s);
+}
+
+/* --- giriş ekranı --- */
+function disGirisHtml(s){
+  const gecmis = disKayitlar().slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const son = gecmis[0];
+  return `<div class="box" style="max-width:760px">
+    <div class="colhead" style="align-items:flex-start">
+      <div><h2 style="margin:0 0 2px">Çalışma Disiplini Analizi</h2><p class="muted" style="margin:0">${DIS_SURE} · 22 madde</p></div>
+      <span class="badge ok">Öz değerlendirme</span>
+    </div>
+    <p class="hint" style="margin:10px 0 4px">Maddeler son birkaç haftadaki çalışma davranışını sorar. Bu bir yetenek ölçümü değil, mevcut düzenin fotoğrafıdır.</p>
+    <p class="hint" style="margin:0 0 10px"><b>Ne gösterir:</b> Çalışma disiplini göstergesi.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px">${DIS_BLOKLAR.map(b=>`<span class="badge" style="padding:5px 9px">${b.ikon} ${b.ad}</span>`).join("")}</div>
+    <div class="box no" style="margin:0 0 10px;background:var(--paper-2)"><b>Başlamadan önce</b><ul class="plist" style="margin:6px 0 0;padding-left:18px">
+      <li>Maddeler son birkaç haftadaki çalışma davranışını sorar; bu bir yetenek ölçümü değil, mevcut düzenin fotoğrafıdır.</li>
+      <li>Bu analiz bir tanı aracı değildir; çalışma düzenine dair bir öz değerlendirme ve yol haritasıdır.</li>
+      <li>Sorulara içinden geldiği gibi, olduğu gibi cevap vermek sonucun işe yararlılığını artırır.</li>
+    </ul></div>
+    <div class="form" style="max-width:320px"><div class="field"><label for="disSinif">Sınıf seviyesi</label><select id="disSinif">${DIS_SINIFLAR.map(g=>`<option value="${g}" ${g===(s.sinif||"8")?"selected":""}>${DIS_SINIF_AD[g]}</option>`).join("")}</select></div></div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="disBasla" type="button">Analize başla</button>${son?`<button class="btn" id="disSonGor" type="button">Son sonucu gör (${trDate(new Date(son.ts).toISOString().slice(0,10))})</button>`:""}</div>
+    ${gecmis.length?`<div style="margin-top:18px"><h3 style="font-size:15px">Geçmiş sonuçlar</h3><table class="stable"><tbody>${gecmis.map(k=>`<tr><td>${esc(trDate(new Date(k.ts).toISOString().slice(0,10)))}</td><td>${esc(DIS_SINIF_AD[k.sinif]||k.sinif)}</td><td><b>${k.yuzde}%</b> disiplin</td><td style="text-align:right;white-space:nowrap"><button class="btn small" data-disac="${esc(k.id)}">Aç</button> <button class="btn small" data-disyaz="${esc(k.id)}">Yazdır</button> <button class="btn small" data-dissil="${esc(k.id)}">Sil</button></td></tr>`).join("")}</tbody></table></div>`:""}
+  </div>`;
+}
+
+/* --- form ekranı --- */
+function disFormHtml(s){
+  const toplam = 22;
+  const dolu = disDolu();
+  const blok = DIS_BLOKLAR[DIS.sayfa] || DIS_BLOKLAR[0];
+  const [a,b] = blok.aralik;
+  const maddeler = [];
+  for(let i=a;i<=b;i++) maddeler.push(i);
+  const doluBlok = maddeler.filter(i=>+DIS.cevap[i]>0).length;
+  return `<div class="box" style="max-width:820px">
+    <div class="colhead" style="align-items:flex-start">
+      <div><h2 style="margin:0 0 2px">Çalışma Disiplini Analizi</h2><p class="muted" style="margin:0">Başlamak kadar devam etmek de önemlidir. Bu analiz öğrencinin çalışma düzenindeki kırılma noktalarını görünür hale getirir.</p></div>
+      <span class="badge">${dolu} / ${toplam}</span>
+    </div>
+    <div class="bar" style="margin:10px 0 14px;height:10px"><i style="width:${Math.round(dolu/toplam*100)}%"></i></div>
+    <div class="seg" style="margin-bottom:12px;flex-wrap:wrap">${DIS_BLOKLAR.map((x,i)=>`<button type="button" class="btn small" data-dispage="${i}" aria-pressed="${i===DIS.sayfa}">${esc(x.ad)} · ${(x.aralik[1]-x.aralik[0]+1)} madde</button>`).join("")}</div>
+    <div class="box no" style="margin:0 0 12px;background:var(--paper-2)">
+      <b>${blok.ikon} ${esc(blok.ad)}</b>
+      <p class="hint" style="margin:4px 0 0">${esc(blok.aciklama)}</p>
+    </div>
+    ${maddeler.map(i=>{
+      const sec = +DIS.cevap[i] || 0;
+      return `<div class="box no" style="margin:0 0 10px;padding:12px 14px">
+        <p style="margin:0 0 8px;font-weight:500"><span class="muted">${i}.</span> ${esc(DIS_MADDELER[i-1])}</p>
+        <div class="seg" role="group" aria-label="Madde ${i}">${DIS_LIKERT.map((l,li)=>`<button type="button" class="btn small" data-dismadde="${i}" data-disv="${li+1}" aria-pressed="${sec===li+1}" title="${esc(l)}">${li+1}<span class="muted" style="font-size:11px;margin-left:3px">${esc(l)}</span></button>`).join("")}</div>
+      </div>`;
+    }).join("")}
+    <div class="actions" style="margin-top:8px;justify-content:space-between;flex-wrap:wrap">
+      <div><button class="btn" id="disGeri" type="button" ${DIS.sayfa===0?"disabled":""}>← Geri</button></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" id="disIptal" type="button">Vazgeç</button>
+        ${DIS.sayfa < DIS_BLOKLAR.length-1
+          ? `<button class="btn primary" id="disDevam" type="button">Devam et →</button>`
+          : `<button class="btn primary" id="disBitir" type="button" ${disHazir()?"":"disabled"}>Sonucumu göster</button>`}
+      </div>
+    </div>
+    ${!disHazir()?`<p class="hint" style="margin:8px 0 0">Sonucu görmek için 22 maddenin tamamını yanıtlayın. Eksik: ${toplam-dolu} madde.</p>`:""}
+  </div>`;
+}
+
+/* --- sonuç ekranı --- */
+function disSonucHtml(s, kayit){
+  if(!kayit) return `<div class="empty">Sonuç bulunamadı.</div>`;
+  const bloklar = DIS_BLOKLAR.map(b=>{
+    const sk = disBoyutSkor(b.aralik, kayit.cevap);
+    return {ad:b.ad, ikon:b.ikon, aralik:b.aralik, ...(sk||{})};
+  });
+  const t = kayit.toplam || {top:0, n:22, yuzde:0};
+  const yorum = disYorum(t.yuzde);
+  const oneriler = disOneriler(t.yuzde, bloklar);
+  return `<div class="box" style="max-width:860px">
+    <div class="colhead" style="align-items:flex-start">
+      <div><h2 style="margin:0 0 2px">Çalışma disiplini sonucu</h2><p class="muted" style="margin:0">${esc(DIS_SINIF_AD[kayit.sinif]||kayit.sinif)} · ${trDate(new Date(kayit.ts).toISOString().slice(0,10))}</p></div>
+      <div class="actions" style="margin:0"><button class="btn small" id="disYaz" type="button">Yazdır</button><button class="btn small" id="disTekrar" type="button">Yeniden uygula</button><button class="btn small" id="disKapat" type="button">Listeye dön</button></div>
+    </div>
+    <div class="pcols-screen" style="margin-top:10px">
+      <div class="box" style="margin:0"><small class="muted">Genel disiplin endeksi</small><div style="font-size:38px;font-weight:650;line-height:1.1">${t.yuzde}<span style="font-size:18px">%</span></div><div class="hint">${esc(yorum.ad)}</div></div>
+      <div class="box" style="margin:0"><small class="muted">Yanıtlanan</small><div style="font-size:26px;font-weight:600">${t.n} / 22</div><div class="hint">madde</div></div>
+      <div class="box" style="margin:0"><small class="muted">En güçlü blok</small><div style="font-size:18px;font-weight:600">${esc(disEnIyi(bloklar)?.ad||"-")}</div><div class="hint">${disEnIyi(bloklar)?`ort. ${disEnIyi(bloklar).ort}/5`:"-"}</div></div>
+      <div class="box" style="margin:0"><small class="muted">En kırılgan blok</small><div style="font-size:18px;font-weight:600">${esc(disEnZayif(bloklar)?.ad||"-")}</div><div class="hint">${disEnZayif(bloklar)?`ort. ${disEnZayif(bloklar).ort}/5`:"-"}</div></div>
+    </div>
+    <h3 style="margin:16px 0 6px;font-size:16px">Blok bazında görünüm</h3>
+    <div class="hb">${bloklar.map(b=>`<div>${b.ikon} ${esc(b.ad)}</div><div class="tr"><div style="display:flex;align-items:center"><div class="br" style="width:${Math.max(2,Math.round((b.ort||0)/5*100*0.82))}%;background:var(--chalk)"></div><span class="hbv">${b.ort!==undefined?b.ort+" / 5":"–"}</span></div></div>`).join("")}</div>
+    <div class="box no" style="margin-top:16px"><b>Yorum</b><p class="hint" style="margin:4px 0 0">${esc(yorum.metin)}</p></div>
+    <div class="box no" style="margin-top:10px"><b>Öneriler</b><ul class="plist" style="margin:4px 0 0;padding-left:18px">${oneriler.map(o=>`<li>${esc(o)}</li>`).join("")}</ul></div>
+    <div class="box no" style="margin-top:10px"><b>Madde bazında işaretler</b><p class="hint" style="margin:4px 0 8px">Ters puanlanan maddeler (3, 5, 7, 10, 12, 13, 16, 20) düşük puan aldığında disiplin göstergesi olumsuz etkilenir.</p>
+      <div class="tscroll"><table class="ttab"><thead><tr><th>#</th><th>Madde</th><th>Yanıt</th><th>Puan</th></tr></thead><tbody>${DIS_MADDELER.map((m,idx)=>{ const i=idx+1; const ham = kayit.cevap[i]; const p = ham?disPuan(i,ham):0; return `<tr><td>${i}</td><td>${esc(m)}</td><td>${ham?DIS_LIKERT[ham-1]:"—"}</td><td>${ham?p+(DIS_TERS.includes(i)?" (ters)":""):"—"}</td></tr>`; }).join("")}</tbody></table></div>
+    </div>
+  </div>`;
+}
+function disYorum(y){
+  if(y >= 80) return {ad:"Güçlü disiplin", metin:"Çalışma düzenin büyük ölçüde oturmuş görünüyor. Bu düzeni korumak ve zorlayıcı hedeflere yönelmek için uygun bir zemindesin."};
+  if(y >= 60) return {ad:"Gelişmekte", metin:"Düzenin büyük parçaları yerinde; ancak bazı bloklarda kopukluklar var. Küçük ve sürdürülebilir değişikliklerle bu yüzdeyi yukarı taşıyabilirsin."};
+  if(y >= 40) return {ad:"Dalgalı", metin:"Çalışma düzenin dalgalı: iyi günler ve kopuk günler birbirini izliyor. Önce rutini sabitlemek, sonra hacmi artırmak daha doğru olur."};
+  return {ad:"Yeniden kurulmalı", metin:"Şu an çalışma düzeninin temel taşları eksik görünüyor. Suçlayıcı olmadan, küçük ve kesin adımlarla yeni bir rutin kurmak en etkili yol olacaktır."};
+}
+function disOneriler(y, bloklar){
+  const on = [];
+  const enZ = disEnZayif(bloklar);
+  if(enZ){ const ar = enZ.aralik;
+    if(ar[1] <= 7) on.push("Rutin için haftanın 5 günü aynı saatte 25-40 dakikalık kısa bir çalışma bloğu belirle; süreyi artırmadan önce düzenliliği oturt.");
+    else if(ar[1] <= 14) on.push("Erteleme için \"2 dakika kuralı\"nı dene: başlamakta zorlandığın işi yalnızca 2 dakika yapmayı hedefle. Başladıktan sonra devam etmek kolaylaşır.");
+    else on.push("Haftalık bir hedef belirle ve hafta sonunda üç soruyla değerlendir: Ne işe yaradı? Ne yaramadı? Gelecek hafta neyi değiştireceğim?");
+  }
+  if(y < 60) on.push("Programı \"her gün 4 saat\" gibi büyük hedeflerle değil, \"her gün 40 dakika, aynı saatte\" gibi küçük ve kesin bir rutinle kur.");
+  if(y >= 60) on.push("Artık hacmi artırabilirsin: haftalık çalışma süresine her hafta 30-45 dakika ekleyerek ilerle.");
+  on.push("Bu sonucu bir not olarak sakla ve 3-4 hafta sonra tekrar uygula; değişimi kendi gözünle gör.");
+  return on;
+}
+function disEnIyi(b){ const L = b.filter(x=>x.ort!==undefined); return L.length ? L.slice().sort((a,c)=>c.ort-a.ort)[0] : null; }
+function disEnZayif(b){ const L = b.filter(x=>x.ort!==undefined); return L.length ? L.slice().sort((a,c)=>a.ort-c.ort)[0] : null; }
+
+/* --- bağlama --- */
+function disBagla(s){
+  const re = ()=>renderDiscipline();
+  if($("disBasla")) $("disBasla").addEventListener('click',()=>disBasla($("disSinif").value));
+  if($("disSonGor")) $("disSonGor").addEventListener('click',()=>{ const k = disKayitlar().slice().sort((a,b)=>(b.ts||0)-(a.ts||0))[0]; if(k){ DIS.son = k; DIS.ekran = "sonuc"; re(); } });
+  document.querySelectorAll('[data-dispage]').forEach(b=>b.addEventListener('click',()=>{ DIS.sayfa = +b.dataset.dispage; re(); }));
+  document.querySelectorAll('[data-dismadde]').forEach(b=>b.addEventListener('click',()=>{
+    const i = +b.dataset.dismadde, v = +b.dataset.disv;
+    DIS.cevap[i] = (DIS.cevap[i] === v) ? 0 : v; re();
+  }));
+  if($("disGeri")) $("disGeri").addEventListener('click',()=>{ if(DIS.sayfa>0){ DIS.sayfa--; re(); } });
+  if($("disDevam")) $("disDevam").addEventListener('click',()=>{
+    const blok = DIS_BLOKLAR[DIS.sayfa]; const eksik = [];
+    for(let i=blok.aralik[0]; i<=blok.aralik[1]; i++) if(!DIS.cevap[i]) eksik.push(i);
+    if(eksik.length){ toast("Bu blokta "+eksik.length+" madde eksik: "+eksik.join(", ")); return; }
+    if(DIS.sayfa < DIS_BLOKLAR.length-1){ DIS.sayfa++; re(); }
+  });
+  if($("disBitir")) $("disBitir").addEventListener('click',()=>{
+    if(!disHazir()){ toast("Önce 22 maddenin tamamını yanıtlayın"); return; }
+    const t = disToplam();
+    const kayit = {id:yeniId("dis"), ts:Date.now(), sinif:DIS.sinif, cevap:Object.assign({}, DIS.cevap), toplam:{top:t.top, n:t.n, yuzde:t.yuzde}};
+    disKayitlar().push(kayit); save(); DIS.son = kayit; DIS.ekran = "sonuc"; re(); toast("Sonuç kaydedildi");
+  });
+  if($("disIptal")) $("disIptal").addEventListener('click',()=>{ DIS.ekran = "giris"; DIS.cevap = {}; re(); });
+  if($("disKapat")) $("disKapat").addEventListener('click',()=>{ DIS.ekran = "giris"; DIS.son = null; DIS.cevap = {}; re(); });
+  if($("disTekrar")) $("disTekrar").addEventListener('click',()=>disBasla(DIS.son ? DIS.son.sinif : (s.sinif||"8")));
+  if($("disYaz")) $("disYaz").addEventListener('click',()=>disYazdir(DIS.son || disKayitlar().slice().sort((a,b)=>(b.ts||0)-(a.ts||0))[0]));
+  document.querySelectorAll('[data-disac]').forEach(b=>b.addEventListener('click',()=>{ const k = disKayitlar().find(x=>x.id===b.dataset.disac); if(k){ DIS.son = k; DIS.ekran = "sonuc"; re(); } }));
+  document.querySelectorAll('[data-dissil]').forEach(b=>b.addEventListener('click',()=>armDel(b,()=>{ DB.discipline[s.id] = disKayitlar().filter(x=>x.id!==b.dataset.dissil); save(); re(); toast("Kayıt silindi"); })));
+  document.querySelectorAll('[data-disyaz]').forEach(b=>b.addEventListener('click',()=>{ const k = disKayitlar().find(x=>x.id===b.dataset.disyaz); if(k) disYazdir(k); }));
+}
+
+/* --- yazdırma --- */
+function disYazdir(kayit){
+  if(!kayit) return;
+  const s = stu();
+  const bloklar = DIS_BLOKLAR.map(b=>({...b, ...(disBoyutSkor(b.aralik, kayit.cevap)||{})}));
+  const t = kayit.toplam || {top:0,n:22,yuzde:0};
+  const yorum = disYorum(t.yuzde);
+  const oneriler = disOneriler(t.yuzde, bloklar);
+  const satir = (b)=>`<tr><td>${b.ikon} ${esc(b.ad)}</td><td>${b.aralik[0]}–${b.aralik[1]}</td><td>${b.ort!==undefined?b.ort:"–"}</td><td>${b.ort!==undefined?Math.round(b.ort/5*100)+"%":"–"}</td></tr>`;
+  doPrint(`<div class="pg">${pHead("Çalışma Disiplini Analizi", esc(DIS_SINIF_AD[kayit.sinif]||kayit.sinif)+" · "+trDate(new Date(kayit.ts).toISOString().slice(0,10)))}
+    <div class="ps"><h2>Genel sonuç</h2>
+      <table class="pt"><tr><th style="width:30%">Disiplin endeksi</th><td><b>${t.yuzde}%</b> — ${esc(yorum.ad)}</td></tr>
+      <tr><th>Yanıtlanan madde</th><td>${t.n} / 22</td></tr></table>
+      <p style="font-size:9pt;margin:4pt 0 0">${esc(yorum.metin)}</p></div>
+    <div class="ps"><h2>Blok bazında sonuç</h2>
+      <table class="pt"><thead><tr><th>Blok</th><th>Maddeler</th><th>Ortalama (1–5)</th><th>Yüzde</th></tr></thead><tbody>${bloklar.map(satir).join("")}</tbody></table></div>
+    <div class="ps"><h2>Öneriler</h2><ul class="plist">${oneriler.map(o=>`<li>${esc(o)}</li>`).join("")}</ul></div>
+    <div class="ps"><h2>Madde bazında yanıtlar</h2>
+      <table class="pt"><thead><tr><th>#</th><th>Madde</th><th>Yanıt</th><th>Puan</th></tr></thead><tbody>${DIS_MADDELER.map((m,i)=>{ const q=i+1; const ham = kayit.cevap[q]; return `<tr><td>${q}</td><td>${esc(m)}</td><td>${ham?DIS_LIKERT[ham-1]:"—"}</td><td>${ham?(disPuan(q,ham)+(DIS_TERS.includes(q)?" (ters)":"")):"—"}</td></tr>`; }).join("")}</tbody></table></div>
+    <div class="sign"><div>Öğrenci</div><div>Veli</div><div>Koç</div></div>${pFoot()}</div>`, "portrait");
+}
+
+
+/* =====================================================================
+   v3.8: ÖĞRENCİ ANALİZ MERKEZİ — Ders Çalışma Program Analizi
+   ===================================================================== */
+const ANK_SORULAR = [
+  {k:"sn", t:"s", q:"Sınıf düzeyin nedir?", o:["9","10","11","12","Mezun"]},
+  {k:"al", t:"s", q:"Alanın nedir?", o:["Sayısal","Eşit Ağırlık","Sözel","Dil"]},
+  {k:"hd", t:"m", q:"Hedefin nedir?", n:"Birden fazla seçenek işaretleyebilirsin.", o:["TYT","AYT","LGS","KPSS","Okul sınavları"]},
+  {k:"ok", t:"s", q:"Okul / ders saatlerin nasıl?", o:["Sabahçıyım (≈08:00–15:00)","Tam gün (≈08:30–16:30)","Öğlenciyim (≈12:00–18:00)","Okula gitmiyorum / mezunum"]},
+  {k:"sa", t:"s", q:"Günlük ortalama kaç saat çalışabilirsin?", o:["1–2 saat","2–4 saat","4–6 saat","6+ saat"]},
+  {k:"zd", t:"m", q:"En çok zorlandığın dersler hangileri?", n:"Birden fazla seçenek işaretleyebilirsin.", o:["Matematik","Geometri","Türkçe","Fizik","Kimya","Biyoloji","Tarih","Coğrafya","Edebiyat"]},
+  {k:"net", t:"n", q:"Son deneme net aralığın nedir?", n:"TYT toplam netini sağa sola kaydırarak yaklaşık olarak seç. Bilmiyorsan tahmini bir değer bırakabilirsin. Eksi ise kutuya elle yaz."},
+  {k:"ph", t:"m", q:"Öncelikli hedefin nedir?", n:"Birden fazla seçenek işaretleyebilirsin.", o:["Konu bitirmek","Net artırmak","Düzenli çalışma alışkanlığı kazanmak","Eksik kapatmak"]},
+  {k:"vd", t:"s", q:"Video ders takip ediyor musun?", o:["Evet düzenli","Ara sıra","Hayır"]},
+  {k:"bg", t:"s", q:"Haftada boş gün istiyor musun?", o:["Evet","Hayır"]},
+  {k:"vs", t:"m", q:"Gün içinde en verimli olduğun saat aralıkları nelerdir?", n:"Birden fazla seçenek işaretleyebilirsin.", o:["Sabah","Öğlen","Akşam","Gece"]},
+  {k:"bz", t:"m", q:"Çalışma düzenini en çok ne bozuyor?", n:"İsteğe bağlı: birden fazla işaretleyebilirsin, boş bırakabilirsin.", opt:1, o:["Telefon / sosyal medya","Uyku düzeni","Motivasyon eksikliği","Dikkat dağınıklığı","Nereden başlayacağımı bilmemek","Okul yoğunluğu"]},
+  {k:"hb", t:"t", q:"Hedef bölüm / puan (isteğe bağlı)", n:"Aklında bir bölüm, üniversite ya da hedef puan varsa yazabilirsin.", opt:1}
+];
+function ankGecerli(q, v){ if(q.opt) return true; if(q.t==="s") return !!v; if(q.t==="m") return Array.isArray(v) && v.length>0; if(q.t==="n") return v!==undefined && v!=="" && !isNaN(+v); return true; }
+function ankSihirbaz(kap, bitti, opt){
+  opt = opt||{}; const S = ANK_SORULAR; const A = Object.assign({}, opt.ilk||{}); let i = 0;
+  if(A.net===undefined) A.net = 40;
+  const ciz = ()=>{
+    const q = S[i]; let g = "";
+    if(q.t==="s") g = `<div class="ank-os" role="radiogroup" aria-label="${esc(q.q)}">${q.o.map(o=>`<button type="button" class="ank-o" role="radio" data-v="${esc(o)}" aria-checked="${A[q.k]===o}">${esc(o)}</button>`).join("")}</div>`;
+    else if(q.t==="m") g = `<div class="ank-os" role="group" aria-label="${esc(q.q)}">${q.o.map(o=>`<button type="button" class="ank-o" data-v="${esc(o)}" aria-pressed="${(A[q.k]||[]).includes(o)}">${esc(o)}</button>`).join("")}</div>`;
+    else if(q.t==="n") g = `<div class="ank-net"><div class="ank-netv" id="ankNetV">${esc(A.net)}</div><input type="range" id="ankRange" min="0" max="120" step="1" value="${Math.max(0,Math.min(120,+A.net||0))}" aria-label="Net"><div class="ank-netu"><span>0</span><span>60</span><span>120</span></div><label class="ank-netl" for="ankNum">Eksi ya da kesin değer için elle yaz:</label><input type="number" id="ankNum" min="-40" max="120" step="0.25" value="${esc(A.net)}"></div>`;
+    else g = `<textarea id="ankTxt" rows="3" placeholder="Örnek: Tıp / 480 puan" aria-label="${esc(q.q)}">${esc(A[q.k]||"")}</textarea>`;
+    kap.innerHTML = `<div class="ank"><div class="ank-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${S.length}" aria-valuenow="${i+1}"><i style="width:${Math.round((i+1)/S.length*100)}%"></i></div><div class="ank-say">${i+1} / ${S.length}${q.opt?" · isteğe bağlı":""}</div><h2 class="ank-q">${esc(q.q)}</h2>${q.n?`<p class="ank-n">${esc(q.n)}</p>`:""}${g}<div class="ank-btn"><button type="button" class="btn" id="ankGeri" ${i?"":"disabled"}>‹ Geri</button><button type="button" class="btn primary" id="ankIleri" ${ankGecerli(q,A[q.k])?"":"disabled"}>${i===S.length-1?"Bitti ✓":"İleri ›"}</button></div></div>`;
+    const ileri = kap.querySelector("#ankIleri");
+    kap.querySelectorAll(".ank-o").forEach(b=>b.addEventListener("click",()=>{
+      const v = b.dataset.v;
+      if(q.t==="s"){ A[q.k] = v; kap.querySelectorAll(".ank-o").forEach(x=>x.setAttribute("aria-checked", x.dataset.v===v?"true":"false")); }
+      else { const L = A[q.k] = A[q.k]||[]; const ix = L.indexOf(v); if(ix>=0) L.splice(ix,1); else L.push(v); b.setAttribute("aria-pressed", ix<0?"true":"false"); }
+      ileri.disabled = !ankGecerli(q,A[q.k]);
+    }));
+    if(q.t==="n"){ const r = kap.querySelector("#ankRange"), n = kap.querySelector("#ankNum"), vv = kap.querySelector("#ankNetV");
+      r.addEventListener("input",()=>{ A.net = +r.value; n.value = r.value; vv.textContent = r.value; ileri.disabled = false; });
+      n.addEventListener("input",()=>{ const x = parseFloat(n.value); if(!isNaN(x)){ A.net = Math.max(-40,Math.min(120,x)); vv.textContent = A.net; r.value = Math.max(0,A.net); ileri.disabled = false; } else ileri.disabled = true; }); }
+    if(q.t==="t") kap.querySelector("#ankTxt").addEventListener("input",e=>{ A[q.k] = e.target.value.trim().slice(0,120); });
+    kap.querySelector("#ankGeri").addEventListener("click",()=>{ if(i>0){ i--; ciz(); } });
+    ileri.addEventListener("click",()=>{ if(ileri.disabled) return; if(i<S.length-1){ i++; ciz(); kap.scrollIntoView({block:"start"}); } else { const out = {}; S.forEach(x=>{ if(A[x.k]!==undefined && !(Array.isArray(A[x.k])&&!A[x.k].length) && A[x.k]!=="") out[x.k] = A[x.k]; }); bitti(out); } });
+  };
+  ciz();
+}
+function ankKayitlar(){ const s = stu(); return (DB.analiz[s.id] = DB.analiz[s.id] || []); }
+const ANK_AD = {sn:"Sınıf", al:"Alan", hd:"Hedef", ok:"Okul saatleri", sa:"Günlük çalışma", zd:"Zorlandığı dersler", net:"Son deneme neti", ph:"Öncelikli hedef", vd:"Video ders", bg:"Haftalık boş gün", vs:"Verimli saatler", bz:"Düzeni bozan", hb:"Hedef bölüm / puan"};
+function ankOzetSatirlar(a){ return ANK_SORULAR.filter(q=>a[q.k]!==undefined && a[q.k]!=="" && !(Array.isArray(a[q.k])&&!a[q.k].length)).map(q=>ANK_AD[q.k]+": "+(Array.isArray(a[q.k])?a[q.k].join(", "):a[q.k])); }
+/* --- plan üretimi --- */
+const ANK_SAAT = {"1–2 saat":1.5,"2–4 saat":3,"4–6 saat":5,"6+ saat":6.5};
+function ankYarim(x){ return Math.round(x*2)/2; }
+function ankDersAgirlik(a){
+  const hd = a.hd||[]; const W = {}; const ekle = (ad,w)=>{ W[ad] = (W[ad]||0)+w; };
+  const yks = hd.includes("TYT") || hd.includes("AYT");
+  if(hd.includes("TYT") || (yks===false && hd.length===0 && ["11","12","Mezun"].includes(a.sn))){ ekle("Türkçe",1.3); ekle("Matematik",1.5); ekle("Geometri",.7); ekle("Fizik",.5); ekle("Kimya",.5); ekle("Biyoloji",.5); ekle("Tarih",.35); ekle("Coğrafya",.35); }
+  if(hd.includes("AYT")){
+    const al = a.al||"Sayısal";
+    if(al==="Sayısal"){ ekle("Matematik",1.4); ekle("Fizik",1); ekle("Kimya",1); ekle("Biyoloji",.8); }
+    else if(al==="Eşit Ağırlık"){ ekle("Matematik",1.2); ekle("Edebiyat",1.2); ekle("Tarih",.7); ekle("Coğrafya",.7); }
+    else if(al==="Sözel"){ ekle("Edebiyat",1.4); ekle("Tarih",1); ekle("Coğrafya",1); ekle("Felsefe grubu",.8); }
+    else { ekle("Yabancı dil",2); }
+  }
+  if(hd.includes("LGS")){ ["Matematik","Türkçe","Fen Bilimleri","T.C. İnkılap Tarihi","İngilizce"].forEach(d=>ekle(d,1)); }
+  if(hd.includes("KPSS")){ ["Türkçe","Matematik","Tarih","Coğrafya","Vatandaşlık"].forEach(d=>ekle(d,1)); }
+  if(!Object.keys(W).length){ ["Matematik","Türkçe","Fen Bilimleri","Sosyal Bilimler"].forEach(d=>ekle(d,1)); }
+  (a.zd||[]).forEach(d=>{ if(W[d]) W[d] *= 1.5; else if(d==="Edebiyat"&&W["Türkçe"]) W["Türkçe"] *= 1.2; else if(d==="Geometri"&&W["Matematik"]) W["Matematik"] *= 1.1; });
+  return W;
+}
+function ankNetSeviye(n){
+  if(n<30) return {ad:"Temel kuruluyor", metin:"Önce temel konuları sağlamlaştırmak ve kısa konu testleriyle başlamak en verimli yol. Deneme sayısını azaltıp konu bitirmeye ağırlık ver."};
+  if(n<60) return {ad:"Gelişim aşaması", metin:"Konu hâkimiyeti oluşuyor. Konu tarama testlerini artır, her hafta bir branş denemesi ekle, yanlış defteri tut."};
+  if(n<90) return {ad:"Orta–üst düzey", metin:"Temel güçlü. Eksik kapatma, branş denemeleri ve haftalık genel deneme + dikkatli deneme analizi ile net artar."};
+  return {ad:"İleri düzey", metin:"Güçlü bir zemin var. Deneme analizi, hız ve zor soru pratiğine odaklan; en zayıf 2 konuyu bilinçli olarak kapat."};
+}
+function ankPlan(a){
+  const hSaat = ANK_SAAT[a.sa] || 3; const bos = a.bg==="Evet"; const gun = bos ? 6 : 7; const hafta = ankYarim(hSaat*gun);
+  const yks = (a.hd||[]).some(h=>h==="TYT"||h==="AYT"); const net = a.net===undefined ? 40 : +a.net;
+  const sabit = []; let kalan = hafta;
+  const koy = (ad, saat)=>{ saat = Math.min(saat, kalan); if(saat>=0.5){ sabit.push({ad, saat:ankYarim(saat)}); kalan -= ankYarim(saat); } };
+  if(yks){ koy("Deneme + deneme analizi", hafta>=14 ? 3.5 : hafta>=8 ? 2.5 : 0); koy("Paragraf / problem soru çözümü", Math.min(3.5, gun*0.5)); }
+  koy("Yanlış defteri / eksik kapatma", hafta>=8 ? 1.5 : 1);
+  koy("Kitap okuma", hafta>=10 ? 1.5 : 1);
+  const W = ankDersAgirlik(a); const top = Object.values(W).reduce((x,y)=>x+y,0);
+  const dersler = Object.keys(W).map(ad=>{ const sa = Math.max(0.5, ankYarim(kalan*W[ad]/top)); const zor = (a.zd||[]).includes(ad)||(ad==="Türkçe"&&(a.zd||[]).includes("Edebiyat")); return {ad, saat:sa, zor}; }).sort((x,y)=>y.saat-x.saat);
+  const ok = a.ok||""; let hi, hs;
+  if(/Sabahçı/.test(ok)){ hi = "16:30–21:30"; hs = "09:00–13:00 ve 14:30–18:00"; }
+  else if(/Tam gün/.test(ok)){ hi = "18:00–22:00"; hs = "09:00–13:00 ve 14:30–18:00"; }
+  else if(/Öğlenci/.test(ok)){ hi = "07:30–11:00 ve 19:00–22:00"; hs = "09:00–13:00 ve 15:00–18:30"; }
+  else { hi = "09:00–12:30, 14:00–17:30 ve 19:00–21:30"; hs = "09:00–13:00, 14:30–18:00 ve 19:30–21:30"; }
+  const vs = a.vs||[]; const zorlar = dersler.filter(d=>d.zor).map(d=>d.ad);
+  const oneri = [];
+  oneri.push("Çalışma düzeni: hafta içi "+hi+", hafta sonu "+hs+" arasında bloklar hâlinde çalış; 40–50 dk çalışma + 10 dk mola.");
+  if(vs.length) oneri.push("Verimli olduğun saat(ler) "+vs.join(", ").toLowerCase()+": en zor dersleri"+(zorlar.length?" ("+zorlar.join(", ")+")":"")+" bu saatlere yerleştir.");
+  if(bos) oneri.push("Haftada 1 gün (öneri: Pazar) tamamen boş; dinlenmek verimi korur.");
+  else oneri.push("Boş gün istemediğin için 7 gün çalışacaksın; en az bir gün hafif tut (yarım gün) ki yorgunluk birikmesin.");
+  if(a.vd==="Evet düzenli") oneri.push("Video ders: not al ve her videodan sonra 15–20 soru çöz; sadece izlemek kalıcı öğrenme sağlamaz.");
+  else if(a.vd==="Ara sıra") oneri.push("Video ders: haftalık plana 2–3 sabit video saati koy; düzensiz izleme konu bitirmeyi yavaşlatır.");
+  else oneri.push("Video kullanmıyorsun: konu anlatımlı bir kaynak ya da koç anlatımıyla konu bitirme planı yapılacak.");
+  const ph = a.ph||[];
+  if(ph.includes("Konu bitirmek")) oneri.push("Konu bitirme: her hafta ders başına 1–2 konu hedefi koy; çetelede konu bitişini işaretle.");
+  if(ph.includes("Net artırmak")) oneri.push("Net artırma: haftada 1 branş denemesi + 1 genel deneme; her denemeden sonra yanlışları 24 saat içinde analiz et.");
+  if(ph.includes("Düzenli çalışma alışkanlığı kazanmak")) oneri.push("Alışkanlık: her gün aynı saatte başla; ilk iki hafta süreyi artırma, sadece düzenliliği oturt.");
+  if(ph.includes("Eksik kapatmak")) oneri.push("Eksik kapatma: konu tarama testlerinde %70’in altında kalan konuları listele, haftada 2 saat bu listeye ayır.");
+  const bz = a.bz||[];
+  if(bz.includes("Telefon / sosyal medya")) oneri.push("Telefon: çalışma bloğunda başka odada ya da uçak modunda; molada bakmak serbest.");
+  if(bz.includes("Uyku düzeni")) oneri.push("Uyku: sabit saatte yat/kalk; gece çalışmayı kademeli olarak öne çek.");
+  if(bz.includes("Motivasyon eksikliği")) oneri.push("Motivasyon: küçük ve ölçülebilir günlük hedef koy; haftalık çetelede tamamladıklarını gör.");
+  if(bz.includes("Dikkat dağınıklığı")) oneri.push("Dikkat: 25 dk odak + 5 dk mola (pomodoro) ile başla; masada sadece o dersin materyali olsun.");
+  if(bz.includes("Nereden başlayacağımı bilmemek")) oneri.push("Başlangıç: ilk hafta koçla birlikte somut konu listesi çıkar; “bugün şu 3 şey” formatıyla çalış.");
+  if(bz.includes("Okul yoğunluğu")) oneri.push("Okul yoğunluğu: hafta içi kısa (1–2 saat) ama kesin bloklar, hafta sonu ana çalışma günleri.");
+  return {gunSaat:hSaat, hafta, gun, sabit, dersler, hi, hs, oneri, seviye: yks ? ankNetSeviye(net) : null, net};
+}
+function ankMesaj(k){
+  const s = stu(); const p = ankPlan(k.a); const a = k.a;
+  let m = "Merhaba "+(s.veliAd?s.veliAd+",":"")+"\n"+s.ad+" için Ders Çalışma Program Analizi sonucu:\n";
+  m += "• Günlük çalışma: "+p.gunSaat+" saat · haftalık yaklaşık "+p.hafta+" saat\n";
+  if(p.seviye) m += "• Seviye: "+p.seviye.ad+" (son net "+p.net+")\n";
+  m += "• Ağırlık verilecek dersler: "+p.dersler.slice(0,4).map(d=>d.ad+" "+d.saat+" sa").join(", ")+"\n";
+  m += "• Haftalık plan koçluk görüşmesinde birlikte netleştirilecek.\n"+(s.koc||"");
+  return m;
+}
+function ankYazdir(k){
+  const s = stu(); const a = k.a; const p = ankPlan(a); const tarih = new Date(k.ts).toISOString().slice(0,10);
+  const cev = ankOzetSatirlar(a).map(x=>{ const i = x.indexOf(": "); return `<tr><th style="width:30%">${esc(x.slice(0,i))}</th><td>${esc(x.slice(i+2))}</td></tr>`; }).join("");
+  doPrint(`<div class="pg">${pHead("Ders Çalışma Programı Analizi", trDate(tarih))}
+    <div class="ps"><h2>Genel görünüm</h2><table class="pt"><tr><th style="width:30%">Günlük çalışma</th><td>${p.gunSaat} saat (haftada ${p.gun} gün) · haftalık yaklaşık <b>${p.hafta} saat</b></td></tr>
+    ${p.seviye?`<tr><th>Seviye</th><td><b>${esc(p.seviye.ad)}</b> (son net: ${esc(p.net)}) — ${esc(p.seviye.metin)}</td></tr>`:""}
+    <tr><th>Çalışma pencereleri</th><td>Hafta içi: ${esc(p.hi)}<br>Hafta sonu: ${esc(p.hs)}</td></tr></table></div>
+    <div class="ps"><h2>Önerilen haftalık ders dağılımı</h2><table class="pt"><thead><tr><th>Ders / çalışma</th><th style="width:18%">Saat / hafta</th><th style="width:22%">Not</th></tr></thead><tbody>
+    ${p.dersler.map(d=>`<tr><td>${esc(d.ad)}</td><td>${d.saat}</td><td>${d.zor?"öncelik (zorlandığı ders)":""}</td></tr>`).join("")}
+    ${p.sabit.map(d=>`<tr><td>${esc(d.ad)}</td><td>${d.saat}</td><td>sabit blok</td></tr>`).join("")}</tbody></table></div>
+    <div class="ps"><h2>İlk yol haritası</h2><ul class="plist">${p.oneri.map(o=>`<li>${esc(o)}</li>`).join("")}</ul></div>
+    <div class="ps"><h2>Analiz cevapları</h2><table class="pt">${cev}</table></div>
+    <div class="pbox" style="font-size:9pt">Bu rapor öğrencinin kendi beyanına dayanan bir ön plandır; haftalık program koçluk görüşmesinde birlikte güncellenir.</div>
+    <div class="sign"><div>Öğrenci</div><div>Veli</div><div>Koç</div></div>${pFoot()}</div>`, "portrait");
+}
+const ANK = {ekran:"liste", kayit:null, sid:null};
+function ankSonucHtml(k){
+  const s = stu(); const p = ankPlan(k.a);
+  const kart = (t,v)=>`<div class="od-kart"><small>${t}</small><b>${v}</b></div>`;
+  return `<div class="box" style="max-width:900px"><div class="colhead" style="align-items:flex-start"><div><h2 style="margin:0 0 2px">Analiz sonucu · ${esc(s.ad)}</h2><p class="muted" style="margin:0">${new Date(k.ts).toLocaleDateString("tr-TR")} · ${k.kaynak==="link"?"öğrenci bağlantıyla doldurdu"+(k.ad?" ("+esc(k.ad)+")":""):"yüz yüze dolduruldu"}</p></div>
+    <div class="actions" style="margin:0;flex-wrap:wrap"><button class="btn small primary" id="anYaz" type="button">Rapor (PDF / yazdır)</button><button class="btn small" id="anMsj" type="button">Veliye/öğrenciye mesaj</button><button class="btn small" id="anKapat" type="button">Kapat</button></div></div>
+    <div class="od-ozet" style="margin-top:12px">${kart("Günlük",p.gunSaat+" saat")}${kart("Haftalık",p.hafta+" saat")}${kart("Çalışılan gün",p.gun)}${p.seviye?kart("Seviye",esc(p.seviye.ad)):""}</div>
+    ${p.seviye?`<p class="hint">${esc(p.seviye.metin)}</p>`:""}
+    <h3 style="font-size:15px;margin:14px 0 4px">Önerilen haftalık dağılım</h3>
+    <div class="tscroll"><table class="stable"><thead><tr><th>Ders / çalışma</th><th>Saat / hafta</th><th>Not</th></tr></thead><tbody>${p.dersler.map(d=>`<tr><td>${esc(d.ad)}</td><td>${d.saat}</td><td>${d.zor?"⭐ öncelik":""}</td></tr>`).join("")}${p.sabit.map(d=>`<tr><td>${esc(d.ad)}</td><td>${d.saat}</td><td class="muted">sabit blok</td></tr>`).join("")}</tbody></table></div>
+    <h3 style="font-size:15px;margin:14px 0 4px">İlk yol haritası</h3><ul class="plist">${p.oneri.map(o=>`<li>${esc(o)}</li>`).join("")}</ul>
+    <details style="margin-top:12px"><summary style="cursor:pointer">Öğrencinin cevapları</summary><ul style="margin:6px 0 0">${ankOzetSatirlar(k.a).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details></div>`;
+}
+function renderAnaliz(){
+  const s = stu(); if(ANK.sid && ANK.sid!==s.id){ ANK.ekran = "liste"; ANK.kayit = null; } ANK.sid = s.id;
+  const L = ankKayitlar().slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const bekl = onayListe().filter(r=>r.form==="analiz" && r.durum==="bekliyor");
+  if(ANK.ekran==="form"){ $("panel").innerHTML = `<div class="box" style="max-width:720px"><div class="colhead"><h2 style="margin:0">Analiz · ${esc(s.ad)} (yüz yüze)</h2><button class="btn small" id="anIptal" type="button">Vazgeç</button></div><div id="ankKap"></div></div>`;
+    $("anIptal").addEventListener("click",()=>{ ANK.ekran = "liste"; renderAnaliz(); });
+    const sn = ({"9":"9","10":"10","11":"11","12":"12"})[s.sinif]||undefined; const ilk = {}; if(sn) ilk.sn = sn; if(s.alan) ilk.al = ({SAY:"Sayısal",EA:"Eşit Ağırlık",SOZ:"Sözel",DIL:"Dil"})[s.alan]||undefined; if(!ilk.al) delete ilk.al;
+    ankSihirbaz($("ankKap"), A=>{ const k = {id:yeniId("an"), ts:Date.now(), kaynak:"yuzyuze", ad:s.ad, a:A}; ankKayitlar().push(k); save(); ANK.kayit = k; ANK.ekran = "sonuc"; renderAnaliz(); toast("Analiz kaydedildi"); }, {ilk}); return; }
+  if(ANK.ekran==="sonuc" && ANK.kayit){ $("panel").innerHTML = ankSonucHtml(ANK.kayit);
+    $("anYaz").addEventListener("click",()=>ankYazdir(ANK.kayit)); $("anKapat").addEventListener("click",()=>{ ANK.ekran = "liste"; renderAnaliz(); });
+    $("anMsj").addEventListener("click",()=>{ const m = ankMesaj(ANK.kayit); const bg = modalAc(`<h3 style="margin:0 0 8px">Mesaj</h3><textarea id="amM" rows="9" style="width:100%">${esc(m)}</textarea><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="amV" type="button">Veliye WhatsApp</button><button class="btn" id="amO" type="button">Öğrenciye WhatsApp</button><button class="btn" id="amK" type="button">Kopyala</button><button class="btn" id="amX" type="button">Kapat</button></div><p class="hint">Raporun PDF’i için “Rapor (PDF / yazdır)” → PDF olarak kaydet, sonra WhatsApp’ta dosya olarak ekle.</p>`);
+      const q = x=>bg.querySelector("#"+x); q("amV").addEventListener("click",()=>gnAc(onayWa(s.veliTel||s.tel||"", q("amM").value))); q("amO").addEventListener("click",()=>gnAc(onayWa(s.tel||s.veliTel||"", q("amM").value)));
+      q("amK").addEventListener("click",async()=>{ try{ await navigator.clipboard.writeText(q("amM").value); toast("Kopyalandı"); }catch(e){ toast("Kopyalanamadı"); } }); q("amX").addEventListener("click",()=>bg.remove()); });
+    return; }
+  $("panel").innerHTML = `<div class="box" style="max-width:900px"><div class="colhead" style="align-items:flex-start"><div><h2 style="margin:0 0 2px">🎯 Öğrenci analiz merkezi</h2><p class="muted" style="margin:0">Ders Çalışma Programı Analizi · ${esc(s.ad)}</p></div><span class="badge ok">12 kısa soru</span></div>
+    <p class="hint" style="margin:10px 0">Seviyeye, hedeflere ve günlük düzene göre öğrenciye özel ön çalışma planı ve ilk yol haritası çıkarır. Öğrenciye bağlantıyla gönderebilir ya da yüz yüze kendin doldurabilirsin; sonuçlar bu öğrencinin portföyünde (ve Drive eşitlemesinde) arşivlenir.</p>
+    <div class="actions"><button class="btn primary" id="anGonder" type="button">📨 Öğrenciye gönder</button><button class="btn" id="anYuz" type="button">✍️ Yüz yüze doldur</button></div>
+    ${bekl.length?`<p class="hint" style="margin-top:8px">⏳ ${bekl.length} gönderilmiş bağlantı cevap bekliyor. Cevap gelince Portföy › Onay ve gönderim bölümünde “Cevaplar geldi · incele” çıkar.</p>`:""}
+    ${L.length?`<h3 style="font-size:15px;margin:16px 0 6px">Geçmiş analizler (${L.length})</h3><div class="tscroll"><table class="stable"><thead><tr><th>Tarih</th><th>Kaynak</th><th>Sınıf / hedef</th><th>Net</th><th>Haftalık</th><th></th></tr></thead><tbody>${L.map(k=>{ const p = ankPlan(k.a); return `<tr><td>${new Date(k.ts).toLocaleDateString("tr-TR")}</td><td>${k.kaynak==="link"?"bağlantı":"yüz yüze"}</td><td>${esc(k.a.sn||"")} · ${esc((k.a.hd||[]).join(", "))}</td><td>${esc(k.a.net===undefined?"":k.a.net)}</td><td>${p.hafta} sa</td><td style="text-align:right;white-space:nowrap"><button class="btn small" data-anac="${k.id}">Aç</button> <button class="btn small" data-anyaz="${k.id}">Rapor</button> <button class="btn small" data-ansil="${k.id}">Sil</button></td></tr>`; }).join("")}</tbody></table></div>`:`<div class="empty" style="margin-top:14px">Henüz analiz yok.</div>`}</div>`;
+  $("anGonder").addEventListener("click",()=>onayHizliGonder("analiz")); $("anYuz").addEventListener("click",()=>{ ANK.ekran = "form"; renderAnaliz(); });
+  document.querySelectorAll("[data-anac]").forEach(b=>b.addEventListener("click",()=>{ ANK.kayit = L.find(x=>x.id===b.dataset.anac); ANK.ekran = "sonuc"; renderAnaliz(); }));
+  document.querySelectorAll("[data-anyaz]").forEach(b=>b.addEventListener("click",()=>{ const k = L.find(x=>x.id===b.dataset.anyaz); if(k) ankYazdir(k); }));
+  document.querySelectorAll("[data-ansil]").forEach(b=>b.addEventListener("click",()=>armDel(b,()=>{ DB.analiz[s.id] = ankKayitlar().filter(x=>x.id!==b.dataset.ansil); save(); renderAnaliz(); toast("Kayıt silindi"); })));
 }
 
 /* ---------- Faz D-1: Analiz ekranı (portföy › Analiz) — SVG/HTML grafikler, internetsiz ---------- */
@@ -4677,9 +5307,9 @@ function onayBaslat(){
   root.addEventListener("input",kontrol); root.addEventListener("change",kontrol);
   const sonucGoster = (kod, tamam)=>{
     const msg = (t.f==="soz"?"Koçluk sözleşmesini onayladım.":"Öğrenci taahhüdünü onayladım.")+" Onay linki (dokununca koçunuzun paneli açılır):\n"+location.href.replace(/#.*$/,"")+"#cevap="+kod;
-    $("onSonuc").innerHTML = `<div class="on-kart"><h2>${tamam?"Onayınız alındı":"Daha önce onaylandı"}</h2><p>Aşağıdaki düğmelerden biriyle koçunuza gönderin; koçunuz mesajdaki bağlantıya dokunduğunda onayınız kayda geçer. (Kod yedek olarak aşağıdadır.)</p><p class="hint" id="onOto" role="status"></p>
+    $("onSonuc").innerHTML = `<div class="on-kart"><h2>${tamam?"Onayınız alındı":"Daha önce onaylandı"}</h2><p class="hint" id="onOto" role="status">${t.u?"":"Bu bağlantıda otomatik iletim kapalı. Aşağıdaki düğmelerle koçunuza gönderin."}</p><details id="onYedek" ${t.u?"":"open"}><summary style="cursor:pointer;margin:6px 0">Koçunuza iletilemedi mi? Gönderme seçeneklerini göster</summary><p class="hint">Aşağıdaki düğmelerden biriyle koçunuza gönderin; koçunuz mesajdaki bağlantıya dokunduğunda onayınız kayda geçer.</p>
       <textarea class="on-kod" id="onKod" readonly aria-label="Onay kodu">${esc(kod)}</textarea>
-      <div class="on-btns"><a class="btn primary" href="${esc(onayWa(t.kt,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" href="${esc(onaySms(t.kt,msg))}">SMS ile gönder</a><button class="btn" id="onKopya" type="button">Kodu kopyala</button></div></div>`;
+      <div class="on-btns"><a class="btn primary" href="${esc(onayWa(t.kt,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" href="${esc(onaySms(t.kt,msg))}">SMS ile gönder</a><button class="btn" id="onKopya" type="button">Kodu kopyala</button></div></details></div>`;
     $("onKopya").addEventListener("click",()=>{ const k=$("onKod"); k.select(); try{ navigator.clipboard.writeText(kod); }catch(e){ document.execCommand("copy"); } $("onKopya").textContent="Kopyalandı"; });
     $("onGo").disabled = true;
   };
@@ -4711,14 +5341,14 @@ async function onayAc(metin){
   const ds = new DecompressionStream("deflate-raw"); const w = ds.writable.getWriter(); w.write(b64uToBytes(m[2])); w.close();
   const buf = await new Response(ds.readable).arrayBuffer(); return JSON.parse(new TextDecoder().decode(buf));
 }
-const ONAY_VERI = {olcek:1, ozdeg:1, tanima:1, kayit:1, ses:1, fd:1};
+const ONAY_VERI = {olcek:1, ozdeg:1, tanima:1, kayit:1, ses:1, fd:1, analiz:1};
 const ONAY_ALAN = {
   tanima:[["ogrenme","Öğrenme biçimi (baskın)","sec",OGRENME_STILI],["iletisim","Tercih edilen iletişim şekli","sec",KANAL],["beklenti","Süreçten beklentiniz","m"],["guclu","Güçlü yönleri","m"],["zayif","Zorlandığı / gelişime açık alanlar","m"],["ihtiyac","Sizce ihtiyaç duyduğu destekler","m"],["aile","Ailenin katılım tercihi ve beklentisi","m"],["diger","Eklemek istedikleriniz","m"]],
   kayit:[["dogum","Doğum tarihi","date"],["tel","Öğrenci telefonu","tel"],["okul","Okul","t"],["ilce","İlçe","t"],["veliAd","Veli adı soyadı","t"],["veliTel","Veli telefonu","tel"],["aile","Aile / kardeş etiketi (isteğe bağlı)","t"]],
   ses:[["gurur","Bu dönem en çok neyle gurur duyuyorum?","m"],["iyi","Bana en çok ne iyi geldi?","m"],["zor","Zorlandığım ya da desteğe ihtiyaç duyduğum konu","m"],["istek","Gelecek dönem için isteğim","m"]]
 };
-const ONAY_AD = {tanima:"Ön görüşme ve tanıma formu", kayit:"Öğrenci kayıt bilgileri", ozdeg:"Öğrenci öz değerlendirme ve çalışma tutumu anketi", ses:"Öğrencinin sesi", olcek:"Ölçek"};
-function onayFormAd(t){ if(t.f==="fd") return (ONAY_FD[t.fd]||"Form")+(t.fd==="haftalik_odev"&&t.w?" – "+t.w+". hafta":""); return t.f==="olcek" ? ((OLCEKLER[t.o]||{}).ad||"Ölçek") : (ONAY_AD[t.f]||"Form"); }
+const ONAY_AD = {tanima:"Ön görüşme ve tanıma formu", kayit:"Öğrenci kayıt bilgileri", ozdeg:"Öğrenci öz değerlendirme ve çalışma tutumu anketi", ses:"Öğrencinin sesi", olcek:"Ölçek", analiz:"Ders çalışma programı analizi"};
+function onayFormAd(t){ if(t.f==="fd") return (t.fb||ONAY_FD[t.fd]||"Form")+(t.fd==="haftalik_odev"&&t.w?" – "+t.w+". hafta":""); return t.f==="olcek" ? ((OLCEKLER[t.o]||{}).ad||"Ölçek") : (ONAY_AD[t.f]||"Form"); }
 
 function onayFormBaslat(t, root, css, ust){
   const anahtar = "akp_onay_"+t.i; let onceki = null; try{ onceki = localStorage.getItem(anahtar); }catch(e){}
@@ -4736,6 +5366,9 @@ function onayFormBaslat(t, root, css, ust){
   } else if(fdS){
     giris = "Aşağıdaki alanları doldurup gönderebilirsiniz. Boş bıraktığınız alanlar kaydedilmez; yazdıklarınız yalnızca koçunuza iletilir.";
     govde = fdS.html;
+  } else if(t.f==="analiz"){
+    giris = "Kısa ve hızlı bir analiz: seviyene, hedeflerine ve günlük düzenine göre sana özel çalışma planı hazırlanacak. Doğru ya da yanlış cevap yoktur.";
+    govde = '<div id="ankKap"></div>';
   } else if(t.f==="ses"){
     giris = "Bu alan senin sesin. Düşüncelerini istediğin gibi yazabilirsin; yazdıkların koçuna iletilir.";
     govde = `<div class="on-kart">${ONAY_ALAN.ses.map(([k,e])=>`<div class="field" style="margin-bottom:10px"><label for="of_${k}">${esc(e)}</label><textarea id="of_${k}" data-of="${k}" rows="3" style="width:100%"></textarea></div>`).join("")}
@@ -4750,6 +5383,7 @@ function onayFormBaslat(t, root, css, ust){
   const topla = ()=>{
     if(fdS) return {v:ofFdTopla(root,fdS)};
     if(sorular) return {v:sorular.map((m,i)=>{ const c = root.querySelector('input[name="q'+i+'"]:checked'); return c?c.value:"0"; }).join("")};
+    if(t.f==="analiz") return {v:ANK_A||{}};
     if(t.f==="ses"){ const v = {}; root.querySelectorAll("[data-of]").forEach(e=>{ v[e.dataset.of] = e.value.trim(); }); v.a = Array.from(root.querySelectorAll("[data-ofa]")).map(e=>e.value||"0").join(""); return {v}; }
     const v = {}; root.querySelectorAll("[data-of]").forEach(e=>{ if(e.value.trim()) v[e.dataset.of] = e.value.trim(); }); return {v};
   };
@@ -4757,17 +5391,21 @@ function onayFormBaslat(t, root, css, ust){
     const {v} = topla(); let tam = true, d = "";
     if(fdS){ tam = ofFdDolu(v); d = tam?"":"En az bir alanı doldurun"; }
     else if(sorular){ const n = v.split("").filter(x=>x!=="0").length; tam = n===sorular.length; d = n+" / "+sorular.length+" madde işaretlendi"; }
+    else if(t.f==="analiz"){ tam = !!ANK_A; d = tam?"":"Önce soruları tamamlayın"; }
     else if(t.f==="ses"){ tam = ["gurur","iyi","zor","istek"].some(k=>v[k]) ; d = tam?"":"En az bir soruyu yanıtlayın"; }
     else { tam = Object.keys(v).length>0; d = tam?"":"En az bir alanı doldurun"; }
     tam = tam && $("ofAd").value.trim().length>=3; $("ofGo").disabled = !tam; $("ofDurum").textContent = d;
   };
   if(fdS) ofFdBagla(root,fdS);
+  let ANK_A = null;
+  if(t.f==="analiz"){ const kart = $("ofAd").closest(".on-kart"); kart.style.display = "none";
+    ankSihirbaz($("ankKap"), A=>{ ANK_A = A; $("ankKap").innerHTML = '<div class="on-kart"><h2>Hepsi tamam ✓</h2><p class="hint">Son adım: adını yazıp Gönder’e bas.</p></div>'; kart.style.display = ""; kontrol(); kart.scrollIntoView({behavior:"smooth",block:"start"}); }, {}); }
   root.addEventListener("input",kontrol); root.addEventListener("change",kontrol); kontrol();
   const sonuc = (kod, yeni)=>{
     const msg = "'"+baslik+"' formunu doldurdum. Cevap linki (dokununca koçunuzun paneli açılır):\n"+location.href.replace(/#.*$/,"")+"#cevap="+kod;
-    $("onSonuc").innerHTML = `<div class="on-kart"><h2>${yeni?"Teşekkürler, cevaplarınız hazır":"Daha önce gönderilmiş"}</h2><p>Aşağıdaki düğmelerden biriyle koçunuza gönderin; koçunuz mesajdaki bağlantıya dokunduğunda cevaplarınız kayda geçer. (Kod yedek olarak aşağıdadır.)</p><p class="hint" id="onOto" role="status"></p>
+    $("onSonuc").innerHTML = `<div class="on-kart"><h2>${yeni?"Teşekkürler":"Daha önce gönderilmiş"}</h2><p class="hint" id="onOto" role="status">${t.u?"":"Bu bağlantıda otomatik iletim kapalı. Aşağıdaki düğmelerle koçunuza gönderin."}</p><details id="onYedek" ${t.u?"":"open"}><summary style="cursor:pointer;margin:6px 0">Koçunuza iletilemedi mi? Gönderme seçeneklerini göster</summary><p class="hint">Aşağıdaki düğmelerden biriyle koçunuza gönderin; koçunuz mesajdaki bağlantıya dokunduğunda cevaplarınız kayda geçer.</p>
       <textarea class="on-kod" id="onKod" readonly aria-label="Cevap kodu">${esc(kod)}</textarea>
-      <div class="on-btns"><a class="btn primary" href="${esc(onayWa(t.kt,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" href="${esc(onaySms(t.kt,msg))}">SMS ile gönder</a><button class="btn" id="onKopya" type="button">Kodu kopyala</button><button class="btn" id="onDosya" type="button">Dosya olarak indir</button></div></div>`;
+      <div class="on-btns"><a class="btn primary" href="${esc(onayWa(t.kt,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" href="${esc(onaySms(t.kt,msg))}">SMS ile gönder</a><button class="btn" id="onKopya" type="button">Kodu kopyala</button><button class="btn" id="onDosya" type="button">Dosya olarak indir</button></div></details></div>`;
     $("onKopya").addEventListener("click",()=>{ const k = $("onKod"); k.select(); try{ navigator.clipboard.writeText(kod); }catch(e){ document.execCommand("copy"); } $("onKopya").textContent = "Kopyalandı"; });
     $("onDosya").addEventListener("click",()=>{ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([msg],{type:"text/plain"})); a.download = "cevap-kodu.txt"; document.body.appendChild(a); a.click(); a.remove(); });
     $("ofGo").disabled = true;
@@ -4796,9 +5434,9 @@ function onayFdCtx(t, fn){
   } finally { DB = eskiDB; W = eskiW; }
 }
 function onayFdOlustur(t){
-  if(!ONAY_FD[t.fd]) return null;
+  if(typeof t.fd!=="string" || !/^[a-z_]{3,40}$/.test(t.fd)) return null;
   return onayFdCtx(t, ()=>{
-    const spec = fdSpec(t.fd); if(!spec) return null;
+    const spec = fdSpec(t.fd); if(!spec || !Array.isArray(spec.bol)) return null;
     const dersAd = fdDersAdlari(); const dk = {};
     dersAd.forEach(n=>{ const c = dersKodu(n); if(c) dk[n] = c; });
     const kodlar = subjects(t.sn||"8", t.al||"");
@@ -4947,6 +5585,28 @@ async function onayCoz(kb64, c){
   const b = b64uToBytes(c); const key = await crypto.subtle.importKey("raw", b64uToBytes(kb64), "AES-GCM", false, ["decrypt"]);
   const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:b.slice(0,12)}, key, b.slice(12)); return new TextDecoder().decode(pt);
 }
+const _SHA = (()=>{ const K = [], H0 = []; let n = 2; const asal = x=>{ for(let i=2;i*i<=x;i++) if(x%i===0) return false; return true; };
+  while(K.length<64){ if(asal(n)){ if(H0.length<8) H0.push((Math.pow(n,.5)%1)*4294967296|0); K.push((Math.pow(n,1/3)%1)*4294967296|0); } n++; } return {K, H0}; })();
+function onaySha256(m){
+  const K = _SHA.K; const l = m.length; const nb = ((l+9+63)>>6)<<6; const buf = new Uint8Array(nb); buf.set(m); buf[l] = 0x80;
+  const dv = new DataView(buf.buffer); dv.setUint32(nb-4, (l*8)>>>0); dv.setUint32(nb-8, Math.floor(l*8/4294967296));
+  const H = _SHA.H0.slice(); const w = new Int32Array(64); const rr = (x,n)=>(x>>>n)|(x<<(32-n));
+  for(let o=0;o<nb;o+=64){
+    for(let i=0;i<16;i++) w[i] = dv.getInt32(o+i*4);
+    for(let i=16;i<64;i++){ const s0 = rr(w[i-15],7)^rr(w[i-15],18)^(w[i-15]>>>3), s1 = rr(w[i-2],17)^rr(w[i-2],19)^(w[i-2]>>>10); w[i] = (w[i-16]+s0+w[i-7]+s1)|0; }
+    let a=H[0], b=H[1], c=H[2], d=H[3], e=H[4], f=H[5], g=H[6], h=H[7];
+    for(let i=0;i<64;i++){ const S1 = rr(e,6)^rr(e,11)^rr(e,25), ch = (e&f)^(~e&g), t1 = (h+S1+ch+K[i]+w[i])|0, S0 = rr(a,2)^rr(a,13)^rr(a,22), mj = (a&b)^(a&c)^(b&c), t2 = (S0+mj)|0; h=g; g=f; f=e; e=(d+t1)|0; d=c; c=b; b=a; a=(t1+t2)|0; }
+    H[0]=(H[0]+a)|0; H[1]=(H[1]+b)|0; H[2]=(H[2]+c)|0; H[3]=(H[3]+d)|0; H[4]=(H[4]+e)|0; H[5]=(H[5]+f)|0; H[6]=(H[6]+g)|0; H[7]=(H[7]+h)|0;
+  }
+  const out = new Uint8Array(32); const o2 = new DataView(out.buffer); H.forEach((x,i)=>o2.setInt32(i*4,x)); return out;
+}
+function onayHmacHex(anahtar, mesaj, n){
+  const te = new TextEncoder(); let k = te.encode(anahtar); if(k.length>64) k = onaySha256(k);
+  const ip = new Uint8Array(64), op = new Uint8Array(64); for(let i=0;i<64;i++){ const x = i<k.length?k[i]:0; ip[i] = x^0x36; op[i] = x^0x5c; }
+  const m = te.encode(mesaj); const ic = new Uint8Array(64+m.length); ic.set(ip); ic.set(m,64);
+  const ih = onaySha256(ic); const oc = new Uint8Array(96); oc.set(op); oc.set(ih,64);
+  const hex = Array.from(onaySha256(oc)).map(x=>("0"+x.toString(16)).slice(-2)).join(""); return n ? hex.slice(0,n) : hex;
+}
 function onayKutuBilgi(){
   const a = onayAyar(); const c = senkCfg();
   if(c && a.inboxDrive) return {url:c.url, mod:"d", t:c.auth};
@@ -4960,7 +5620,8 @@ async function kutuIstek(kb, islem, ek){
 }
 async function onayDriveDene(){
   const c = senkCfg(); if(!c) return false;
-  try{ const j = await kutuIstek({mod:"d", url:c.url, t:c.auth}, "ping"); if(j && j.ok){ onayAyar().inboxDrive = true; save(); return true; } }catch(e){}
+  try{ const j = await kutuIstek({mod:"d", url:c.url, t:c.auth}, "ping");
+    if(j && j.ok){ const a = onayAyar(); const sv = j.s||1; if(!a.inboxDrive || a.inboxSurum!==sv){ a.inboxDrive = true; a.inboxSurum = sv; save(); } return true; } }catch(e){}
   return false;
 }
 function onayKutuDurumMetin(){
@@ -4972,17 +5633,19 @@ async function onayOtomatik(t, kod){
   if(!t.u || !t.k || !(window.crypto && crypto.subtle)) return "yok";
   try{
     const c = await onaySifrele(t.k, kod); const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 20000);
-    const r = await fetch(t.u, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(t.m==="d" ? {a:"okoy", i:t.i, c, x:t.x} : {islem:"koy", i:t.i, c, x:t.x}), redirect:"follow", signal:ctl.signal});
+    const r = await fetch(t.u, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(t.m==="d" ? {a:"okoy", i:t.i, c, x:t.x, h:t.h} : {islem:"koy", i:t.i, c, x:t.x}), redirect:"follow", signal:ctl.signal});
     clearTimeout(to); const j = await r.json(); return j.ok ? "ok" : (j.hata==="var" ? "var" : (j.hata==="sure" ? "sure" : "hata"));
   }catch(e){ return "hata"; }
 }
 function onayOtoYaz(d){
-  const e = document.getElementById("onOto"); if(!e) return;
-  e.textContent = d==="ok" ? "✓ Cevabınız koçunuza otomatik iletildi. Başka bir şey yapmanız gerekmez (isterseniz kodu yine de gönderebilirsiniz)."
-    : d==="var" ? "Bu form daha önce iletilmiş."
-    : d==="sure" ? "Bağlantının süresi dolmuş; lütfen kodu koçunuza gönderin."
-    : d==="hata" ? "Otomatik iletilemedi (internet ya da kurulum sorunu olabilir). Lütfen aşağıdaki kodu koçunuza gönderin."
-    : "";
+  const e = document.getElementById("onOto"); if(!e) return; const y = document.getElementById("onYedek");
+  const goster = ()=>{ if(y){ y.style.display = ""; y.open = true; } }, gizle = ()=>{ if(y) y.style.display = "none"; };
+  if(d==="ok"){ e.textContent = "✓ Cevabınız koçunuza iletildi. Başka bir şey yapmanız gerekmez."; gizle(); }
+  else if(d==="var"){ e.textContent = "Bu form daha önce iletilmiş. Başka bir şey yapmanız gerekmez."; gizle(); }
+  else if(d==="sure"){ e.textContent = "Bağlantının süresi dolmuş; lütfen aşağıdaki düğmelerle koçunuza gönderin."; goster(); }
+  else if(d==="hata"){ e.textContent = "Otomatik iletilemedi (internet ya da bağlantı sorunu olabilir). Lütfen aşağıdaki düğmelerle koçunuza gönderin."; goster(); }
+  else if(d==="yok"){ e.textContent = "Bu bağlantıda otomatik iletim kapalı. Aşağıdaki düğmelerle koçunuza gönderin."; goster(); }
+  else e.textContent = "";
 }
 async function onayKabul(r, x, sid){
   const h = (await onayHash(r.yuk)).slice(0,24);
@@ -5009,7 +5672,7 @@ async function onayKutuGetir(sessiz){
     }catch(err){}
   }
   if(sil.length){ save(); try{ await kutuIstek(kb, "sil", {ids:sil}); }catch(e){} }
-  if(n){ toast(n+" yeni cevap geldi"); if(TAB==="portfoy" && PF_SEK==="onay") renderPortfoy(); }
+  if(n){ toast(n+" yeni cevap geldi"); if(TAB==="portfoy" && PF_SEK==="onay") renderPortfoy(); else if(TAB==="gonder") renderGonder(); }
   else if(!sessiz) toast("Yeni cevap yok");
   return n;
 }
@@ -5024,9 +5687,10 @@ function onayYuk(f, ek){
   const t = {v:1, f, i:yeniId("on"), ko:(s.koc||a.kocAd||"").trim(), og:s.ad, ve:s.veliAd||"", kt:a.kocTel||"", x:Date.now()+ONAY_GUN*86400000};
   if(f==="soz"){ t.s = Object.assign({}, onayDij()); t.ek = sozl().ek.slice(); }
   if(f==="olcek") t.o = ek;
-  if(f==="fd"){ t.fd = ek; t.sn = s.sinif; t.al = s.alan||""; if(fdSpec(ek) && fdSpec(ek).hafta) t.w = W; }
+  if(f==="fd"){ const sp = fdSpec(ek); t.fd = ek; t.fb = (sp&&sp.baslik)||""; t.sn = s.sinif; t.al = s.alan||""; if(sp && sp.hafta) t.w = W; }
   const kb = onayKutuBilgi();
-  if(kb && window.crypto){ t.u = kb.url; if(kb.mod==="d") t.m = "d"; t.k = b64uBytes(crypto.getRandomValues(new Uint8Array(32))); }
+  if(kb && window.crypto){ t.u = kb.url; if(kb.mod==="d") t.m = "d"; t.k = b64uBytes(crypto.getRandomValues(new Uint8Array(32)));
+    if(kb.mod==="d" && (onayAyar().inboxSurum||1)>=2){ const c = senkCfg(); if(c) t.h = onayHmacHex(c.auth, t.i+"|"+t.x, 24); } }
   return t;
 }
 function onayAlici(f, fdId){ const s = stu(); if(f==="fd") return fdId==="lgs_hedef" ? (s.veliTel||s.tel||"") : (s.tel||s.veliTel||""); return (f==="soz"||f==="tanima"||f==="kayit") ? (s.veliTel||"") : (s.tel||s.veliTel||""); }
@@ -5057,6 +5721,7 @@ function onayMesaj(r){
   if(r.form==="taah") return "Merhaba "+s.ad+", öğrenci taahhüdünü aşağıdaki bağlantıdan okuyup onaylayabilirsin (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
   const ad = onayFormAd(r.yuk);
   if(r.form==="fd") return (r.yuk.fd==="lgs_hedef" ? "Merhaba, "+s.ad+" ile birlikte" : "Merhaba "+s.ad+",")+" '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilir"+(r.yuk.fd==="lgs_hedef"?"siniz":"sin")+". Telefondan açıp doldurman yeterli. (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
+  if(r.form==="analiz") return "Merhaba "+s.ad+", sana özel bir çalışma planı hazırlayabilmem için kısa bir analiz hazırladım (yaklaşık 3 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
   if(r.form==="olcek"||r.form==="ozdeg"||r.form==="ses") return "Merhaba "+s.ad+", '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilirsin. Doğru ya da yanlış cevap yoktur; bu bir sınav değildir. (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
   return "Merhaba "+(s.veliAd||"Sayın veli")+", "+s.ad+" için '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilirsiniz (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
 }
@@ -5095,9 +5760,9 @@ function onayHtml(){
   const kocK = `<div class="box kr-kart"><h3>Koç taahhüdü</h3><p class="hint">“Sözleşme süresince profesyonel koçluk etiğine uygun davranacağımı… taahhüt ederim.” Onaylı çıktıda yer alır.</p>
     <p>${koc?`<span class="badge" style="background:var(--chalk-soft);color:var(--chalk)">Onaylandı</span> ${esc(trDate(new Date(koc.ts).toISOString().slice(0,10)))}`:'<span class="badge">Henüz onaylanmadı</span>'}</p>
     <div class="actions"><button class="btn${koc?"":" primary"}" id="onKoc" type="button">${koc?"Yeniden onayla":"Koç taahhüdünü onaylıyorum"}</button></div></div>`;
-  const fdSec = `<div class="field" style="max-width:460px"><label for="onFd">Form</label><select id="onFd">${Object.keys(ONAY_FD).map(k=>`<option value="${k}">${esc(ONAY_FD[k])}</option>`).join("")}</select></div><div class="actions" style="margin-top:6px"><button class="btn" id="onFdHafta" type="button">Bu haftanın ödev takip bağlantısını hazırla (${esc(W)}. hafta)</button></div>`;
+  const fdSec = `<div class="field" style="max-width:460px"><label for="onFd">Form</label><select id="onFd">${onayFdListe().map(x=>`<option value="${x.id}">${esc(x.ad)}</option>`).join("")}</select></div><div class="actions" style="margin-top:6px"><button class="btn" id="onFdHafta" type="button">Bu haftanın ödev takip bağlantısını hazırla (${esc(W)}. hafta)</button></div>`;
   const olcekSec = `<div class="field" style="max-width:420px"><label for="onOlcek">Ölçek</label><select id="onOlcek">${Object.keys(OLCEKLER).map(k=>`<option value="${k}">${esc(OLCEKLER[k].ad)}</option>`).join("")}</select></div>`;
-  return `<div class="box"><h3>Onay ve gönderim</h3><p class="hint">Sözleşme, taahhüt ve formları velinin/öğrencinin telefonundan doldurup onaylayacağı bağlantı olarak gönderin. Cevap kodu geri geldiğinde kayıt portföye aktarılır.</p></div>
+  return onayUyariHtml()+`<div class="box"><h3>Onay ve gönderim</h3><p class="hint">Sözleşme, taahhüt ve formları velinin/öğrencinin telefonundan doldurup onaylayacağı bağlantı olarak gönderin. Cevap kodu geri geldiğinde kayıt portföye aktarılır.</p></div>
     ${ayar}${onayKartHtml("soz","Koçluk sözleşmesi ve veli onayı","Veliye gönderilir; taraf, kapsam, gizlilik, iptal ve ücret maddeleri ile veli beyanı ve veri işleme rızası onaylanır.",soz)}
     ${onayKartHtml("taah","Öğrenci taahhüdü","Öğrenciye (telefonu yoksa veliye) gönderilir.","")}${kocK}
     <h3 style="margin:18px 0 0">Doldurulacak formlar</h3>
@@ -5133,6 +5798,7 @@ function onayOnizleme(r, x){
   if(f==="olcek"){ const {o,c,n} = onayCevap(r,x); const sn = olcekSonuc(o,c);
     return baslik+"<br>"+n+" / "+o.maddeler.length+" madde yanıtlandı.<br>"+sn.map(b=>esc(b.ad)+": "+(b.ort===null?"–":anSay(b.ort)+" ("+esc(b.yorum)+")")).join("<br>")+"<br><i>Bu sonuç yalnızca sizde kalır; ölçek kaydı olarak eklenecek.</i>"; }
   if(f==="fd"){ const sp = fdSpec(r.yuk.fd); if(!sp) return baslik+"<br>Form şablonu bulunamadı."; const uy = (r.yuk.sn && stu().sinif!==r.yuk.sn) ? "<br><i>Uyarı: öğrencinin sınıfı bağlantı gönderildiğinden beri değişmiş; satırlar yeni şablona göre eşleşir.</i>" : ""; return baslik+(r.yuk.w&&sp.hafta?" · "+esc(r.yuk.w)+". hafta":"")+"<br><br>"+fdOnayOzet(sp, x.v||{})+uy+"<br><br><i>Formlar sekmesine tarihli kayıt olarak eklenecek.</i>"; }
+  if(f==="analiz"){ return baslik+"<br>"+ankOzetSatirlar(x.v||{}).map(esc).join("<br>")+"<br><i>Portföye eklenecek; plan ve rapor “Öğrenci analiz merkezi”nde hazırlanır.</i>"; }
   if(f==="ozdeg"){ const v = String(x.v||""); const n = v.split("").filter(d=>d!=="0").length; return baslik+"<br>"+n+" / "+OZDEGER_MADDE.length+" madde yanıtlandı. Mevcut öz değerlendirme yanıtlarının yerine yazılacak (koç rehberi boyut sonuçları güncellenir)."; }
   if(f==="tanima"||f==="kayit"||f==="ses"){ const v = x.v||{}; const s = stu(); const alanlar = ONAY_ALAN[f];
     const satir = alanlar.filter(([k])=>v[k]).map(([k,e])=>{ let eski = ""; if(f==="kayit"){ const m = s[k]; if(m && m!==v[k]) eski = " <i>(şu an: "+esc(m)+")</i>"; } return esc(e)+": "+esc(v[k])+eski; });
@@ -5154,7 +5820,140 @@ function onayUygula(r, x){
     Object.keys(harita).forEach(k=>{ if(!v[k]) return; const h = harita[k]; if(k==="ogrenme"||k==="iletisim"){ o[h] = v[k]; } else { o[h] = (o[h]?o[h]+"\n":"")+"[Veli formu] "+v[k]; } }); return; }
   if(f==="kayit"){ ONAY_ALAN.kayit.forEach(([k])=>{ if(v[k]) s[k] = v[k]; }); return; }
   if(f==="ses"){ onaySesUygula(x); return; }
+  if(f==="analiz"){ ankKayitlar().push({id:yeniId("an"), ts:Date.parse(x.z||"")||Date.now(), kaynak:"link", ad:x.ad||"", a:Object.assign({}, v)}); return; }
   if(f==="fd"){ fdOnayUygula(r,x); return; }
+}
+
+/* --- v3.5: kurulum durumu, güncelleme sihirbazı, Toplu gönderim merkezi --- */
+function onayFdListe(){
+  fdSpec("haftalik_odev"); const ids = (fdSpec.idler||[]).filter(i=>i!=="veli_rapor");
+  ids.sort((a,b)=>(a==="haftalik_odev"?-1:0)-(b==="haftalik_odev"?-1:0));
+  return ids.map(id=>({id, ad:((fdSpec(id)||{}).baslik)||id}));
+}
+function onayKurulumDurumu(){
+  const a = onayAyar();
+  if(senkCfg()) return (a.inboxDrive && (a.inboxSurum||1)>=2) ? "tamam" : "eski";
+  return (a.inboxUrl && a.inboxSifre) ? "tamam" : "yok";
+}
+function onayUyariHtml(){
+  const d = onayKurulumDurumu();
+  if(d==="tamam") return "";
+  if(d==="eski") return `<div class="kr-uyari" role="status">⚠️ Cevapların kendiliğinden gelmesi için Drive scriptinizi bir kez güncelleyin (yaklaşık 2 dk). O zamana kadar cevaplar WhatsApp'ta bağlantı olarak gelir. <button class="btn small primary" type="button" data-onsihir>Adım adım göster</button></div>`;
+  return `<div class="kr-uyari" role="status">⚠️ Cevapların kendiliğinden gelmesi için önce Drive eşitlemesini açın (üst çubuktaki “Drive”). Açtıktan sonra buradan scripti güncelleyebilirsiniz. O zamana kadar cevaplar WhatsApp'ta bağlantı olarak gelir.</div>`;
+}
+document.addEventListener("click", e=>{ if(e.target && e.target.closest && e.target.closest("[data-onsihir]")) onayKurulumSihirbazi(); });
+function onayKurulumSihirbazi(){
+  if(!senkCfg()){ toast("Önce Drive eşitlemesini açın (üst çubuktaki Drive)"); return; }
+  const bg = modalAc(`<h3 style="margin:0 0 6px">Otomatik geri dönüşü aç (tek seferlik)</h3><p class="hint" style="margin:0 0 8px">Drive eşitleme scriptinize küçük bir ekleme yapılır. Adres ve şifre değişmez, verileriniz silinmez.</p>
+    <ol style="padding-left:18px;line-height:1.8"><li><button class="btn small primary" id="szKop" type="button">Yeni script kodunu kopyala</button></li>
+    <li><b>script.google.com</b> → eşitleme için kurduğunuz proje → <b>Code.gs</b>: içindeki her şeyi silip yapıştırın → <b>Kaydet</b>.</li>
+    <li><b>Dağıt → Dağıtımları yönet → ✎ (düzenle) → Sürüm: Yeni sürüm → Dağıt</b>. Adres aynı kalır.</li>
+    <li><button class="btn small" id="szTest" type="button">Kontrol et</button> <span id="szDurum" class="muted"></span></li></ol>
+    <div class="actions"><button class="btn" id="szKapat" type="button">Kapat</button></div>`);
+  const kapat = ()=>{ if(bg.parentNode) bg.parentNode.removeChild(bg); };
+  bg.querySelector("#szKapat").addEventListener("click", kapat);
+  bg.querySelector("#szKop").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(GAS_KODU); toast("Script kodu kopyalandı"); }catch(e){ const ta = document.createElement("textarea"); ta.value = GAS_KODU; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast("Script kodu kopyalandı"); }catch(x){ toast("Kopyalanamadı"); } ta.remove(); } });
+  bg.querySelector("#szTest").addEventListener("click", async ()=>{
+    const d = bg.querySelector("#szDurum"); d.textContent = "Kontrol ediliyor…";
+    const ok = await onayDriveDene();
+    if(ok && (onayAyar().inboxSurum||1)>=2){ d.textContent = "✓ Hazır. Artık cevaplar kendiliğinden gelir."; setTimeout(()=>{ kapat(); renderAll(); },900); }
+    else if(ok){ d.textContent = "Script çalışıyor ama eski sürüm: kodu yapıştırıp “Yeni sürüm” olarak dağıttığınızdan emin olun."; }
+    else d.textContent = "Henüz güncellenmemiş görünüyor. 2. ve 3. adımı tamamlayıp tekrar deneyin.";
+  });
+}
+const GN = {form:"soz", sablon:"davet", kime:"", sinif:"", durum:"hepsi", metin:null, secili:{}};
+const GN_SABLON = {
+  davet:{ad:"Form daveti", durum:"hepsi", o:"Merhaba {ad}, {form} formunu aşağıdaki bağlantıdan telefonundan doldurabilirsin. Cevapların otomatik olarak bana ulaşır (bağlantı {gun} gün geçerli).\n{link}\n{koc}", v:"Merhaba {veli}, {ad} için {form} formunu aşağıdaki bağlantıdan telefonunuzdan doldurup onaylayabilirsiniz. Cevaplar otomatik olarak bana ulaşır (bağlantı {gun} gün geçerli).\n{link}\n{koc}"},
+  hatirlat:{ad:"Hatırlatma", durum:"yok", o:"Merhaba {ad}, {form} formunu henüz doldurmadığını gördüm; müsait olduğunda şu bağlantıdan tamamlayabilirsin:\n{link}\n{koc}", v:"Merhaba {veli}, {ad} için gönderdiğim {form} formu henüz doldurulmamış görünüyor; müsait olduğunuzda şu bağlantıdan tamamlayabilirsiniz:\n{link}\n{koc}"},
+  tesekkur:{ad:"Teşekkür", durum:"geldi", linksiz:true, o:"Merhaba {ad}, {form} formunu doldurduğun için teşekkür ederim; cevaplarını aldım.\n{koc}", v:"Merhaba {veli}, {form} formunu doldurduğunuz için teşekkür ederim; cevaplarınızı aldım.\n{koc}"}
+};
+function gnFormListe(){
+  const L = [{k:"soz",ad:"Koçluk sözleşmesi ve veli onayı",f:"soz",grup:"Veliye",kime:"v"},{k:"tanima",ad:"Ön görüşme ve tanıma formu",f:"tanima",grup:"Veliye",kime:"v"},{k:"kayit",ad:"Öğrenci kayıt bilgileri",f:"kayit",grup:"Veliye",kime:"v"},
+    {k:"taah",ad:"Öğrenci taahhüdü",f:"taah",grup:"Öğrenciye",kime:"o"},{k:"ozdeg",ad:"Öz değerlendirme anketi",f:"ozdeg",grup:"Öğrenciye",kime:"o"},{k:"ses",ad:"Öğrencinin sesi",f:"ses",grup:"Öğrenciye",kime:"o"},{k:"analiz",ad:"Ders çalışma programı analizi",f:"analiz",grup:"Öğrenciye",kime:"o"}];
+  Object.keys(OLCEKLER).forEach(id=>L.push({k:"olcek:"+id,ad:"Ölçek: "+OLCEKLER[id].ad,f:"olcek",ek:id,grup:"Öğrenciye",kime:"o"}));
+  onayFdListe().forEach(x=>L.push({k:"fd:"+x.id,ad:x.ad,f:"fd",ek:x.id,grup:"Çalışma ve planlama formları",kime:(x.id==="lgs_hedef"||x.id==="veli_geri")?"v":"o"}));
+  return L;
+}
+function onayStuIcin(sid, fn){ const e = DB.cur; DB.cur = sid; try{ return fn(); } finally { DB.cur = e; } }
+function gnKayit(sid, item){
+  const L = (DB.onay[sid]||[]).filter(r=>r.form===item.f && (item.f==="olcek" ? r.yuk.o===item.ek : item.f==="fd" ? r.yuk.fd===item.ek : true));
+  return L.sort((a,b)=>(b.ts||0)-(a.ts||0))[0] || null;
+}
+function gnKayitYarat(sid, item){
+  const tb = onayTaban();
+  return onayStuIcin(sid, ()=>{
+    let r = gnKayit(sid, item);
+    const gecerli = r && r.durum==="bekliyor" && !r.gelen && r.yuk.x>Date.now() && (item.ek!=="haftalik_odev" || +r.yuk.w===+W);
+    if(gecerli) return r;
+    const yuk = onayYuk(item.f, item.ek);
+    r = {id:yeniId("or"), form:item.f, ts:Date.now(), yuk, link:tb+"#onay="+b64uE(JSON.stringify(yuk)), durum:"bekliyor", gonderim:[]};
+    (DB.onay[sid] = DB.onay[sid]||[]).push(r); save(); return r;
+  });
+}
+async function gnSozGaranti(sid){
+  const d = onayStuIcin(sid, ()=>onayDij()); if(d.sr.trim() && d.uc.trim()) return true;
+  const ad = (DB.students.find(x=>x.id===sid)||{}).ad||"";
+  const v = await formSor("Sözleşme bilgileri ("+ad+")","Sözleşmede görünecek süre ve ücreti yazın.",[{id:"sr",etiket:"Sözleşme süresi",ph:"Örnek: 6 ay / 24 seans"},{id:"uc",etiket:"Ücret",ph:"Örnek: Aylık paket 4.000 TL"}],"Devam",v=>(!v.sr.trim()||!v.uc.trim())?"İkisini de doldurun":null);
+  if(!v) return false; d.sr = v.sr.trim(); d.uc = v.uc.trim(); save(); return true;
+}
+function gnMesaj(r, s, metin){
+  const d = {ad:(s.ad||"").trim().split(/\s+/)[0]||"", veli:(s.veliAd||"").trim()||"Sayın veli", form:onayFormAd(r.yuk), link:r.link, koc:onayAyar().kocAd||s.koc||"", gun:ONAY_GUN};
+  return metin.replace(/\{(\w+)\}/g,(m,a)=>Object.prototype.hasOwnProperty.call(d,a)?d[a]:m);
+}
+function gnAc(url){ const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+function gnSatirlar(item){
+  const tip = GN.kime || item.kime;
+  return aktifler().filter(s=>!GN.sinif || s.sinif===GN.sinif).map(s=>{
+    const r = gnKayit(s.id, item); const dur = r ? (r.durum==="onaylandi" ? "geldi" : r.gelen ? "geldi" : "bekliyor") : "yok";
+    return {s, r, dur, tip, tel:(tip==="v" ? (s.veliTel||"") : (s.tel||s.veliTel||""))};
+  }).filter(x=>GN.durum==="hepsi" || (GN.durum==="yok" ? x.dur!=="geldi" : x.dur==="geldi"));
+}
+async function gnGonder(sid, kanal){
+  const item = gnFormListe().find(x=>x.k===GN.form); const s = DB.students.find(x=>x.id===sid); const sab = GN_SABLON[GN.sablon]; if(!item||!s||!sab) return;
+  if(!onayTaban()){ toast("Önce panel yayın adresini yazın (Öğrenci portföyü › Onay ve gönderim)"); return; }
+  const tip = GN.kime || item.kime; let r = null;
+  if(sab.linksiz){ r = gnKayit(sid, item); if(!r){ toast("Bu öğrenci için bu forma ait kayıt yok"); return; } }
+  else { if(item.f==="soz" && !(await gnSozGaranti(sid))) return; r = gnKayitYarat(sid, item); }
+  const msg = gnMesaj(r, s, GN.metin!==null ? GN.metin : sab[tip]); const tel = tip==="v" ? (s.veliTel||"") : (s.tel||s.veliTel||"");
+  gnAc(kanal==="sms" ? onaySms(tel,msg) : onayWa(tel,msg));
+  r.gonderim.push({k:kanal, t:GN.sablon, z:Date.now()}); save(); renderGonder();
+}
+function renderGonder(){
+  const items = gnFormListe(); if(!items.find(x=>x.k===GN.form)) GN.form = items[0].k;
+  const item = items.find(x=>x.k===GN.form); const sab = GN_SABLON[GN.sablon]; const tip = GN.kime || item.kime;
+  const rows = gnSatirlar(item); const metin = GN.metin!==null ? GN.metin : sab[tip];
+  const gruplar = []; items.forEach(x=>{ let g = gruplar.find(q=>q.ad===x.grup); if(!g){ g = {ad:x.grup, L:[]}; gruplar.push(g); } g.L.push(x); });
+  const siniflar = Array.from(new Set(DB.students.map(s=>s.sinif))).sort((a,b)=>String(a).localeCompare(String(b),"tr",{numeric:true}));
+  const gonderildi = r=>{ const g = r && (r.gonderim||[]).filter(q=>q.t===GN.sablon).slice(-1)[0]; return g ? `<span class="chip ok">✔ ${esc(new Date(g.z).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}</span>` : ""; };
+  $("panel").innerHTML = `<div class="box"><h3>Toplu gönderim</h3><p class="hint">Formu ve mesajı seçin, öğrencileri işaretleyin; her kişi için kendi bağlantısı hazırlanır ve WhatsApp/SMS mesajı hazır açılır. Doldurulan formlar otomatik olarak sisteme düşer.</p></div>
+    ${onayUyariHtml()}
+    <div class="box" style="margin-top:12px"><div class="form">
+      <div class="field"><label for="gnForm">Form</label><select id="gnForm">${gruplar.map(g=>`<optgroup label="${esc(g.ad)}">${g.L.map(x=>`<option value="${esc(x.k)}"${x.k===GN.form?" selected":""}>${esc(x.ad)}</option>`).join("")}</optgroup>`).join("")}</select></div>
+      <div class="field"><label for="gnSablon">Mesaj</label><select id="gnSablon">${Object.keys(GN_SABLON).map(k=>`<option value="${k}"${k===GN.sablon?" selected":""}>${esc(GN_SABLON[k].ad)}</option>`).join("")}</select></div>
+      <div class="field"><label for="gnKime">Kime</label><select id="gnKime"><option value="">Formun varsayılanı (${item.kime==="v"?"veli":"öğrenci"})</option><option value="o"${GN.kime==="o"?" selected":""}>Öğrenci numarası</option><option value="v"${GN.kime==="v"?" selected":""}>Veli numarası</option></select></div>
+      <div class="field"><label for="gnSinif">Sınıf</label><select id="gnSinif"><option value="">Tümü</option>${siniflar.map(x=>`<option value="${esc(x)}"${GN.sinif===x?" selected":""}>${esc(GLABEL[x]||x)}</option>`).join("")}</select></div>
+      <div class="field"><label for="gnDurum">Yanıt durumu</label><select id="gnDurum"><option value="hepsi">Hepsi</option><option value="yok"${GN.durum==="yok"?" selected":""}>Yanıt vermeyenler</option><option value="geldi"${GN.durum==="geldi"?" selected":""}>Yanıt verenler</option></select></div>
+    </div>
+    <div class="field" style="margin-top:8px"><label for="gnMetin">Mesaj metni <span class="muted">({ad} {veli} {form} {link} {koc})</span></label><textarea id="gnMetin" rows="5" style="width:100%">${esc(metin)}</textarea></div></div>
+    <div class="box" style="margin-top:12px"><div class="colhead"><h3>Alıcılar <span class="kayit-sayaci">${rows.length}</span></h3><div class="actions" style="margin:0"><button class="btn small" id="gnHepsi" type="button">Tümünü seç</button><button class="btn small primary" id="gnSonraki" type="button">Sıradaki ›</button><button class="btn small" id="gnYenile" type="button">Cevapları getir</button></div></div>
+      ${rows.length?`<div class="tscroll"><table class="stable"><thead><tr><th></th><th>Öğrenci</th><th>Telefon</th><th>Durum</th><th>Gönderildi</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td><input type="checkbox" data-gnsel="${esc(x.s.id)}" ${GN.secili[x.s.id]?"checked":""} aria-label="${esc(x.s.ad)} seç"></td><td><b>${esc(x.s.ad)}</b><div class="muted" style="font-size:12px">${esc(GLABEL[x.s.sinif]||x.s.sinif)}</div></td><td>${esc(x.tel||"kayıtlı değil")}</td><td>${x.r?onayDurumMetin(x.r):'<span class="badge">Bağlantı yok</span>'}</td><td>${gonderildi(x.r)}</td><td style="white-space:nowrap"><button class="btn small primary" data-gnwa="${esc(x.s.id)}" type="button">WhatsApp</button> <button class="btn small" data-gnsms="${esc(x.s.id)}" type="button">SMS</button></td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Bu seçime uyan öğrenci yok.</p>'}</div>`;
+  const yeni = ()=>{ GN.metin = null; renderGonder(); };
+  $("gnForm").addEventListener("change",e=>{ GN.form = e.target.value; GN.kime = ""; yeni(); });
+  $("gnSablon").addEventListener("change",e=>{ GN.sablon = e.target.value; GN.durum = GN_SABLON[GN.sablon].durum; yeni(); });
+  $("gnKime").addEventListener("change",e=>{ GN.kime = e.target.value; yeni(); });
+  $("gnSinif").addEventListener("change",e=>{ GN.sinif = e.target.value; renderGonder(); });
+  $("gnDurum").addEventListener("change",e=>{ GN.durum = e.target.value; renderGonder(); });
+  $("gnMetin").addEventListener("input",e=>{ GN.metin = e.target.value; });
+  document.querySelectorAll("[data-gnsel]").forEach(c=>c.addEventListener("change",()=>{ GN.secili[c.dataset.gnsel] = c.checked; }));
+  $("gnHepsi").addEventListener("click",()=>{ rows.forEach(x=>{ GN.secili[x.s.id] = true; }); renderGonder(); });
+  $("gnYenile").addEventListener("click",()=>onayKutuGetir(false).then(()=>renderGonder()));
+  document.querySelectorAll("[data-gnwa]").forEach(b=>b.addEventListener("click",()=>gnGonder(b.dataset.gnwa,"wa")));
+  document.querySelectorAll("[data-gnsms]").forEach(b=>b.addEventListener("click",()=>gnGonder(b.dataset.gnsms,"sms")));
+  $("gnSonraki").addEventListener("click",()=>{
+    const x = rows.find(q=>GN.secili[q.s.id] && !(q.r && (q.r.gonderim||[]).some(g=>g.t===GN.sablon)));
+    if(!x){ toast(Object.keys(GN.secili).some(k=>GN.secili[k]) ? "İşaretli herkese gönderildi ✔" : "Önce öğrencileri işaretleyin"); return; }
+    gnGonder(x.s.id,"wa");
+  });
 }
 async function onayGelenIncele(r){
   if(!r || !r.gelen) return;
@@ -5180,16 +5979,16 @@ async function cevapIsle(){
 }
 function onayHizliListe(){
   const L = [["Bu haftanın ödev takibi","fd","haftalik_odev","Öğrenciye"],
-    ["Öğrenci taahhüdü","taah",undefined,"Öğrenciye"],["Öz değerlendirme anketi","ozdeg",undefined,"Öğrenciye"],["Öğrencinin sesi","ses",undefined,"Öğrenciye"]];
+    ["Öğrenci taahhüdü","taah",undefined,"Öğrenciye"],["Öz değerlendirme anketi","ozdeg",undefined,"Öğrenciye"],["Öğrencinin sesi","ses",undefined,"Öğrenciye"],["Ders çalışma programı analizi","analiz",undefined,"Öğrenciye"]];
   Object.keys(OLCEKLER).forEach(k=>L.push(["Ölçek: "+OLCEKLER[k].ad,"olcek",k,"Öğrenciye"]));
   L.unshift(["Koçluk sözleşmesi ve veli onayı","soz",undefined,"Veliye"],["Ön görüşme ve tanıma formu","tanima",undefined,"Veliye"],["Öğrenci kayıt bilgileri","kayit",undefined,"Veliye"]);
-  Object.keys(ONAY_FD).filter(k=>k!=="haftalik_odev").forEach(k=>L.push([ONAY_FD[k],"fd",k,"Çalışma ve planlama formları"]));
+  onayFdListe().filter(x=>x.id!=="haftalik_odev").forEach(x=>L.push([x.ad,"fd",x.id,"Çalışma ve planlama formları"]));
   return L;
 }
-function onayHizliGonder(){
+function onayHizliGonder(onsec){
   const s = stu(); const L = onayHizliListe(); let grup = "";
   const liste = L.map((x,i)=>{ const b = `<button class="btn" type="button" data-hg="${i}" style="text-align:left;min-height:44px;width:100%">${esc(x[0])}</button>`; if(x[3]!==grup){ grup = x[3]; return `<p class="muted" style="margin:10px 0 2px;font-weight:600">${esc(grup)}</p>`+b; } return b; }).join("");
-  const bg = modalAc(`<h3 style="margin:0 0 6px">${esc(s.ad)} için gönder</h3><p class="hint" style="margin:0 0 6px">Formu seçin; bağlantı hazırlanır, ardından WhatsApp veya SMS mesajı hazır açılır.</p><div style="display:flex;flex-direction:column;gap:6px" id="hgListe">${liste}</div><div class="actions" style="margin-top:12px"><button class="btn" id="hgKapat" type="button">Vazgeç</button></div>`);
+  const bg = modalAc(`<h3 style="margin:0 0 6px">${esc(s.ad)} için gönder</h3><p class="hint" style="margin:0 0 6px">Formu seçin; bağlantı hazırlanır, ardından WhatsApp veya SMS mesajı hazır açılır.</p>${onayKurulumDurumu()==="tamam"?"":`<p class="kr-uyari" style="margin:0 0 6px">⚠️ Otomatik geri dönüş kapalı: cevaplar WhatsApp'ta bağlantı olarak gelir. <button class="btn small primary" type="button" data-onsihir>Aç</button></p>`}<div style="display:flex;flex-direction:column;gap:6px" id="hgListe">${liste}</div><div class="actions" style="margin-top:12px"><button class="btn" id="hgKapat" type="button">Vazgeç</button></div>`);
   const kutu = bg.firstElementChild; const kapat = ()=>{ if(bg.parentNode) bg.parentNode.removeChild(bg); renderAll(); };
   bg.querySelector("#hgKapat").addEventListener("click",()=>{ if(bg.parentNode) bg.parentNode.removeChild(bg); });
   bg.querySelectorAll("[data-hg]").forEach(b=>b.addEventListener("click",async ()=>{
@@ -5215,6 +6014,7 @@ function onayHizliGonder(){
     kutu.querySelector("#hgKop").addEventListener("click",async ()=>{ try{ await navigator.clipboard.writeText(msg); toast("Mesaj kopyalandı"); }catch(e){ toast("Kopyalanamadı"); } kayit("kopya"); });
     kutu.querySelector("#hgBitti").addEventListener("click",kapat);
   }));
+  if(onsec){ const ix = L.findIndex(x=>x[1]===onsec); if(ix>=0){ const q = bg.querySelector('[data-hg="'+ix+'"]'); if(q) q.click(); } }
 }
 function onayBagla(){
   const re = ()=>renderPortfoy(); const a = onayAyar(); const s = stu();
@@ -5284,6 +6084,11 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.8.0", t:"30 Ekim 2026", n:"Koçluk › Öğrenci analiz merkezi: “Ders Çalışma Programı Analizi” (12 kısa, adım adım soru; telefon dostu). Öğrenciye bağlantıyla gönderilir (Toplu gönderim ve 📨 Gönder’de de var) ya da yüz yüze doldurulur; cevaplar önizlemeyle portföye ve arşive girer (Drive’da şifreli). Cevaplardan ön çalışma planı çıkar: günlük/haftalık saat, ders dağılımı (zorlanılan derse ağırlık, TYT/AYT/alan), çalışma pencereleri, ilk yol haritası. Logolu PDF rapor (dosya adı otomatik) ve veli/öğrenciye hazır mesaj."},
+  {v:"3.7.1", t:"26 Ekim 2026", n:"Yeni: Koçluk › Çalışma disiplini analizi (22 madde, 3 blok: rutin, görev/erteleme, zorluk/takip; 5’li ölçek, ters maddeler otomatik, blok grafiği, yorum, öneriler, geçmiş sonuçlar, yazdırma; öğrenci portföyüne ve arşiv paketine dahil)."},
+  {v:"3.7.0", t:"22 Ekim 2026", n:"Ödeme sayfası yenilendi: üstte toplam/tahsil/kalan/yapılan ders özeti (kardeşlerde aile toplamı); kayıt formu 3 kısım (ne için · ödeme: kısmi ödeme ve ödeme şekli · ders günlüğü); “Yapılan ders tarihleri” kutusu yerine “Ders günlüğü” satırları (tarih + süre + kısa not + raporda göster; eski tarih listeleri otomatik satırlara döner; özel ders kayıtlarından getirilebilir); renkli durum etiketleri, “Ödendi yap”, süzgeç (bu ay/bekleyenler); veliye hazır hatırlatma ve ders özeti mesajı (WhatsApp/SMS, düzenlenebilir, gönderim kaydı); ödeme raporunda ders günlüğü + ödenen/kalan. Yazdır/PDF kaydederken dosya adı otomatik “Bölüm adı - Öğrenci Ad Soyad - tarih” olur (boş formlarda öğrenci adı yazılmaz)."},
+  {v:"3.6.0", t:"20 Ekim 2026", n:"Kullanım düzeni: (1) 20 sekme 7 ana menüye toplandı; alt sekmeler ana menünün altında açılır, etkin sekmenin grubu otomatik açık kalır, üstte “Grup › Sekme” yolu görünür. (2) Öğrenci/sınıf/hafta seçici sol menüden çıkarıp her sayfada görünen sabit üst çubuğa alındı (‹ › ile önceki/sonraki öğrenci); telefonda da görünür. (3) Yardım › Yedek ve güvenlik: durum özeti, şifreli tam yedek (indir / paylaş / Drive’a tarihli yedek), kontrol kodu, birleştir-değiştir seçenekli yükleme, öğrenci arşiv paketi (şifreli) + okunur özet, arşive alma/geri alma, şifre ayarları, menüde 7 günlük yedek rozeti. Drive scripti yeni “yedek bırak” işlemi için güncellendi (bir kez yeniden yapıştırılır)."},
+  {v:"3.5.0", t:"20 Ekim 2026", n:"Uzaktan form toplama: (1) Bağlantılar kişiye/forma özel HMAC imzalı; Drive scripti imzasız ya da sahte cevabı kabul etmez (spam ve taklit önlenir). (2) Script sürüm kontrolü ve “adım adım” güncelleme sihirbazı; eskiyse panel uyarır. (3) Veli/öğrenci sayfası otomatik iletim başarılıysa yalnızca “iletildi ✓” gösterir; kod ve WhatsApp seçenekleri yalnızca iletim başarısız olursa açılır. (4) Yeni “Toplu gönderim” sekmesi: form + mesaj şablonu (davet, hatırlatma, teşekkür), sınıf/yanıt durumu filtresi, kişi seçimi, kişiye özel bağlantı ve hazır WhatsApp/SMS mesajı, “Sıradaki” düğmesi, gönderim ve yanıt durumu takibi. (5) Gönderilebilir form listesi artık form tanımlarından otomatik oluşur: sonradan eklenen her form listeye kendiliğinden girer. (6) Yeni formlar: Seans/Ders Geri Bildirim ve Veli Memnuniyet formları (uzaktan seanslar için)."},
   {v:"3.4.0", t:"19 Ekim 2026", n:"Gönderim kolaylaştı: öğrenci portföyünde “📨 Gönder” düğmesi (form seç → bağlantı kendiliğinden hazırlanır → WhatsApp/SMS mesajı hazır açılır; yayın adresi ve sözleşme süre/ücreti yalnızca eksikse sorulur). Cevap WhatsApp'ta “cevap linki” olarak gelir; dokununca panel açılır, sözleşme/taahhüt otomatik onaylanır, diğer formlar önizleme ile aktarılır (kurulum gerekmez). Tam otomatik geri dönüş artık mevcut Drive eşitleme scriptiyle çalışır: scripti bir kez güncelleyip yeni sürüm dağıtmak yeterli, ayrı adres gerekmez; ayrı onay kutusu “Gelişmiş” bölümüne taşındı."},
   {v:"3.3.0", t:"19 Ekim 2026", n:"Dijital onay › koç formları bağlantıyla: haftalık ödev takibi, tanıma/SWOT, LGS hedef, yazılı/not takibi, TYT başlangıç, seri deneme, sömestr-kamp ve yaz planı telefondan doldurulabilir (satır kartları, müfredattan konu önerisi, koç notu alanları gizli). Cevaplar önizleme + onayla Formlar sekmesine tarihli kayıt olarak eklenir. “Bu haftanın ödev takip bağlantısı” tek tuşla hazırlanır, aynı hafta için tekrar üretilmez."},
   {v:"3.2.0", t:"19 Ekim 2026", n:"Dijital onay › otomatik geri dönüş: Google Apps Script ile “Onay kutusu” (ayrı, panelden kopyalanan kod). Veli/öğrenci formu gönderince cevap telefonda AES-GCM ile şifrelenip kutuya düşer; anahtar yalnızca bağlantıda bulunur. Panel kutuyu açılışta ve “Yeni cevapları getir” ile kontrol eder: sözleşme/taahhüt otomatik “Onaylandı”, diğer formlar önizleme ile aktarılır. Kod yöntemi yedek olarak kalır. Script tarafında boyut sınırı, tekrar gönderim ve süre denetimi var."},
@@ -5403,7 +6208,7 @@ function guvenlikHtml(){
 }
 function bindGuvenlik(){
   const b=id=>$(id);
-  if(b("gEskiSil")) b("gEskiSil").addEventListener('click',()=>{ window.akpClearPin(); toast("Eski giriş şifresi kaldırıldı"); renderOgrenci(); });
+  if(b("gEskiSil")) b("gEskiSil").addEventListener('click',()=>{ window.akpClearPin(); toast("Eski giriş şifresi kaldırıldı"); yenileMerkez(); });
   if(b("gAc")) b("gAc").addEventListener('click',sifrelemeAc);
   if(b("gDegis")) b("gDegis").addEventListener('click',sifreDegistir);
   if(b("gSoru")) b("gSoru").addEventListener('click',soruDegistir);
@@ -5429,7 +6234,7 @@ async function sifrelemeAc(){
   depoYaz(); await DEPO.yaz;
   await yedekDonustur(true);
   try{ localStorage.removeItem("akp-pin-hash"); localStorage.removeItem("akp-pin-off"); localStorage.removeItem(LS_DEVKEY); sessionStorage.setItem("akp_unlocked","1"); }catch(e){}
-  toast("Şifreleme açıldı"); renderOgrenci();
+  toast("Şifreleme açıldı"); yenileMerkez();
 }
 async function sifreDegistir(){
   const r = await yetkiliIslem("Şifreyi değiştir","",[{id:"y1",etiket:"Yeni şifre (en az 6 karakter)",tip:"password"},{id:"y2",etiket:"Yeni şifre (tekrar)",tip:"password"}],"Değiştir",v=>sifreKontrol(v.y1,v.y2));
@@ -5454,7 +6259,7 @@ async function sorDegistir(){
   if(!r) return;
   if(kapaliYap){ try{ localStorage.setItem(LS_DEVKEY,b64(r.raw)); }catch(e){} env.sor=false; }
   else { try{ localStorage.removeItem(LS_DEVKEY); }catch(e){} env.sor=true; }
-  envYaz(env); toast(kapaliYap?"Girişte şifre sorulmayacak":"Girişte şifre sorulacak"); renderOgrenci();
+  envYaz(env); toast(kapaliYap?"Girişte şifre sorulmayacak":"Girişte şifre sorulacak"); yenileMerkez();
 }
 async function sifrelemeKapat(){
   const r = await yetkiliIslem("Şifrelemeyi kapat","Veriler ve yedekler şifresiz saklanacak.",[],"Şifrelemeyi kapat");
@@ -5465,7 +6270,7 @@ async function sifrelemeKapat(){
   DEPO.sifreli=false; depoYaz();
   try{ localStorage.removeItem(LS_ENV); localStorage.removeItem(LS_DEVKEY); }catch(e){}
   DEPO.dek=null; DEPO.dekRaw=null;
-  toast("Şifreleme kapatıldı"); renderOgrenci();
+  toast("Şifreleme kapatıldı"); yenileMerkez();
 }
 
 /* ---- şifreli yedek dosyası ---- */
@@ -5479,23 +6284,174 @@ async function yedekDosyaIndir(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(dosya)],{type:'application/json'}));
   a.download='akp-yedek-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); toast("Şifreli yedek indirildi");
   try{ localStorage.setItem('akp-last-backup', todayIso()); }catch(x){}
-  if(TAB==="ogrenci") renderOgrenci();
+  yenileMerkez();
 }
 function dosyaOku(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsText(f); }); }
+/* ---------- v3.6: Yedek ve güvenlik merkezi ---------- */
+const OGR_KOL = ["takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz"];
+const KOL_AD = {takip:"Haftalık uygulama takibi",denetim:"Deneme / denetim",gorusme:"Veli görüşmeleri",kariyer:"Kariyer planlama",odeme:"Ödemeler",okuma:"Okuma takibi",seans:"Seans notları",sozlesme:"Koçluk sözleşmesi",tanima:"Tanıma formu",taahhut:"Taahhütname",olcek:"Ölçekler",fkayit:"Form kayıtları",portfoy:"Portföy",ozel:"Özel ders",karne:"Gelişim karnesi",onay:"Dijital onaylar",discipline:"Çalışma disiplini analizi",analiz:"Ders çalışma programı analizi",weeks:"Haftalık planlar",ajanda:"Ajanda"};
+function kopya(x){ return JSON.parse(JSON.stringify(x)); }
+function ogrVeriCikar(db, sid){
+  const v = {}; OGR_KOL.forEach(k=>{ if(db[k] && db[k][sid]!==undefined) v[k] = kopya(db[k][sid]); });
+  const w = {}; Object.keys(db.weeks||{}).forEach(k=>{ if(k.indexOf(sid+":")===0) w[k] = kopya(db.weeks[k]); });
+  if(Object.keys(w).length) v.weeks = w;
+  const aj = (db.ajanda||[]).filter(x=>x.sid===sid).map(kopya); if(aj.length) v.ajanda = aj;
+  return v;
+}
+function ogrVeriYaz(hedef, ogr, v){
+  const o = kopya(ogr); delete o.arsiv; const i = hedef.students.findIndex(x=>x.id===o.id);
+  if(i>=0) hedef.students[i] = o; else hedef.students.push(o);
+  OGR_KOL.forEach(k=>{ if(v[k]!==undefined){ if(!hedef[k]) hedef[k] = {}; hedef[k][o.id] = kopya(v[k]); } });
+  Object.keys(v.weeks||{}).forEach(k=>{ hedef.weeks[k] = kopya(v.weeks[k]); });
+  (v.ajanda||[]).forEach(x=>{ if(!hedef.ajanda.some(y=>y.id===x.id)) hedef.ajanda.push(kopya(x)); });
+}
+function secimSor(baslik, metin, secenekler){
+  return new Promise(res=>{
+    const bg = modalAc(`<h3 style="margin:0 0 8px">${esc(baslik)}</h3><p class="hint" style="margin:0 0 12px">${metin}</p><div class="actions" style="flex-wrap:wrap">${secenekler.map((o,i)=>`<button class="btn ${o.ana?"primary":""}" data-sc="${i}" type="button">${esc(o.ad)}</button>`).join("")}<button class="btn" data-sc="-1" type="button">Vazgeç</button></div>`);
+    bg.addEventListener('click',e=>{ const b = e.target.closest('[data-sc]'); if(!b) return; const i = +b.dataset.sc; bg.remove(); res(i<0 ? null : secenekler[i].k); });
+  });
+}
+async function sha8(m){ const h = await crypto.subtle.digest("SHA-256", _te.encode(m)); return Array.from(new Uint8Array(h)).slice(0,5).map(x=>("0"+x.toString(16)).slice(-2)).join(""); }
+async function yedekDosyaYap(nesne, sifre, tur, ad){
+  const salt = crypto.getRandomValues(new Uint8Array(16)); const kek = await kdfAnahtar(sifre, salt, KDF_ITER); const e = await aesSifrele(kek, _te.encode(JSON.stringify(nesne)));
+  const d = {akpYedek:2, sifreli:true, iter:KDF_ITER, salt:b64(salt), iv:e.iv, ct:e.ct, tur:tur||"tam", ad:ad||"", z:Date.now()}; d.kod = await sha8(d.ct);
+  return JSON.stringify(d);
+}
+async function yedekSifreSor(baslik){
+  const r = await formSor(baslik, "Dosya bu şifreyle şifrelenir. Şifreyi unutursanız dosya açılamaz; panel şifrenizden farklı olabilir.", [{id:"s1",etiket:"Yedek şifresi (en az 6 karakter)",tip:"password"},{id:"s2",etiket:"Yedek şifresi (tekrar)",tip:"password"}], "Devam", v=>sifreKontrol(v.s1,v.s2));
+  return r ? r.s1 : null;
+}
+function dosyaIndir(ad, metin, tip){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([metin],{type:tip||'application/json'})); a.download = ad; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+function yedekIsaret(){ try{ localStorage.setItem('akp-last-backup', todayIso()); }catch(x){} try{ renderTop(); }catch(e){} }
+function sonYedekGun(){ let d = null; try{ d = localStorage.getItem('akp-last-backup'); }catch(e){} return d ? Math.floor((new Date(todayIso())-new Date(d))/86400000) : null; }
+function yenileMerkez(){ if(TAB==="yedek") renderYedekMerkezi(); else if(TAB==="ogrenci") renderOgrenci(); }
+async function yedekTamAl(kanal){
+  if(DEPO.kilitli) return;
+  if(!kriptoVar()){ toast("Bu tarayıcıda şifreli yedek kullanılamıyor"); return; }
+  const c = senkCfg();
+  if(kanal==="drive" && !c){ toast("Önce Drive eşitlemeyi kurun (üstteki ☁️ düğmesi)"); return; }
+  const sifre = await yedekSifreSor(kanal==="paylas" ? "Yedeği paylaş" : kanal==="drive" ? "Drive'a yedek bırak" : "Şifreli yedek indir"); if(!sifre) return;
+  toast("Yedek hazırlanıyor…");
+  const metin = await yedekDosyaYap(DB, sifre, "tam"); const kod = JSON.parse(metin).kod; const tarih = new Date().toISOString().slice(0,10);
+  if(kanal==="indir"){ dosyaIndir("akp-yedek-"+tarih+".json", metin); yedekIsaret(); toast("Şifreli yedek indirildi · kontrol kodu "+kod); }
+  else if(kanal==="paylas"){
+    const f = new File([metin], "akp-yedek-"+tarih+".json", {type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], title:"Akademik Koçluk yedeği"}); yedekIsaret(); toast("Yedek paylaşıldı"); }catch(e){ if(e && e.name!=="AbortError") toast("Paylaşılamadı"); } }
+    else { dosyaIndir(f.name, metin); yedekIsaret(); toast("Bu tarayıcıda paylaşma yok; dosya indirildi"); }
+  } else {
+    const dad = "yedek-"+new Date().toISOString().slice(0,16).replace(/[-:T]/g,"")+".json"; let j = null;
+    try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"ydk", t:c.auth, ad:dad, veri:metin}), redirect:"follow"}); j = await r.json(); }catch(e){}
+    if(j && j.ok){ onayAyar().yedekDrive = {z:Date.now(), ad:j.ad||dad, adet:j.adet||0}; save(); yedekIsaret(); toast("Drive'a yedek bırakıldı"); }
+    else if(j && j.hata==="bilinmeyen") toast("Drive scripti eski sürüm: “Script'i güncelle” düğmesindeki adımları izleyin");
+    else if(j && (j.hata==="yetkisiz"||j.hata==="yetki")) toast("Eşitleme şifresi uyuşmuyor");
+    else toast("Drive'a ulaşılamadı");
+  }
+  yenileMerkez();
+}
+async function arsivPaketIndir(sid){
+  const s0 = DB.students.find(x=>x.id===sid); if(!s0 || DEPO.kilitli) return;
+  const sifre = await yedekSifreSor("Arşiv paketi: "+s0.ad); if(!sifre) return;
+  const metin = await yedekDosyaYap({akpArsiv:1, z:Date.now(), ogrenci:kopya(s0), veri:ogrVeriCikar(DB,sid)}, sifre, "arsiv", "");
+  const slug = (s0.ad||"ogrenci").toLocaleLowerCase("tr").replace(/[^a-z0-9ğüşıöç]+/g,"-").replace(/^-+|-+$/g,"") || "ogrenci";
+  dosyaIndir("akp-arsiv-"+slug+"-"+new Date().toISOString().slice(0,10)+".json", metin); yedekIsaret();
+  toast("Arşiv paketi indirildi · kontrol kodu "+JSON.parse(metin).kod);
+}
+function ozetGor(x, d){
+  d = d||0; if(x===null || x===undefined || x==="" || x===false) return "";
+  if(typeof x!=="object") return esc(String(x)); if(d>5) return "…";
+  if(Array.isArray(x)){ const q = x.map(i=>ozetGor(i,d+1)).filter(Boolean); return q.length ? "<ul>"+q.map(i=>"<li>"+i+"</li>").join("")+"</ul>" : ""; }
+  const r = Object.keys(x).filter(k=>!["yuk","link","k","dek"].includes(k)).map(k=>{ const v = ozetGor(x[k],d+1); return v ? `<div class="r"><span class="k">${esc(k)}</span><span class="v">${v}</span></div>` : ""; }).filter(Boolean);
+  return r.join("");
+}
+function arsivOzetIndir(sid){
+  const s0 = DB.students.find(x=>x.id===sid); if(!s0) return; const v = ogrVeriCikar(DB,sid);
+  const bol = Object.keys(v).map(k=>`<section><h2>${esc(KOL_AD[k]||k)}</h2>${ozetGor(v[k])||"<p class=\"b\">Kayıt yok</p>"}</section>`).join("");
+  const html = `<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Öğrenci arşivi – ${esc(s0.ad)}</title><style>body{font:14px/1.5 system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0 16px;color:#1c2733}h1{font-size:22px}h2{font-size:16px;border-bottom:1px solid #ccd;padding-bottom:4px;margin-top:26px}.r{display:flex;gap:10px;padding:2px 0;border-bottom:1px dotted #e3e8ee}.k{flex:0 0 150px;color:#5b6b7b}.v{flex:1}ul{margin:2px 0;padding-left:18px}.b{color:#888}.u{background:#fff4d6;border:1px solid #e6c96b;border-radius:8px;padding:8px 12px;font-size:12.5px}</style><h1>${esc(s0.ad)} – öğrenci arşivi</h1><p class="u">Bu özet <b>şifresizdir</b> ve kişisel veri içerir; güvenli bir yerde saklayın, paylaşmayın. Oluşturulma: ${new Date().toLocaleDateString("tr-TR")}</p><section><h2>Öğrenci bilgileri</h2>${ozetGor(s0)}</section>${bol}</html>`;
+  dosyaIndir("akp-arsiv-ozet-"+(s0.ad||"ogrenci").toLocaleLowerCase("tr").replace(/[^a-z0-9ğüşıöç]+/g,"-").replace(/^-+|-+$/g,"")+".html", html, "text/html"); toast("Okunur özet indirildi (şifresiz!)");
+}
+async function ogrArsivle(sid){
+  const s0 = DB.students.find(x=>x.id===sid); if(!s0) return;
+  if(aktifler().length<2){ toast("En az bir aktif öğrenci kalmalı"); return; }
+  if(!(await onayAl("Arşive al: "+s0.ad, "Öğrenci seçiciden, genel bakıştan, toplu gönderimden ve uyarılardan çıkar. Hiçbir kayıt silinmez; “Arşivden geri al” ile döner. Önce arşiv paketini indirmeniz önerilir.", "Arşive al"))) return;
+  await yedekAl("Arşivlemeden önce","onceki");
+  s0.arsiv = Date.now(); if(DB.cur===sid) DB.cur = aktifler()[0].id; save(); renderAll(); toast("Arşive alındı");
+}
+function ogrArsivGeri(sid){ const s0 = DB.students.find(x=>x.id===sid); if(!s0) return; delete s0.arsiv; save(); renderAll(); toast("Arşivden geri alındı"); }
 async function yedekDosyaYukle(f){
   if(DEPO.kilitli) return;
-  let o; try{ o=JSON.parse(await dosyaOku(f)); }catch(e){ toast("Dosya okunamadı. Bu panelin indirdiği .json yedeğini seçin."); return; }
+  let o; try{ o = JSON.parse(await dosyaOku(f)); }catch(e){ toast("Dosya okunamadı. Bu panelin indirdiği .json yedeğini seçin."); return; }
   if(o && o.akpYedek===2 && o.sifreli){
-    let veri=null;
-    const r = await formSor("Yedek şifresi","Bu dosya şifreli. İndirirken belirlediğiniz yedek şifresini yazın.",[{id:"s",etiket:"Yedek şifresi",tip:"password"}],"Aç",async v=>{
-      try{ const kek=await kdfAnahtar(v.s,unb64(o.salt),o.iter||KDF_ITER); veri=JSON.parse(_td.decode(await aesCoz(kek,o))); }catch(e){ return "Şifre yanlış ya da dosya bozuk."; } return "";
+    if(o.kod && o.ct && (await sha8(o.ct))!==o.kod){ toast("Dosya bozulmuş görünüyor (kontrol kodu uyuşmuyor). Başka bir kopya deneyin."); return; }
+    let veri = null;
+    const r = await formSor("Yedek şifresi","Bu dosya şifreli. İndirirken belirlediğiniz yedek şifresini yazın."+(o.kod?" <br>Dosya kontrol kodu: <b>"+esc(o.kod)+"</b>":""),[{id:"s",etiket:"Yedek şifresi",tip:"password"}],"Aç",async v=>{
+      try{ const kek = await kdfAnahtar(v.s, unb64(o.salt), o.iter||KDF_ITER); veri = JSON.parse(_td.decode(await aesCoz(kek,o))); }catch(e){ return "Şifre yanlış ya da dosya bozuk."; } return "";
     });
-    if(!r) return; o=veri;
+    if(!r) return; o = veri;
+  }
+  if(o && o.akpArsiv===1 && o.ogrenci){
+    const var_ = DB.students.some(x=>x.id===o.ogrenci.id);
+    if(!(await onayAl("Arşiv paketini geri yükle", esc(o.ogrenci.ad||"Öğrenci")+" için tüm kayıtlar aktif listeye eklenir."+(var_?" Bu öğrenci zaten panelde var; kayıtları paketteki ile <b>değiştirilir</b>.":""), "Geri yükle"))) return;
+    await yedekAl("Arşiv paketi yüklemeden önce","onceki");
+    ogrVeriYaz(DB, o.ogrenci, o.veri||{}); save(); renderAll(); toast("Öğrenci geri yüklendi"); return;
   }
   if(!o || !Array.isArray(o.students)){ toast("Dosya okunamadı. Bu panelin indirdiği .json yedeğini seçin."); return; }
-  if(!(await onayAl("Yedeği yükle","Şu anki tüm veriler bu yedeğin içeriğiyle değiştirilecek. Önce otomatik olarak “İçe aktarmadan önce” yedeği alınır.","Yükle"))) return;
+  const mod = await secimSor("Yedeği yükle", "Yedekte <b>"+o.students.length+" öğrenci</b> var. Yüklemeden önce otomatik “geri dönüş” yedeği alınır.", [{k:"birlestir",ad:"Birleştir (eksikleri ekle)",ana:true},{k:"degistir",ad:"Tümünü değiştir"}]);
+  if(!mod) return;
+  if(mod==="degistir" && !(await onayAl("Tüm veriler değişecek","Şu anki tüm veriler bu yedeğin içeriğiyle değiştirilecek.","Değiştir"))) return;
   await yedekAl("İçe aktarmadan önce","onceki");
-  DB=dbNormalize(o); save(); renderAll(); toast("Yedek yüklendi");
+  if(mod==="degistir"){ DB = dbNormalize(o); }
+  else {
+    const y = dbNormalize(kopya(o)); let n = 0;
+    y.students.forEach(st=>{ if(!DB.students.some(x=>x.id===st.id)){ ogrVeriYaz(DB, st, ogrVeriCikar(y, st.id)); if(st.arsiv) DB.students.find(x=>x.id===st.id).arsiv = st.arsiv; n++; } });
+    (y.kitaplik||[]).forEach(k=>{ if(!DB.kitaplik.some(x=>x.id===k.id)) DB.kitaplik.push(k); });
+    toast(n+" öğrenci eklendi");
+  }
+  save(); renderAll(); if(mod==="degistir") toast("Yedek yüklendi");
+}
+function renderYedekMerkezi(){
+  const gun = sonYedekGun(), c = senkCfg(), a = onayAyar(), ak = aktifler(), ars = DB.students.filter(x=>x.arsiv);
+  const kart = (d,t,alt,btn)=>`<div class="yk-kart"><span class="yk-d ${d}"></span><div class="yk-t"><b>${t}</b><small>${alt}</small></div>${btn||""}</div>`;
+  const driveSurum = c ? ((a.inboxSurum||1)>=3 || a.yedekDrive) : false;
+  $("panel").innerHTML = `<div class="box"><h3>🛡️ Yedek ve güvenlik</h3>
+    <p class="hint">Öğrenci verileri bu cihazda saklanır; telefon kaybolur ya da tarayıcı verisi silinirse tek kurtarıcı dışarı aldığınız şifreli yedektir. Aşağıdaki durum satırları neyin eksik olduğunu gösterir.</p>
+    ${kart(DEPO.sifreli?"g":"r","Veri şifreleme", DEPO.sifreli?"Veriler bu cihazda AES-256 ile şifreli saklanıyor.":"Veriler şifresiz saklanıyor. Şifrelemeyi açmanız önerilir.", DEPO.sifreli?"":`<button class="btn primary" id="ykSifre" type="button">Şifrelemeyi aç</button>`)}
+    ${kart(gun===null?"r":gun>=7?"y":"g","Şifreli yedek dosyası", gun===null?"Henüz hiç yedek dosyası alınmamış.":gun>=7?"Son yedek "+gun+" gün önce ("+trDate(localStorage.getItem('akp-last-backup'))+"). Yenilemeniz önerilir.":"Son yedek "+(gun===0?"bugün":gun+" gün önce")+".", `<button class="btn ${gun===null||gun>=7?"primary":""}" id="ykAl1" type="button">Şimdi indir</button>`)}
+    ${kart("g","Otomatik yerel yedekler","<span id=\"ykOto\">Okunuyor…</span>","")}
+    ${kart(c?"g":"y","Google Drive eşitleme", c?"Açık: veriler uçtan uca şifreli olarak Drive'ınızla eşitleniyor.":"Kapalı. Başka cihazdan açmak ve ek kopya için üstteki ☁️ düğmesinden kurun.", c?"":`<button class="btn" id="ykSenk" type="button">Eşitlemeyi kur</button>`)}
+    ${c?kart(driveSurum?"g":"y","Drive'a tarihli yedek", driveSurum?(a.yedekDrive?"Son: "+new Date(a.yedekDrive.z).toLocaleString("tr-TR")+" · Drive'da "+(a.yedekDrive.adet||"?")+" yedek dosyası":"Hazır."):"Script'in bir kez güncellenmesi gerekiyor (yeni kodu yapıştırıp “Yeni sürüm” dağıtın).", driveSurum?"":`<button class="btn" id="ykGunc" type="button">Script'i güncelle</button>`):""}
+  </div>
+  <div class="box" style="margin-top:14px"><h3>Tam yedek</h3>
+    <p class="hint">Tüm öğrenciler tek şifreli dosyada. Dosyanın bir kopyasını telefon dışında (Drive, e-posta, bilgisayar) saklayın.</p>
+    <div class="actions"><button class="btn primary" id="ykIndir" type="button">⬇️ İndir</button><button class="btn" id="ykPaylas" type="button">📤 Paylaş (WhatsApp, e-posta, Drive…)</button><button class="btn" id="ykDrive" type="button"${c?"":" disabled"}>☁️ Drive'a yedek bırak</button><button class="btn" id="ykYukle" type="button">Yedeği / arşivi yükle</button><input type="file" id="ykFile" accept=".json,application/json" hidden></div>
+    <p class="hint" style="margin-top:8px">Yükleme sırasında “Birleştir” (yalnızca eksik öğrenciler eklenir) ya da “Tümünü değiştir” seçersiniz; her ikisinde de önce otomatik geri dönüş yedeği alınır.</p>
+  </div>
+  <div class="box" style="margin-top:14px"><h3>Öğrenci arşivi</h3>
+    <p class="hint">Bir öğrencinin tüm kayıtlarını (portföy, formlar, onaylar, denemeler, notlar, ödeme, okuma) şifreli tek dosya olarak alın. “Arşive al” öğrenciyi aktif listelerden çıkarır, silmez.</p>
+    ${ak.length?`<div class="actions"><select id="ykOgr" aria-label="Öğrenci" style="max-width:260px">${ak.map(x=>`<option value="${x.id}"${x.id===stu().id?" selected":""}>${esc(x.ad)}</option>`).join("")}</select><button class="btn primary" id="ykPaket" type="button">Arşiv paketi (şifreli)</button><button class="btn" id="ykOzet" type="button">Okunur özet (şifresiz)</button><button class="btn" id="ykArsivle" type="button">Arşive al</button></div>`:`<p class="muted">Aktif öğrenci yok.</p>`}
+    ${ars.length?`<h4 style="margin:14px 0 4px">Arşivdekiler (${ars.length})</h4>${ars.map(x=>`<div class="yk-kart"><div class="yk-t"><b>${esc(x.ad)}</b><small>${esc(GLABEL[x.sinif]||x.sinif||"")} · arşive alınma ${new Date(x.arsiv).toLocaleDateString("tr-TR")}</small></div><button class="btn" data-ykpaket="${x.id}" type="button">Paket indir</button><button class="btn primary" data-ykgeri="${x.id}" type="button">Arşivden geri al</button></div>`).join("")}`:""}
+  </div>
+  ${guvenlikHtml()}
+  <div class="box" style="margin-top:14px"><h3>Verileri nasıl koruyoruz?</h3>
+    <ul class="hint" style="margin:0;padding-left:18px">
+      <li>Veriler yalnızca bu cihazın tarayıcısında durur; şifrelemeyi açarsanız AES-256 ile şifreli saklanır.</li>
+      <li>Drive eşitleme ve yedekler Google'a yalnızca şifreli gider; şifre Google'da yoktur.</li>
+      <li>Öğrenci ve veli formları bağlantıyla gelir; cevaplar telefonda şifrelenir, yalnızca bu panel açabilir.</li>
+      <li>Okunur özet dosyası şifresizdir; kişisel veri içerdiği için paylaşmayın, işiniz bitince silin.</li>
+      <li>Öğrenci/veli verisi kişisel veridir (KVKK): yalnızca koçluk amacıyla kullanın, gerekmeyen kaydı arşivleyin. Bu kutu bilgilendirmedir, hukuki görüş değildir.</li>
+    </ul></div>`;
+  $("ykAl1").addEventListener('click',()=>yedekTamAl("indir")); $("ykIndir").addEventListener('click',()=>yedekTamAl("indir"));
+  $("ykPaylas").addEventListener('click',()=>yedekTamAl("paylas")); $("ykDrive").addEventListener('click',()=>yedekTamAl("drive"));
+  $("ykYukle").addEventListener('click',()=>$("ykFile").click()); $("ykFile").addEventListener('change',e=>{ const f = e.target.files[0]; e.target.value=""; if(f) yedekDosyaYukle(f); });
+  if($("ykSifre")) $("ykSifre").addEventListener('click',sifrelemeAc);
+  if($("ykSenk")) $("ykSenk").addEventListener('click',()=>$("senkBtn").click());
+  if($("ykGunc")) $("ykGunc").addEventListener('click',()=>onayKurulumSihirbazi());
+  if($("ykPaket")) $("ykPaket").addEventListener('click',()=>arsivPaketIndir($("ykOgr").value));
+  if($("ykOzet")) $("ykOzet").addEventListener('click',()=>arsivOzetIndir($("ykOgr").value));
+  if($("ykArsivle")) $("ykArsivle").addEventListener('click',()=>ogrArsivle($("ykOgr").value));
+  document.querySelectorAll('[data-ykpaket]').forEach(b=>b.addEventListener('click',()=>arsivPaketIndir(b.dataset.ykpaket)));
+  document.querySelectorAll('[data-ykgeri]').forEach(b=>b.addEventListener('click',()=>ogrArsivGeri(b.dataset.ykgeri)));
+  bindGuvenlik();
+  YEDEK.liste().then(L=>{ const e = $("ykOto"); if(!e) return; const oto = L.filter(x=>x.tur==="otomatik"||x.tur==="gunluk"); e.textContent = L.length+" kopya (en yeni: "+(L[0]?new Date(L[0].ts).toLocaleString("tr-TR"):"yok")+"). Sürüm geçmişi sekmesinden geri yüklenebilir."; }).catch(()=>{ const e = $("ykOto"); if(e) e.textContent = "Okunamadı"; });
 }
 
 /* ---- Sürüm geçmişi ve geri alma sekmesi ---- */
@@ -5639,7 +6595,7 @@ async function yedekGeriYukle(id){
   acilisYedekleri();
   if(!DEPO.kilitli) renderAll();
   if(!DEPO.kilitli) ajKontrol();
-  if(!DEPO.kilitli) setTimeout(()=>{ try{ if(onayKutuBilgi()) onayKutuGetir(true); else if(senkCfg()) onayDriveDene().then(ok=>{ if(ok) onayKutuGetir(true); }); }catch(e){} },1500);
+  if(!DEPO.kilitli) setTimeout(()=>{ try{ if(senkCfg()) onayDriveDene().then(ok=>{ if(ok || onayKutuBilgi()) onayKutuGetir(true); }); else if(onayKutuBilgi()) onayKutuGetir(true); }catch(e){} },1500);
   if(!DEPO.kilitli && isUnlocked()) cevapIsle();
   if(!isUnlocked()){
     const lg=document.querySelector('.side-logo'); if(lg && lg.src) $("lockLogo").src=lg.src;
