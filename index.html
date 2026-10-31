@@ -652,7 +652,7 @@ function varsayilanOgrenci(){
 function dbNormalize(db){
   if(!db || typeof db!=="object") db = {};
   if(!Array.isArray(db.students)) db.students = [];
-  ["weeks","takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz","uni","cetele"].forEach(k=>{
+  ["weeks","takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz","uni","cetele","motiv"].forEach(k=>{
     if(!db[k] || typeof db[k]!=="object" || Array.isArray(db[k])) db[k] = {};
   });
   if(!db.ayar || typeof db.ayar!=="object" || Array.isArray(db.ayar)) db.ayar = {};
@@ -667,7 +667,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.13.0";
+const SURUM = "3.14.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1856,12 +1856,12 @@ function renderOgrenci(){
     const backup = {
       student: s, idx,
       weeks: Object.entries(DB.weeks).filter(([k])=>k.startsWith(s.id+":")),
-      takip: DB.takip[s.id], denetim: DB.denetim[s.id], discipline: DB.discipline[s.id], analiz: DB.analiz[s.id], uni: DB.uni[s.id], cetele: DB.cetele[s.id], gorusme: DB.gorusme[s.id], kariyer: DB.kariyer[s.id], odeme: DB.odeme[s.id], okuma: DB.okuma[s.id], seans: DB.seans[s.id], olcek: DB.olcek[s.id], fkayit: DB.fkayit[s.id], portfoy: DB.portfoy[s.id], ozel: DB.ozel[s.id], karne: DB.karne[s.id], onay: DB.onay[s.id], sozlesme: DB.sozlesme[s.id], tanima: DB.tanima[s.id], taahhut: DB.taahhut[s.id],
+      takip: DB.takip[s.id], denetim: DB.denetim[s.id], discipline: DB.discipline[s.id], analiz: DB.analiz[s.id], uni: DB.uni[s.id], cetele: DB.cetele[s.id], motiv: DB.motiv[s.id], gorusme: DB.gorusme[s.id], kariyer: DB.kariyer[s.id], odeme: DB.odeme[s.id], okuma: DB.okuma[s.id], seans: DB.seans[s.id], olcek: DB.olcek[s.id], fkayit: DB.fkayit[s.id], portfoy: DB.portfoy[s.id], ozel: DB.ozel[s.id], karne: DB.karne[s.id], onay: DB.onay[s.id], sozlesme: DB.sozlesme[s.id], tanima: DB.tanima[s.id], taahhut: DB.taahhut[s.id],
       wasCur: DB.cur===s.id
     };
     DB.students = DB.students.filter(x=>x.id!==s.id);
     Object.keys(DB.weeks).forEach(k=>{ if(k.startsWith(s.id+":")) delete DB.weeks[k]; });
-    delete DB.takip[s.id]; delete DB.denetim[s.id]; delete DB.discipline[s.id]; delete DB.analiz[s.id]; delete DB.uni[s.id]; delete DB.cetele[s.id]; delete DB.gorusme[s.id]; delete DB.kariyer[s.id]; delete DB.odeme[s.id]; delete DB.okuma[s.id]; delete DB.seans[s.id]; delete DB.olcek[s.id]; delete DB.fkayit[s.id]; delete DB.portfoy[s.id]; delete DB.ozel[s.id]; delete DB.karne[s.id]; delete DB.onay[s.id]; delete DB.sozlesme[s.id]; delete DB.tanima[s.id]; delete DB.taahhut[s.id];
+    delete DB.takip[s.id]; delete DB.denetim[s.id]; delete DB.discipline[s.id]; delete DB.analiz[s.id]; delete DB.uni[s.id]; delete DB.cetele[s.id]; delete DB.motiv[s.id]; delete DB.gorusme[s.id]; delete DB.kariyer[s.id]; delete DB.odeme[s.id]; delete DB.okuma[s.id]; delete DB.seans[s.id]; delete DB.olcek[s.id]; delete DB.fkayit[s.id]; delete DB.portfoy[s.id]; delete DB.ozel[s.id]; delete DB.karne[s.id]; delete DB.onay[s.id]; delete DB.sozlesme[s.id]; delete DB.tanima[s.id]; delete DB.taahhut[s.id];
     if(DB.cur===s.id) DB.cur = (aktifler()[0]||DB.students[0]).id;
     save(); renderAll();
     toast(s.ad+" silindi", {label:"Geri al", duration:6000, onClick:()=>{
@@ -1876,6 +1876,7 @@ function renderOgrenci(){
       if(backup.analiz) DB.analiz[s.id]=backup.analiz;
       if(backup.uni) DB.uni[s.id]=backup.uni;
       if(backup.cetele) DB.cetele[s.id]=backup.cetele;
+      if(backup.motiv) DB.motiv[s.id]=backup.motiv;
       if(backup.okuma) DB.okuma[s.id]=backup.okuma;
       if(backup.seans) DB.seans[s.id]=backup.seans;
       if(backup.olcek) DB.olcek[s.id]=backup.olcek;
@@ -5081,6 +5082,10 @@ function renderAnaliz(){
   const s = stu(); if(ANK.sid && ANK.sid!==s.id){ ANK.ekran = "liste"; ANK.kayit = null; } ANK.sid = s.id;
   const L = ankKayitlar().slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
   const bekl = onayListe().filter(r=>r.form==="analiz" && r.durum==="bekliyor");
+  if(ANK.ekran==="motform"){ $("panel").innerHTML = `<div class="box" style="max-width:720px"><div class="colhead"><h2 style="margin:0">Akademik motivasyon analizi · ${esc(s.ad)} (yüz yüze)</h2><button class="btn small" id="anIptal" type="button">Vazgeç</button></div><div id="ankKap"></div></div>`;
+    $("anIptal").addEventListener("click",()=>{ ANK.ekran = "liste"; renderAnaliz(); });
+    const ilk = {}; if(UNI_SINIF.indexOf(String(s.sinif))>=0) ilk.sn = String(s.sinif);
+    mtvSihirbaz($("ankKap"), A=>{ const k = {id:yeniId("mt"), ts:Date.now(), kaynak:"yuzyuze", ad:s.ad, a:A}; mtvKayitlar().push(k); save(); ANK.ekran = "liste"; DEG.ekran = "detay"; DEG.tur = "motiv"; DEG.sid = s.id; DEG.id = k.id; TAB = "degerlendirme"; renderAll(); toast("Analiz kaydedildi"); }, {ilk, son:"Kaydet ve sonucu göster"}); return; }
   if(ANK.ekran==="uniform"){ $("panel").innerHTML = `<div class="box" style="max-width:720px"><div class="colhead"><h2 style="margin:0">Üniversite ve bölüm analizi · ${esc(s.ad)} (yüz yüze)</h2><button class="btn small" id="anIptal" type="button">Vazgeç</button></div><div id="ankKap"></div></div>`;
     $("anIptal").addEventListener("click",()=>{ ANK.ekran = "liste"; renderAnaliz(); });
     const ilk = {}; if(UNI_SINIF.indexOf(String(s.sinif))>=0) ilk.sn = String(s.sinif);
@@ -5094,11 +5099,13 @@ function renderAnaliz(){
     $("anMsj").addEventListener("click",()=>mesajPenceresi(ankMesaj(ANK.kayit)));
     return; }
   const KUT = [{id:"an", ikon:"📚", ad:"Ders Çalışma Programı Analizi", acik:"12 kısa soru · yaklaşık 3 dakika. Seviyeye, hedeflere ve günlük düzene göre ön çalışma planı ve ilk yol haritası çıkarır.", f:"analiz", sayi:ankKayitlar().length, bk:bekl.length},
-    {id:"uni", ikon:"🎓", ad:"Üniversite ve Bölüm Karar Analizi", acik:"28 madde · yaklaşık 8 dakika. Kararda neye ağırlık verildiğini, hangi başlıkta bilgi eksiği olduğunu gösterir ve araştırma listesi üretir. Hangi üniversitenin yazılacağını söylemez.", f:"uni", sayi:uniKayitlar().length, bk:onayListe().filter(r=>r.form==="uni" && r.durum==="bekliyor").length}];
+    {id:"uni", ikon:"🎓", ad:"Üniversite ve Bölüm Karar Analizi", acik:"28 madde · yaklaşık 8 dakika. Kararda neye ağırlık verildiğini, hangi başlıkta bilgi eksiği olduğunu gösterir ve araştırma listesi üretir. Hangi üniversitenin yazılacağını söylemez.", f:"uni", sayi:uniKayitlar().length, bk:onayListe().filter(r=>r.form==="uni" && r.durum==="bekliyor").length},
+    {id:"mtv", ikon:"🔋", ad:"Akademik Motivasyon Kaynakları Analizi", acik:"22 madde · yaklaşık 5 dakika. Çalışma isteğinin nereden geldiğini gösterir: merak, ustalaşma, hedefle bağ, süreçten doyum, çevre beklentisi ve kaygı. “İyi/kötü öğrenci” demez; hangi kaynağın bugün taşıdığını ve hangisinin desteklenebileceğini gösterir.", f:"motiv", sayi:mtvKayitlar().length, bk:onayListe().filter(r=>r.form==="motiv" && r.durum==="bekliyor").length}];
   $("panel").innerHTML = `<div class="box" style="max-width:900px"><div class="colhead" style="align-items:flex-start"><div><h2 style="margin:0 0 2px">🎯 Öğrenci analiz merkezi</h2><p class="muted" style="margin:0">Analizi öğrenciye bağlantıyla gönder ya da yüz yüze doldur · ${esc(s.ad)}</p></div><button class="btn small" id="anDeg" type="button">Sonuçlar › Değerlendirme</button></div>
     <p class="hint" style="margin:10px 0">Cevaplar sen onaylayınca portföye girer ve <b>Değerlendirme</b> sekmesinde incelenir; oradan koç raporu ve öğrenci/veli bilgilendirme raporu hazırlanır. Yeni analizler zamanla bu listeye eklenir.</p>
     ${KUT.map(a=>`<div class="box no" style="margin:10px 0"><h3 style="margin:0 0 4px">${a.ikon} ${esc(a.ad)} ${a.sayi?`<span class="badge">${a.sayi} sonuç</span>`:""}</h3><p class="hint" style="margin:0 0 8px">${esc(a.acik)}</p><div class="actions"><button class="btn primary" id="${a.id}Gonder" type="button">📨 Öğrenciye gönder</button><button class="btn" id="${a.id}Yuz" type="button">✍️ Yüz yüze doldur</button></div>${a.bk?`<p class="hint" style="margin-top:8px">⏳ ${a.bk} gönderilmiş bağlantı cevap bekliyor (Gelen kutusu).</p>`:""}</div>`).join("")}</div>`;
   $("anGonder").addEventListener("click",()=>onayHizliGonder("analiz")); $("anYuz").addEventListener("click",()=>{ ANK.ekran = "form"; renderAnaliz(); });
+  $("mtvGonder").addEventListener("click",()=>onayHizliGonder("motiv")); $("mtvYuz").addEventListener("click",()=>{ ANK.ekran = "motform"; renderAnaliz(); });
   $("uniGonder").addEventListener("click",()=>onayHizliGonder("uni")); $("uniYuz").addEventListener("click",()=>{ ANK.ekran = "uniform"; renderAnaliz(); });
   $("anDeg").addEventListener("click",()=>{ DEG.ekran = "liste"; TAB = "degerlendirme"; renderAll(); });
 }
@@ -5142,17 +5149,18 @@ function renderKutu(){
   const bul = b=>{ const rec = (DB.onay[b.dataset.sid]||[]).find(x=>x.id===b.dataset.kuinc||x.id===b.dataset.kutek||x.id===b.dataset.kuac); return rec; };
   document.querySelectorAll("[data-kuinc]").forEach(b=>b.addEventListener("click",async()=>{ const r = bul(b); if(!r) return; DB.cur = b.dataset.sid; save(); await onayGelenIncele(r); }));
   document.querySelectorAll("[data-kutek]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; const msg = onayStuIcin(b.dataset.sid,()=>onayMesaj(r)); const tel = onayStuIcin(b.dataset.sid,()=>onayAlici(r.form, r.yuk.fd)); gnAc(onayWa(tel,msg)); }));
-  document.querySelectorAll("[data-kuac]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; DB.cur = b.dataset.sid; save(); if(r.form==="analiz"||r.form==="uni"){ TAB = "degerlendirme"; } else if(r.form==="cetele"){ TAB = "cetele"; CET.w = (r.yuk.ct||{}).w || CET.w; CET.ekran = "liste"; } else { TAB = "portfoy"; PF_SEK = "onay"; } renderAll(); }));
+  document.querySelectorAll("[data-kuac]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; DB.cur = b.dataset.sid; save(); if(r.form==="analiz"||r.form==="uni"||r.form==="motiv"){ TAB = "degerlendirme"; } else if(r.form==="cetele"){ TAB = "cetele"; CET.w = (r.yuk.ct||{}).w || CET.w; CET.ekran = "liste"; } else { TAB = "portfoy"; PF_SEK = "onay"; } renderAll(); }));
 }
 
 /* --- Değerlendirme --- */
 const DEG = {ekran:"liste", kapsam:"bu", tur:null, id:null};
-function degKoleksiyon(t){ return t==="analiz" ? DB.analiz : (t==="uni" ? DB.uni : DB.discipline); }
+function degKoleksiyon(t){ return t==="analiz" ? DB.analiz : (t==="uni" ? DB.uni : (t==="motiv" ? DB.motiv : DB.discipline)); }
 function degKayitlar(){
   const hedef = DEG.kapsam==="hepsi" ? aktifler() : [stu()];
   const L = [];
   hedef.forEach(st=>{
     (DB.analiz[st.id]||[]).forEach(k=>{ const p = ankPlan(k.a); L.push({sid:st.id, ad:st.ad, tur:"analiz", id:k.id, ts:k.ts, baslik:"Ders çalışma programı analizi", ozet:"haftalık ≈ "+p.hafta+" saat"+(p.seviye?" · "+p.seviye.ad:""), k}); });
+    (DB.motiv[st.id]||[]).forEach(k=>{ const h = mtvHesap(k.a); L.push({sid:st.id, ad:st.ad, tur:"motiv", id:k.id, ts:k.ts, baslik:"Akademik Motivasyon Kaynakları Analizi", ozet:"taşıyan: "+h.tasiyan.map(b=>b.ad).join(", ")+" · "+h.denge, k}); });
     (DB.uni[st.id]||[]).forEach(k=>{ const h = uniHesap(k.a); L.push({sid:st.id, ad:st.ad, tur:"uni", id:k.id, ts:k.ts, baslik:"Üniversite ve Bölüm Karar Analizi", ozet:"öne çıkan: "+h.oncelik.map(b=>b.ad).join(", "), k}); });
     (DB.discipline[st.id]||[]).forEach(k=>{ const t = k.toplam||{}; L.push({sid:st.id, ad:st.ad, tur:"dis", id:k.id, ts:k.ts, baslik:"Çalışma disiplini analizi", ozet:(t.yuzde!==undefined?"endeks %"+t.yuzde+" · "+disYorum(t.yuzde).ad:""), k}); });
   });
@@ -5160,6 +5168,7 @@ function degKayitlar(){
 }
 function degBilgiTaslak(tur, k){
   if(tur==="uni") return uniBilgiTaslak(k);
+  if(tur==="motiv") return mtvBilgiTaslak(k);
   const s = stu(); const veli = s.veliAd ? s.veliAd+"," : ""; let m = "";
   if(tur==="analiz"){
     const p = ankPlan(k.a); const top = p.dersler.slice(0,3).map(d=>d.ad).join(", ");
@@ -5181,7 +5190,7 @@ function degBilgiTaslak(tur, k){
   return m+"\n"+(s.koc||"");
 }
 function degBilgiRaporu(tur, k){
-  const s = stu(); const baslik = tur==="analiz" ? "Ders Çalışma Programı Analizi" : (tur==="uni" ? "Üniversite ve Bölüm Karar Analizi" : "Çalışma Disiplini Analizi");
+  const s = stu(); const baslik = tur==="analiz" ? "Ders Çalışma Programı Analizi" : (tur==="motiv" ? "Akademik Motivasyon Kaynakları Analizi" : tur==="uni" ? "Üniversite ve Bölüm Karar Analizi" : "Çalışma Disiplini Analizi");
   const bg = modalAc(`<h3 style="margin:0 0 6px">Öğrenci / veli bilgilendirme raporu</h3><p class="hint" style="margin:0 0 8px">Taslak otomatik hazırlandı; yüzde ve puan içermez. İstediğini değiştir, sonra yazdır ya da gönder.</p><textarea id="dbT" rows="14" style="width:100%">${esc(degBilgiTaslak(tur,k))}</textarea><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="dbY" type="button">Yazdır / PDF</button><button class="btn" id="dbM" type="button">WhatsApp / kopyala</button><button class="btn" id="dbX" type="button">Kapat</button></div>`);
   const q = x=>bg.querySelector("#"+x);
   q("dbX").addEventListener("click",()=>bg.remove());
@@ -5196,12 +5205,13 @@ function renderDegerlendirme(){
     const k = degKoleksiyon(DEG.tur)[DEG.sid]; const kay = (k||[]).find(x=>x.id===DEG.id);
     if(!kay){ DEG.ekran = "liste"; return renderDegerlendirme(); }
     const analiz = DEG.tur==="analiz", uni = DEG.tur==="uni";
-    $("panel").innerHTML = (analiz ? ankSonucHtml(kay) : (uni ? uniSonucHtml(kay) : disSonucHtml(stu(), kay)));
+    $("panel").innerHTML = (analiz ? ankSonucHtml(kay) : (uni ? uniSonucHtml(kay) : DEG.tur==="motiv" ? mtvSonucHtml(kay) : disSonucHtml(stu(), kay)));
     const act = $("panel").querySelector(".actions");
     const bilgi = document.createElement("button"); bilgi.type = "button"; bilgi.className = "btn small primary"; bilgi.id = "degBilgi"; bilgi.textContent = "Öğrenci/veli bilgilendirme raporu"; if(act) act.insertBefore(bilgi, act.firstChild);
     bilgi.addEventListener("click",()=>degBilgiRaporu(DEG.tur, kay));
     const geri = ()=>{ DEG.ekran = "liste"; renderDegerlendirme(); };
-    if(uni){ $("uniYaz").addEventListener("click",()=>uniYazdir(kay)); $("uniMsj").addEventListener("click",()=>mesajPenceresi(uniMesaj(kay))); $("uniKapat").addEventListener("click",geri); }
+    if(DEG.tur==="motiv"){ $("mtvYaz").addEventListener("click",()=>mtvYazdir(kay)); $("mtvMsj").addEventListener("click",()=>mesajPenceresi(mtvMesaj(kay))); $("mtvKapat").addEventListener("click",geri); }
+    else if(uni){ $("uniYaz").addEventListener("click",()=>uniYazdir(kay)); $("uniMsj").addEventListener("click",()=>mesajPenceresi(uniMesaj(kay))); $("uniKapat").addEventListener("click",geri); }
     else if(analiz){ const y = $("anYaz"); if(y){ y.textContent = "Koç raporu (PDF)"; y.className = "btn small"; y.addEventListener("click",()=>ankYazdir(kay)); } if($("anMsj")) $("anMsj").addEventListener("click",()=>mesajPenceresi(ankMesaj(kay))); if($("anKapat")) $("anKapat").addEventListener("click",geri); }
     else { if($("disYaz")){ $("disYaz").textContent = "Koç raporu (PDF)"; $("disYaz").addEventListener("click",()=>disYazdir(kay)); } if($("disTekrar")) $("disTekrar").addEventListener("click",()=>{ TAB = "discipline"; DIS.ekran = "giris"; renderAll(); }); if($("disKapat")) $("disKapat").addEventListener("click",geri); }
     return;
@@ -5214,13 +5224,15 @@ function renderDegerlendirme(){
   document.querySelectorAll("[data-dk]").forEach(b=>b.addEventListener("click",()=>{ DEG.kapsam = b.dataset.dk; renderDegerlendirme(); }));
   document.querySelectorAll("[data-dg]").forEach(b=>b.addEventListener("click",()=>{ const [t,sid,id] = b.dataset.dg.split("|"); DEG.ekran = "detay"; DEG.tur = t; DEG.sid = sid; DEG.id = id; DB.cur = sid; save(); renderAll(); }));
   document.querySelectorAll("[data-dgs]").forEach(b=>b.addEventListener("click",()=>armDel(b,()=>{ const [t,sid,id] = b.dataset.dgs.split("|"); const D = degKoleksiyon(t); D[sid] = (D[sid]||[]).filter(x=>x.id!==id); save(); renderDegerlendirme(); toast("Kayıt silindi"); })));
-  $("degYeni").addEventListener("click",()=>{ const bg = modalAc(`<h3 style="margin:0 0 10px">Yeni değerlendirme</h3><div class="actions" style="flex-direction:column;align-items:stretch;gap:8px"><button class="btn primary" id="dyA" type="button">Ders çalışma analizi · yüz yüze doldur</button><button class="btn" id="dyG" type="button">Ders çalışma analizi · öğrenciye gönder</button><button class="btn primary" id="dyU" type="button">Üniversite ve bölüm analizi · yüz yüze doldur</button><button class="btn" id="dyUG" type="button">Üniversite ve bölüm analizi · öğrenciye gönder</button><button class="btn" id="dyD" type="button">Çalışma disiplini analizi (22 madde)</button><button class="btn" id="dyX" type="button">Vazgeç</button></div>`);
+  $("degYeni").addEventListener("click",()=>{ const bg = modalAc(`<h3 style="margin:0 0 10px">Yeni değerlendirme</h3><div class="actions" style="flex-direction:column;align-items:stretch;gap:8px"><button class="btn primary" id="dyA" type="button">Ders çalışma analizi · yüz yüze doldur</button><button class="btn" id="dyG" type="button">Ders çalışma analizi · öğrenciye gönder</button><button class="btn primary" id="dyM" type="button">Akademik motivasyon analizi · yüz yüze doldur</button><button class="btn" id="dyMG" type="button">Akademik motivasyon analizi · öğrenciye gönder</button><button class="btn primary" id="dyU" type="button">Üniversite ve bölüm analizi · yüz yüze doldur</button><button class="btn" id="dyUG" type="button">Üniversite ve bölüm analizi · öğrenciye gönder</button><button class="btn" id="dyD" type="button">Çalışma disiplini analizi (22 madde)</button><button class="btn" id="dyX" type="button">Vazgeç</button></div>`);
     const q = x=>bg.querySelector("#"+x);
     q("dyX").addEventListener("click",()=>bg.remove());
     q("dyA").addEventListener("click",()=>{ bg.remove(); ANK.ekran = "form"; TAB = "analiz"; renderAll(); });
     q("dyG").addEventListener("click",()=>{ bg.remove(); onayHizliGonder("analiz"); });
     q("dyU").addEventListener("click",()=>{ bg.remove(); ANK.ekran = "uniform"; TAB = "analiz"; renderAll(); });
     q("dyUG").addEventListener("click",()=>{ bg.remove(); onayHizliGonder("uni"); });
+    q("dyM").addEventListener("click",()=>{ bg.remove(); ANK.ekran = "motform"; TAB = "analiz"; renderAll(); });
+    q("dyMG").addEventListener("click",()=>{ bg.remove(); onayHizliGonder("motiv"); });
     q("dyD").addEventListener("click",()=>{ bg.remove(); DIS.ekran = "giris"; TAB = "discipline"; renderAll(); }); });
 }
 
@@ -5555,6 +5567,167 @@ function renderCetele(){
     $("ctYaz").addEventListener("click",()=>{ r.koc = $("ctKoc").value.trim(); save(); cetYazdir(w, r); });
     $("ctSil").addEventListener("click",async()=>{ if(await onayAl("Bu haftanın çetelesi silinsin mi?")){ delete C.haf[w]; save(); renderCetele(); } });
   }
+}
+
+
+/* =====================================================================
+   v3.14: AKADEMİK MOTİVASYON KAYNAKLARI ANALİZİ
+   ===================================================================== */
+const MTV_MADDE = [
+ "Sınavda çıkmayacağını bilsem de merak ettiğim bir konuyu araştırdığım oluyor.",
+ "Ders çalışırken konunun kendisiyle ilgilendiğim anlar yaşıyorum.",
+ "Aklıma takılan bir dersi konusunu kendi başıma araştırıyorum.",
+ "Dersler bana tümüyle anlamsız geliyor; yalnızca sınav için okuyorum.",
+ "Bir konuyu \"artık yapabiliyorum\" diyene kadar üzerinde durmak bana iyi geliyor.",
+ "Yanlış yaptığım soruyu, doğrusunu anlayana kadar bırakmıyorum.",
+ "Zor bir soruyu çözebilmek, o dersten yüksek not almak kadar değerli geliyor.",
+ "Konuyu anlamak yerine sınavı geçecek kadarını öğrenmeyi tercih ediyorum.",
+ "Hedeflediğim bölüm, bugün yaptığım çalışmayı benim için anlamlı kılıyor.",
+ "Çalıştığım konuların hedefimle bağını kurabiliyorum.",
+ "Neden çalıştığımı kendime tek cümleyle açıklayabiliyorum.",
+ "Hedefim bana soyut geliyor; günlük çalışmamla bağını kuramıyorum.",
+ "Çalışmamın asıl nedeni ailemin beklentisini karşılamak.",
+ "Kimse sorup takip etmeyecek olsa çalışma isteğim büyük ölçüde biterdi.",
+ "Arkadaşlarımla karşılaştırılmak, çalışma nedenlerimin başında geliyor.",
+ "Kimse takip etmese de kendi belirlediğim programı sürdürürüm.",
+ "Çalışmamın büyük bölümü, kaybetme korkusuyla ilerliyor.",
+ "Kötü sonuç alma ihtimali çalışırken aklımdan çıkmıyor.",
+ "Zor bir konuyu, yapamıyor görünmemek için hiç denemediğim oluyor.",
+ "Planladığım çalışmayı tamamlamak, günümün iyi geçtiği hissini veriyor.",
+ "Sonucu ne olursa olsun, çalıştığım gün kendimi daha iyi hissediyorum.",
+ "Çalışırken zamanın nasıl geçtiğini fark etmediğim oturumlar oluyor."];
+const MTV_SAYFA = [{ad:"İlgi ve ustalaşma",a:1,b:8},{ad:"Hedef ve çevre beklentisi",a:9,b:16},{ad:"Kaygı ve süreçten alınan doyum",a:17,b:22}];
+const MTV_TERS = [4,8,12,16];
+const MTV_KAYNAK = [
+ {k:"merak", ad:"Merak ve ilgi", grup:"i", m:[1,2,3,4]},
+ {k:"ustal", ad:"Ustalaşma isteği", grup:"i", m:[5,6,7,8]},
+ {k:"hedef", ad:"Hedefle bağ", grup:"i", m:[9,10,11,12]},
+ {k:"doyum", ad:"Süreçten doyum", grup:"i", m:[20,21,22]},
+ {k:"cevre", ad:"Çevre beklentisi", grup:"c", m:[13,14,15,16]},
+ {k:"kaygi", ad:"Kaygı ve kaçınma", grup:"c", m:[17,18,19]}];
+const MTV_METIN = {
+ merak:{y:"Konunun kendisi seni çekiyor. Merak, zor dönemlerde çalışmayı sürdüren en dayanıklı kaynaklardan biridir.", d:"Konulara duyulan merak bugün çalışmanı çok taşımıyor. Bu bir eksiklik değil, desteklenebilecek bir alan.",
+  soru:["Bu dönem en az sıkıcı bulduğun konu hangisi, neden?","Bir konuda “bu neden böyle?” diye en son ne zaman düşündün?"], adim:"Haftada bir konu seç ve 10 dakika sınav dışı bir soruyla (neden, nerede kullanılır) ilgilen."},
+ ustal:{y:"Bir konuyu tam anlayana kadar üzerinde durmak seni taşıyor.", d:"Anlamaktan çok geçmeye yönelik bir çalışma öne çıkıyor. Ustalaşma hissi desteklenebilir.",
+  soru:["En son hangi konuyu “artık yapabiliyorum” diyerek bıraktın?","Yanlış yaptığın bir soruyu çözene kadar ne kadar sürdürüyorsun?"], adim:"Her gün bir yanlış soruyu seç ve çözümünü kendi cümlelerinle anlat."},
+ hedef:{y:"Hedefinle bugünkü çalışman arasındaki bağı kurabiliyorsun.", d:"Hedef ile günlük çalışma arasındaki bağ henüz net değil.",
+  soru:["Bugün çalıştığın konu, hedeflediğin bölümde nerede karşına çıkacak?","Neden çalıştığını tek cümleyle yazsan ne yazardın?"], adim:"Tek cümlelik “neden çalışıyorum” cümlesini yaz, çalışma masasının önüne as; haftalık plandaki her konunun hedefle bağını bir satırla ekle."},
+ doyum:{y:"Çalışmanın kendisi (planı bitirmek, akışa girmek) sana iyi geliyor.", d:"Çalışmadan alınan doyum henüz az. Süreç yük olarak yaşanıyor olabilir.",
+  soru:["Hangi çalışma anında kendini en iyi hissediyorsun?","Gün sonunda hangi küçük başarıyı fark ediyorsun?"], adim:"Her gün sonunda tamamladığın bir işi çeteleye ✓ olarak yaz."},
+ cevre:{y:"Ailenin beklentisi, takip edilmek ve karşılaştırma bugün çalışmanı taşıyor. Bu kötü bir şey değil; yalnızca motivasyonun bir kısmının dışarıdan geldiğini gösterir.", d:"Dış beklentilerin payı düşük. Çalışma isteği büyük ölçüde senin içinden geliyor.",
+  soru:["Kimse takip etmese hangi çalışmaları yine yapardın?","Beklenti seni hangi anlarda destekliyor, hangilerinde yoruyor?"], adim:"Ailenle haftada bir kısa “nasıl destek olabilirim?” konuşması yap; takip yerine kendi plan özetini kendin sun."},
+ kaygi:{y:"Kaybetme korkusu ve kötü sonuç ihtimali çalışmanda önemli yer tutuyor. Bu bir tanı değildir; çalışma düzeninde dikkat edilecek bir noktadır.", d:"Kaygı çalışmanda büyük pay almıyor.",
+  soru:["Çalışırken aklına en sık gelen “ya olmazsa” düşüncesi ne?","Denemekten kaçındığın bir konu var mı? Onu küçük bir adıma bölebilir miyiz?"], adim:"Zor bir konuyu 10 dakikalık deneme olarak planla; yanlışlar kayıt altına alınacak bir veri olsun."}};
+function mtvTemizle(a){
+  a = a||{}; const c = {}; const src = a.c||{};
+  for(let i=1;i<=22;i++){ const v = parseInt(src[i],10); if(v>=1 && v<=5) c[i] = v; }
+  return {sn: UNI_SINIF.indexOf(String(a.sn))>=0 ? String(a.sn) : "", c};
+}
+function mtvPuan(c,i){ const v = +c[i]; if(!v) return null; return MTV_TERS.indexOf(i)>=0 ? 6-v : v; }
+function mtvSeviye(grup, sk){
+  if(grup==="i") return sk>=70 ? "Bugün seni taşıyor" : sk>=50 ? "Kısmen taşıyor" : "Desteklenmeye açık";
+  return sk>=60 ? "Çalışmanda payı yüksek" : sk>=40 ? "Orta pay" : "Düşük pay";
+}
+function mtvHesap(a){
+  a = mtvTemizle(a); const c = a.c;
+  const S = MTV_KAYNAK.map(b=>{ const p = b.m.map(i=>mtvPuan(c,i)).filter(x=>x!==null); const o = p.length ? p.reduce((x,y)=>x+y,0)/p.length : null; const sk = o===null ? 0 : Math.round((o-1)/4*100);
+    return Object.assign({}, b, {skor:sk, seviye:mtvSeviye(b.grup, sk)}); });
+  const ic = S.filter(b=>b.grup==="i"), cv = S.filter(b=>b.grup==="c");
+  const ort = L=>L.length ? Math.round(L.reduce((x,b)=>x+b.skor,0)/L.length) : 0;
+  const icO = ort(ic), cvO = ort(cv), fark = icO-cvO;
+  const denge = fark>15 ? "İçten ağırlıklı" : fark<-15 ? "Çevre ve kaygı ağırlıklı" : "Karma";
+  const sirali = ic.slice().sort((x,y)=>y.skor-x.skor);
+  const tasiyan = sirali.slice(0,2);
+  const destek = sirali.slice().reverse().filter(b=>b.skor<70).slice(0,2);
+  return {S, ic, cv, icO, cvO, fark, denge, tasiyan, destek, sn:a.sn, c};
+}
+function mtvNeden(h){
+  const out = [];
+  h.tasiyan.slice(0,2).forEach(b=>{ let en = null; b.m.forEach(i=>{ const p = mtvPuan(h.c,i); if(p!==null && (en===null || p>en.p)) en = {i,p}; }); if(en) out.push({tur:"Taşıyan", ad:b.ad, madde:MTV_MADDE[en.i-1], cevap:UNI_LIKERT[h.c[en.i]-1]}); });
+  h.destek.slice(0,2).forEach(b=>{ let en = null; b.m.forEach(i=>{ const p = mtvPuan(h.c,i); if(p!==null && (en===null || p<en.p)) en = {i,p}; }); if(en) out.push({tur:"Desteklenmeye açık", ad:b.ad, madde:MTV_MADDE[en.i-1], cevap:UNI_LIKERT[h.c[en.i]-1]}); });
+  return out;
+}
+function mtvDengeYorum(h){
+  return h.denge==="İçten ağırlıklı" ? "Çalışma isteğin büyük ölçüde senin içinden geliyor; dışarıdan gelen beklenti ve kaygı daha küçük bir yer tutuyor."
+    : h.denge==="Çevre ve kaygı ağırlıklı" ? "Bugün çalışmanı taşıyan kaynaklar ağırlıkla dışarıdan (beklenti, takip) ve kaygıdan geliyor. Bu bir yargı değil; içten kaynakları güçlendirmek için bir başlangıç noktası."
+    : "İçten kaynaklar ile dışarıdan gelen kaynaklar yaklaşık dengede; ikisi de çalışmanı taşıyor.";
+}
+function mtvBilgiTaslak(k){
+  const s = stu(); const h = mtvHesap(k.a); const veli = s.veliAd ? s.veliAd+"," : "";
+  let m = "Merhaba "+veli+"\n"+s.ad+" ile “Akademik Motivasyon Kaynakları Analizi”ni birlikte inceledik. Bu analiz kimsenin “daha iyi öğrenci” olduğunu göstermez; çalışma isteğinin nereden geldiğini ve nerede desteğe açık olduğunu gösterir.\n\n";
+  m += "Çalışma isteğini bugün taşıyan kaynaklar: "+h.tasiyan.map(b=>b.ad).join(", ")+".\n";
+  if(h.destek.length) m += "Birlikte güçlendirmeyi planladığımız alan: "+h.destek.map(b=>b.ad).join(", ")+".\n";
+  m += "\nBu hafta için önerimiz:\n"+(h.destek[0]?"• "+MTV_METIN[h.destek[0].k].adim+"\n":"")+"• Evde destek olarak yargılamadan, “bugün ne çalıştın, nasıl hissettin?” diye sormanız yeterlidir.\n\n6–8 hafta sonra tekrar bakıp ilerlemeyi birlikte değerlendireceğiz.";
+  return m+"\n"+(s.koc||"");
+}
+function mtvKayitlar(){ const s = stu(); return (DB.motiv[s.id] = DB.motiv[s.id] || []); }
+function mtvSihirbaz(kap, bitti, opt){
+  opt = opt||{}; const A = {sn:(opt.ilk&&opt.ilk.sn)||"", c:{}}; let ad = 0;
+  const say = ()=>Object.keys(A.c).length;
+  const ciz = ()=>{
+    if(ad===0){
+      kap.innerHTML = `<div class="ank"><h2 class="ank-q">Akademik Motivasyon Kaynakları Analizi</h2><p class="ank-n">Maddeler çalışma isteğinin nereden geldiğini sorar; ne kadar çalıştığını değil. Doğru ya da yanlış cevap yok: hiçbir kaynak diğerinden “daha iyi öğrenci” anlamına gelmez. Sonuç, hangi kaynağın seni bugün taşıdığını ve hangisinin desteklenmeye açık olduğunu gösterir.</p>
+        <div class="field" style="margin:12px 0"><label for="mSn">Sınıf seviyen</label><select id="mSn"><option value="">Seçiniz</option>${UNI_SINIF.map(x=>`<option value="${x}"${A.sn===x?" selected":""}>${x==="Mezun"?"Mezun":x+". Sınıf"}</option>`).join("")}</select></div>
+        <p class="ank-n">Bu analiz bir tanı aracı değildir; çalışma düzenine dair bir öz değerlendirme ve yol haritasıdır. Telefon numarası istenmez.</p>
+        <div class="ank-btn"><span></span><button type="button" class="btn primary" id="mBasla" ${A.sn?"":"disabled"}>Analize başla</button></div></div>`;
+      kap.querySelector("#mSn").addEventListener("change",e=>{ A.sn = e.target.value; kap.querySelector("#mBasla").disabled = !A.sn; });
+      kap.querySelector("#mBasla").addEventListener("click",()=>{ if(!A.sn) return; ad = 1; ciz(); kap.scrollIntoView({block:"start"}); });
+      return;
+    }
+    const P = MTV_SAYFA[ad-1]; const idx = []; for(let i=P.a;i<=P.b;i++) idx.push(i); const son = ad===MTV_SAYFA.length;
+    kap.innerHTML = `<div class="ank"><div class="ank-bar" role="progressbar" aria-valuemin="0" aria-valuemax="22" aria-valuenow="${say()}"><i id="mBar" style="width:${Math.round(say()/22*100)}%"></i></div><div class="ank-say"><b>${esc(P.ad)}</b> · <span id="mSay">${say()}</span> / 22</div>
+      ${idx.map(i=>`<div class="uni-md" role="radiogroup" aria-labelledby="mm${i}"><p class="uni-q" id="mm${i}"><b>${i}.</b> ${esc(MTV_MADDE[i-1])}</p><div class="uni-lk">${[1,2,3,4,5].map(v=>`<button type="button" class="ank-o uni-o" role="radio" data-i="${i}" data-v="${v}" aria-checked="${A.c[i]===v}"><b>${v}</b><span>${UNI_LIKERT[v-1]}</span></button>`).join("")}</div></div>`).join("")}
+      <div class="ank-btn"><button type="button" class="btn" id="mGeri">‹ Geri</button><button type="button" class="btn primary" id="mIleri" disabled>${son?(opt.son||"Sonucumu göster"):"Devam Et ›"}</button></div></div>`;
+    const tam = ()=>idx.every(i=>A.c[i]); const ileri = kap.querySelector("#mIleri"); ileri.disabled = !tam();
+    kap.querySelectorAll(".uni-o").forEach(b=>b.addEventListener("click",()=>{
+      const i = +b.dataset.i, v = +b.dataset.v; A.c[i] = v;
+      b.closest(".uni-md").querySelectorAll(".uni-o").forEach(x=>x.setAttribute("aria-checked", +x.dataset.v===v?"true":"false"));
+      kap.querySelector("#mSay").textContent = say(); kap.querySelector("#mBar").style.width = Math.round(say()/22*100)+"%"; ileri.disabled = !tam(); }));
+    kap.querySelector("#mGeri").addEventListener("click",()=>{ ad--; ciz(); kap.scrollIntoView({block:"start"}); });
+    ileri.addEventListener("click",()=>{ if(ileri.disabled) return; if(!son){ ad++; ciz(); kap.scrollIntoView({block:"start"}); } else bitti(mtvTemizle(A)); });
+  };
+  ciz();
+}
+function mtvCubuk(b){ const renk = b.grup==="i" ? "var(--v1,#2f6690)" : "var(--v2,#b5651d)"; return `<div style="background:var(--line);border-radius:6px;height:10px;min-width:120px"><div style="width:${b.skor}%;height:10px;border-radius:6px;background:${renk}"></div></div>`; }
+function mtvSonucHtml(k){
+  const s = stu(); const h = mtvHesap(k.a); const nd = mtvNeden(h);
+  const kart = (t,v)=>`<div class="od-kart"><small>${t}</small><b>${v}</b></div>`;
+  const kaygiYuksek = h.S.find(b=>b.k==="kaygi").skor>=75;
+  return `<div class="box" style="max-width:920px"><div class="colhead" style="align-items:flex-start"><div><h2 style="margin:0 0 2px">Akademik motivasyon kaynakları · ${esc(s.ad)}</h2><p class="muted" style="margin:0">${new Date(k.ts).toLocaleDateString("tr-TR")} · ${k.kaynak==="link"?"öğrenci bağlantıyla doldurdu"+(k.ad?" ("+esc(k.ad)+")":""):"yüz yüze dolduruldu"} · ${esc(h.sn?(h.sn==="Mezun"?"Mezun":h.sn+". sınıf"):"")}</p></div>
+    <div class="actions" style="margin:0;flex-wrap:wrap"><button class="btn small" id="mtvYaz" type="button">Koç raporu (PDF)</button><button class="btn small" id="mtvMsj" type="button">Mesaj</button><button class="btn small" id="mtvKapat" type="button">Kapat</button></div></div>
+    <div class="od-ozet" style="margin-top:12px">${kart("Genel denge",esc(h.denge))}${kart("İçten kaynaklar",h.icO+" / 100")}${kart("Çevre ve kaygı",h.cvO+" / 100")}</div>
+    <p class="hint">${esc(mtvDengeYorum(h))}</p>
+    <h3 style="font-size:15px;margin:14px 0 4px">Kaynaklar</h3>
+    <div class="tscroll"><table class="stable"><thead><tr><th>Kaynak</th><th>Skor</th><th style="min-width:140px"></th><th>Durum</th></tr></thead><tbody>${h.S.map(b=>`<tr><td>${esc(b.ad)}${b.grup==="c"?' <span class="muted">(dışsal)</span>':""}</td><td>${b.skor}</td><td>${mtvCubuk(b)}</td><td>${esc(b.seviye)}</td></tr>`).join("")}</tbody></table></div>
+    <h3 style="font-size:15px;margin:14px 0 4px">Bugün seni en çok taşıyan kaynaklar</h3>
+    ${h.tasiyan.map(b=>`<div class="dk-satir"><div><div class="dk-ad">${esc(b.ad)} · ${b.skor}</div><div class="dk-alt">${esc(MTV_METIN[b.k].y)}</div></div></div>`).join("")}
+    ${h.destek.length?`<h3 style="font-size:15px;margin:14px 0 4px">Desteklenmeye açık kaynaklar</h3>${h.destek.map(b=>`<div class="dk-satir"><div><div class="dk-ad">${esc(b.ad)} · ${b.skor}</div><div class="dk-alt">${esc(MTV_METIN[b.k].d)}</div></div></div>`).join("")}`:`<p class="hint">İçten kaynakların dördü de bugün çalışmayı taşıyor görünüyor.</p>`}
+    <h3 style="font-size:15px;margin:14px 0 4px">Çevre ve kaygının çalışmadaki payı</h3>
+    ${h.cv.map(b=>`<div class="dk-satir"><div><div class="dk-ad">${esc(b.ad)} · ${b.skor} · ${esc(b.seviye)}</div><div class="dk-alt">${esc(b.skor>=60?MTV_METIN[b.k].y:(b.skor<40?MTV_METIN[b.k].d:"Bu kaynak çalışmada orta düzeyde pay alıyor."))}</div></div></div>`).join("")}
+    ${kaygiYuksek?`<p class="hint"><b>Koç notu:</b> Kaygı skoru yüksek. Bu bir tanı değildir; kaygı sürekli ve günlük yaşamı etkiliyorsa okulun rehberlik servisiyle görüşmek uygun olabilir.</p>`:""}
+    ${nd.length?`<h3 style="font-size:15px;margin:14px 0 4px">Bu sonuç nasıl kuruldu?</h3>${nd.map(n=>`<div class="box no" style="margin:6px 0"><b>${esc(n.ad)}</b> <span class="muted">(${esc(n.tur)})</span><p class="hint" style="margin:4px 0 0">«${esc(n.madde)}» maddesine «${esc(n.cevap)}» cevabı verdi.</p></div>`).join("")}`:""}
+    <h3 style="font-size:15px;margin:14px 0 4px">Koçluk görüşmesi için sorular</h3><ul class="plist">${h.destek.concat(h.tasiyan.slice(0,1)).slice(0,3).map(b=>MTV_METIN[b.k].soru.map(q=>`<li>${esc(q)}</li>`).join("")).join("")}</ul>
+    <h3 style="font-size:15px;margin:14px 0 4px">Bu hafta küçük adımlar</h3><ul class="plist">${h.destek.slice(0,2).map(b=>`<li><b>${esc(b.ad)}:</b> ${esc(MTV_METIN[b.k].adim)}</li>`).join("")||"<li>Bugün taşıyan kaynakları fark etmek için gün sonunda bir cümle yaz: “Bugün çalışırken en iyi hissettiğim an…”</li>"}</ul>
+    <h3 style="font-size:15px;margin:14px 0 4px">Ne zaman tekrar ölçmeli?</h3><p class="hint">6–8 hafta sonra. Motivasyon kaynakları günlerle değil haftalarla değişir; küçük adımların etkisi bu sürede görünür. Karşılaştırırken tek bir skora değil, “desteklenmeye açık” kaynak sayısına ve genel dengeye bakın.</p>
+    <p class="hint" style="margin-top:10px">Bu analiz bir tanı aracı değildir; öğrencinin kendi beyanına dayanan bir öz değerlendirme ve yol haritasıdır. Hiçbir kaynak diğerinden “daha iyi öğrenci” anlamına gelmez.</p></div>`;
+}
+function mtvYazdir(k){
+  const s = stu(); const h = mtvHesap(k.a); const nd = mtvNeden(h); const tarih = new Date(k.ts).toISOString().slice(0,10);
+  doPrint(`<div class="pg">${pHead("Akademik Motivasyon Kaynakları Analizi", trDate(tarih))}
+    <div class="ps"><h2>Genel görünüm</h2><table class="pt"><tr><th style="width:30%">Sınıf</th><td>${esc(h.sn==="Mezun"?"Mezun":(h.sn?h.sn+". sınıf":"—"))}</td></tr><tr><th>Genel denge</th><td><b>${esc(h.denge)}</b> — ${esc(mtvDengeYorum(h))}</td></tr><tr><th>İçten kaynaklar</th><td>${h.icO} / 100</td></tr><tr><th>Çevre ve kaygı</th><td>${h.cvO} / 100</td></tr></table></div>
+    <div class="ps"><h2>Kaynaklar</h2><table class="pt"><thead><tr><th>Kaynak</th><th style="width:12%">Skor</th><th style="width:30%">Durum</th></tr></thead><tbody>${h.S.map(b=>`<tr><td>${esc(b.ad)}</td><td>${b.skor}</td><td>${esc(b.seviye)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="ps"><h2>Bugün taşıyan kaynaklar</h2><ul class="plist">${h.tasiyan.map(b=>`<li><b>${esc(b.ad)}:</b> ${esc(MTV_METIN[b.k].y)}</li>`).join("")}</ul></div>
+    ${h.destek.length?`<div class="ps"><h2>Desteklenmeye açık kaynaklar</h2><ul class="plist">${h.destek.map(b=>`<li><b>${esc(b.ad)}:</b> ${esc(MTV_METIN[b.k].d)}</li>`).join("")}</ul></div>`:""}
+    ${nd.length?`<div class="ps"><h2>Bu sonuç nasıl kuruldu?</h2>${nd.map(n=>`<p><b>${esc(n.ad)}</b> (${esc(n.tur)}) — «${esc(n.madde)}» maddesine «${esc(n.cevap)}» cevabı.</p>`).join("")}</div>`:""}
+    <div class="ps"><h2>Koçluk görüşmesi için sorular</h2><ul class="plist">${h.destek.concat(h.tasiyan.slice(0,1)).slice(0,3).map(b=>MTV_METIN[b.k].soru.map(q=>`<li>${esc(q)}</li>`).join("")).join("")}</ul></div>
+    <div class="ps"><h2>Bu hafta küçük adımlar</h2><ul class="plist">${h.destek.slice(0,2).map(b=>`<li><b>${esc(b.ad)}:</b> ${esc(MTV_METIN[b.k].adim)}</li>`).join("")||"<li>Gün sonunda bir cümle yaz: “Bugün çalışırken en iyi hissettiğim an…”</li>"}</ul></div>
+    <div class="ps"><h2>Ne zaman tekrar ölçmeli?</h2><p>6–8 hafta sonra; tek bir skora değil, desteklenmeye açık kaynak sayısına ve genel dengeye bakılır.</p></div>
+    <div class="pbox" style="font-size:9pt">Bu analiz bir tanı aracı değildir; öğrencinin kendi beyanına dayanan bir öz değerlendirme ve yol haritasıdır. Hiçbir kaynak diğerinden “daha iyi öğrenci” anlamına gelmez.</div>
+    <div class="sign"><div>Öğrenci</div><div>Veli</div><div>Koç</div></div>${pFoot()}</div>`, "portrait");
+}
+function mtvMesaj(k){
+  const s = stu(); const h = mtvHesap(k.a);
+  return "Merhaba "+(s.veliAd?s.veliAd+",":"")+"\n"+s.ad+" için Akademik Motivasyon Kaynakları Analizi tamamlandı.\n• Çalışma isteğini bugün taşıyan kaynaklar: "+h.tasiyan.map(b=>b.ad).join(", ")+"\n"+(h.destek.length?"• Birlikte güçlendireceğimiz alan: "+h.destek.map(b=>b.ad).join(", ")+"\n":"")+"• Sonraki adımları koçluk görüşmesinde birlikte planlayacağız.\n"+(s.koc||"");
 }
 
 /* ---------- Faz D-1: Analiz ekranı (portföy › Analiz) — SVG/HTML grafikler, internetsiz ---------- */
@@ -6026,13 +6199,13 @@ async function onayAc(metin){
   const ds = new DecompressionStream("deflate-raw"); const w = ds.writable.getWriter(); w.write(b64uToBytes(m[2])); w.close();
   const buf = await new Response(ds.readable).arrayBuffer(); return JSON.parse(new TextDecoder().decode(buf));
 }
-const ONAY_VERI = {olcek:1, ozdeg:1, tanima:1, kayit:1, ses:1, fd:1, analiz:1, uni:1, cetele:1};
+const ONAY_VERI = {olcek:1, ozdeg:1, tanima:1, kayit:1, ses:1, fd:1, analiz:1, uni:1, cetele:1, motiv:1};
 const ONAY_ALAN = {
   tanima:[["ogrenme","Öğrenme biçimi (baskın)","sec",OGRENME_STILI],["iletisim","Tercih edilen iletişim şekli","sec",KANAL],["beklenti","Süreçten beklentiniz","m"],["guclu","Güçlü yönleri","m"],["zayif","Zorlandığı / gelişime açık alanlar","m"],["ihtiyac","Sizce ihtiyaç duyduğu destekler","m"],["aile","Ailenin katılım tercihi ve beklentisi","m"],["diger","Eklemek istedikleriniz","m"]],
   kayit:[["dogum","Doğum tarihi","date"],["tel","Öğrenci telefonu","tel"],["okul","Okul","t"],["ilce","İlçe","t"],["veliAd","Veli adı soyadı","t"],["veliTel","Veli telefonu","tel"],["aile","Aile / kardeş etiketi (isteğe bağlı)","t"]],
   ses:[["gurur","Bu dönem en çok neyle gurur duyuyorum?","m"],["iyi","Bana en çok ne iyi geldi?","m"],["zor","Zorlandığım ya da desteğe ihtiyaç duyduğum konu","m"],["istek","Gelecek dönem için isteğim","m"]]
 };
-const ONAY_AD = {tanima:"Ön görüşme ve tanıma formu", kayit:"Öğrenci kayıt bilgileri", ozdeg:"Öğrenci öz değerlendirme ve çalışma tutumu anketi", ses:"Öğrencinin sesi", olcek:"Ölçek", analiz:"Ders çalışma programı analizi", uni:"Üniversite ve bölüm karar analizi", cetele:"YKS haftalık çetele"};
+const ONAY_AD = {tanima:"Ön görüşme ve tanıma formu", kayit:"Öğrenci kayıt bilgileri", ozdeg:"Öğrenci öz değerlendirme ve çalışma tutumu anketi", ses:"Öğrencinin sesi", olcek:"Ölçek", analiz:"Ders çalışma programı analizi", uni:"Üniversite ve bölüm karar analizi", cetele:"YKS haftalık çetele", motiv:"Akademik motivasyon kaynakları analizi"};
 function onayFormAd(t){ if(t.f==="fd") return (t.fb||ONAY_FD[t.fd]||"Form")+(t.fd==="haftalik_odev"&&t.w?" – "+t.w+". hafta":""); return t.f==="olcek" ? ((OLCEKLER[t.o]||{}).ad||"Ölçek") : (ONAY_AD[t.f]||"Form"); }
 
 function onayFormBaslat(t, root, css, ust){
@@ -6057,6 +6230,9 @@ function onayFormBaslat(t, root, css, ust){
   } else if(t.f==="uni"){
     giris = "Bu analiz hangi üniversiteyi yazacağını söylemez; kararında nelere ağırlık verdiğini ve nerede bilgi toplaman gerektiğini görmene yardım eder. Doğru ya da yanlış cevap yoktur.";
     govde = '<div id="ankKap"></div>';
+  } else if(t.f==="motiv"){
+    giris = "Maddeler çalışma isteğinin nereden geldiğini sorar; ne kadar çalıştığını değil. Doğru ya da yanlış cevap yok: hiçbir kaynak diğerinden daha iyi öğrenci anlamına gelmez.";
+    govde = '<div id="ankKap"></div>';
   } else if(t.f==="cetele"){
     giris = "Bu haftanın çalışmalarını işaretle. Boş bıraktığın sayı 0 sayılır. Yalnızca koçuna iletilir.";
     govde = '<div id="ankKap"></div>';
@@ -6074,7 +6250,7 @@ function onayFormBaslat(t, root, css, ust){
   const topla = ()=>{
     if(fdS) return {v:ofFdTopla(root,fdS)};
     if(sorular) return {v:sorular.map((m,i)=>{ const c = root.querySelector('input[name="q'+i+'"]:checked'); return c?c.value:"0"; }).join("")};
-    if(t.f==="analiz"||t.f==="uni"||t.f==="cetele") return {v:ANK_A||{}};
+    if(t.f==="analiz"||t.f==="uni"||t.f==="cetele"||t.f==="motiv") return {v:ANK_A||{}};
     if(t.f==="ses"){ const v = {}; root.querySelectorAll("[data-of]").forEach(e=>{ v[e.dataset.of] = e.value.trim(); }); v.a = Array.from(root.querySelectorAll("[data-ofa]")).map(e=>e.value||"0").join(""); return {v}; }
     const v = {}; root.querySelectorAll("[data-of]").forEach(e=>{ if(e.value.trim()) v[e.dataset.of] = e.value.trim(); }); return {v};
   };
@@ -6082,15 +6258,15 @@ function onayFormBaslat(t, root, css, ust){
     const {v} = topla(); let tam = true, d = "";
     if(fdS){ tam = ofFdDolu(v); d = tam?"":"En az bir alanı doldurun"; }
     else if(sorular){ const n = v.split("").filter(x=>x!=="0").length; tam = n===sorular.length; d = n+" / "+sorular.length+" madde işaretlendi"; }
-    else if(t.f==="analiz"||t.f==="uni"||t.f==="cetele"){ tam = !!ANK_A; d = tam?"":"Önce soruları tamamlayın"; }
+    else if(t.f==="analiz"||t.f==="uni"||t.f==="cetele"||t.f==="motiv"){ tam = !!ANK_A; d = tam?"":"Önce soruları tamamlayın"; }
     else if(t.f==="ses"){ tam = ["gurur","iyi","zor","istek"].some(k=>v[k]) ; d = tam?"":"En az bir soruyu yanıtlayın"; }
     else { tam = Object.keys(v).length>0; d = tam?"":"En az bir alanı doldurun"; }
     tam = tam && $("ofAd").value.trim().length>=3; $("ofGo").disabled = !tam; $("ofDurum").textContent = d;
   };
   if(fdS) ofFdBagla(root,fdS);
   let ANK_A = null;
-  if(t.f==="analiz"||t.f==="uni"||t.f==="cetele"){ const kart = $("ofAd").closest(".on-kart"); kart.style.display = "none";
-    (t.f==="uni"?uniSihirbaz:t.f==="cetele"?((k,b)=>cetFormKur(k,t.ct,null,b,{})):ankSihirbaz)($("ankKap"), A=>{ ANK_A = A; $("ankKap").innerHTML = '<div class="on-kart"><h2>Hepsi tamam ✓</h2><p class="hint">Son adım: adını yazıp Gönder’e bas.</p></div>'; kart.style.display = ""; kontrol(); kart.scrollIntoView({behavior:"smooth",block:"start"}); }, {}); }
+  if(t.f==="analiz"||t.f==="uni"||t.f==="cetele"||t.f==="motiv"){ const kart = $("ofAd").closest(".on-kart"); kart.style.display = "none";
+    (t.f==="motiv"?mtvSihirbaz:t.f==="uni"?uniSihirbaz:t.f==="cetele"?((k,b)=>cetFormKur(k,t.ct,null,b,{})):ankSihirbaz)($("ankKap"), A=>{ ANK_A = A; $("ankKap").innerHTML = '<div class="on-kart"><h2>Hepsi tamam ✓</h2><p class="hint">Son adım: adını yazıp Gönder’e bas.</p></div>'; kart.style.display = ""; kontrol(); kart.scrollIntoView({behavior:"smooth",block:"start"}); }, {}); }
   root.addEventListener("input",kontrol); root.addEventListener("change",kontrol); kontrol();
   const sonuc = (kod, yeni)=>{
     const msg = "'"+baslik+"' formunu doldurdum. Cevap linki (dokununca koçunuzun paneli açılır):\n"+location.href.replace(/#.*$/,"")+"#cevap="+kod;
@@ -6413,6 +6589,7 @@ function onayMesaj(r){
   if(r.form==="taah") return "Merhaba "+s.ad+", öğrenci taahhüdünü aşağıdaki bağlantıdan okuyup onaylayabilirsin (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
   const ad = onayFormAd(r.yuk);
   if(r.form==="fd") return (r.yuk.fd==="lgs_hedef" ? "Merhaba, "+s.ad+" ile birlikte" : "Merhaba "+s.ad+",")+" '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilir"+(r.yuk.fd==="lgs_hedef"?"siniz":"sin")+". Telefondan açıp doldurman yeterli. (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
+  if(r.form==="motiv") return "Merhaba "+s.ad+", çalışma isteğinin nereden geldiğini görmek için kısa bir analiz hazırladım (yaklaşık 5 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
   if(r.form==="cetele") return "Merhaba "+s.ad+", bu haftanın çetelesini doldurabilirsin (yaklaşık 3 dakika, telefondan). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
   if(r.form==="uni") return "Merhaba "+s.ad+", üniversite ve bölüm tercihine hazırlanırken nelere ağırlık verdiğini görmek için kısa bir analiz hazırladım (yaklaşık 8 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
   if(r.form==="analiz") return "Merhaba "+s.ad+", sana özel bir çalışma planı hazırlayabilmem için kısa bir analiz hazırladım (yaklaşık 3 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
@@ -6492,6 +6669,7 @@ function onayOnizleme(r, x){
   if(f==="olcek"){ const {o,c,n} = onayCevap(r,x); const sn = olcekSonuc(o,c);
     return baslik+"<br>"+n+" / "+o.maddeler.length+" madde yanıtlandı.<br>"+sn.map(b=>esc(b.ad)+": "+(b.ort===null?"–":anSay(b.ort)+" ("+esc(b.yorum)+")")).join("<br>")+"<br><i>Bu sonuç yalnızca sizde kalır; ölçek kaydı olarak eklenecek.</i>"; }
   if(f==="fd"){ const sp = fdSpec(r.yuk.fd); if(!sp) return baslik+"<br>Form şablonu bulunamadı."; const uy = (r.yuk.sn && stu().sinif!==r.yuk.sn) ? "<br><i>Uyarı: öğrencinin sınıfı bağlantı gönderildiğinden beri değişmiş; satırlar yeni şablona göre eşleşir.</i>" : ""; return baslik+(r.yuk.w&&sp.hafta?" · "+esc(r.yuk.w)+". hafta":"")+"<br><br>"+fdOnayOzet(sp, x.v||{})+uy+"<br><br><i>Formlar sekmesine tarihli kayıt olarak eklenecek.</i>"; }
+  if(f==="motiv"){ const a = mtvTemizle(x.v||{}); const h = mtvHesap(a); return baslik+"<br>Sınıf: "+esc(a.sn||"—")+"<br>"+Object.keys(a.c).length+" / 22 madde cevaplandı<br>Bugün en çok taşıyan: "+esc(h.tasiyan.map(b=>b.ad).join(", "))+"<br>Genel denge: "+esc(h.denge)+"<br><i>Portföye eklenecek; sonuç ve rapor “Sonuçlar ve raporlar”da hazırlanır.</i>"; }
   if(f==="cetele"){ const v2 = cetTemizle(x.v||{}); const ct = {h:cetHedef(stu())}; const u = cetUyum(v2, ct); return baslik+"<br>Hafta: "+esc(cetEtiket(v2.w))+"<br>Uyum: %"+u.yuzde+(v2.mot?" · motivasyon "+v2.mot+"/5":"")+"<br><i>Çeteleye işlenecek; yorum ve mesaj “YKS çetele”de hazırlanır.</i>"; }
   if(f==="uni"){ const a = uniTemizle(x.v||{}); const h = uniHesap(a); return baslik+"<br>Sınıf: "+esc(a.sn||"—")+(a.hb?"<br>Hedef: "+esc(a.hb):"")+"<br>"+Object.keys(a.c).length+" / 28 madde cevaplandı<br>Öne çıkan ölçütler: "+esc(h.oncelik.map(b=>b.ad).join(", "))+"<br><i>Portföye eklenecek; sonuç ve rapor “Değerlendirme”de hazırlanır.</i>"; }
   if(f==="analiz"){ return baslik+"<br>"+ankOzetSatirlar(x.v||{}).map(esc).join("<br>")+"<br><i>Portföye eklenecek; plan ve rapor “Öğrenci analiz merkezi”nde hazırlanır.</i>"; }
@@ -6516,6 +6694,7 @@ function onayUygula(r, x){
     Object.keys(harita).forEach(k=>{ if(!v[k]) return; const h = harita[k]; if(k==="ogrenme"||k==="iletisim"){ o[h] = v[k]; } else { o[h] = (o[h]?o[h]+"\n":"")+"[Veli formu] "+v[k]; } }); return; }
   if(f==="kayit"){ ONAY_ALAN.kayit.forEach(([k])=>{ if(v[k]) s[k] = v[k]; }); return; }
   if(f==="ses"){ onaySesUygula(x); return; }
+  if(f==="motiv"){ mtvKayitlar().push({id:yeniId("mt"), ts:Date.parse(x.z||"")||Date.now(), kaynak:"link", ad:x.ad||"", a:mtvTemizle(v)}); return; }
   if(f==="cetele"){ const v2 = cetTemizle(v); const C = cetVeri(); const o = C.haf[v2.w] || {}; C.haf[v2.w] = Object.assign({}, o, v2, {ts:Date.parse(x.z||"")||Date.now(), kaynak:"link", ad:x.ad||"", koc:o.koc||""}); return; }
   if(f==="uni"){ uniKayitlar().push({id:yeniId("un"), ts:Date.parse(x.z||"")||Date.now(), kaynak:"link", ad:x.ad||"", a:uniTemizle(v)}); return; }
   if(f==="analiz"){ ankKayitlar().push({id:yeniId("an"), ts:Date.parse(x.z||"")||Date.now(), kaynak:"link", ad:x.ad||"", a:Object.assign({}, v)}); return; }
@@ -6567,7 +6746,7 @@ const GN_SABLON = {
 };
 function gnFormListe(){
   const L = [{k:"soz",ad:"Koçluk sözleşmesi ve veli onayı",f:"soz",grup:"Veliye",kime:"v"},{k:"tanima",ad:"Ön görüşme ve tanıma formu",f:"tanima",grup:"Veliye",kime:"v"},{k:"kayit",ad:"Öğrenci kayıt bilgileri",f:"kayit",grup:"Veliye",kime:"v"},
-    {k:"taah",ad:"Öğrenci taahhüdü",f:"taah",grup:"Öğrenciye",kime:"o"},{k:"ozdeg",ad:"Öz değerlendirme anketi",f:"ozdeg",grup:"Öğrenciye",kime:"o"},{k:"ses",ad:"Öğrencinin sesi",f:"ses",grup:"Öğrenciye",kime:"o"},{k:"analiz",ad:"Ders çalışma programı analizi",f:"analiz",grup:"Öğrenciye",kime:"o"},{k:"uni",ad:"Üniversite ve bölüm karar analizi",f:"uni",grup:"Öğrenciye",kime:"o"},{k:"cetele",ad:"YKS haftalık çetele",f:"cetele",grup:"Öğrenciye",kime:"o"}];
+    {k:"taah",ad:"Öğrenci taahhüdü",f:"taah",grup:"Öğrenciye",kime:"o"},{k:"ozdeg",ad:"Öz değerlendirme anketi",f:"ozdeg",grup:"Öğrenciye",kime:"o"},{k:"ses",ad:"Öğrencinin sesi",f:"ses",grup:"Öğrenciye",kime:"o"},{k:"analiz",ad:"Ders çalışma programı analizi",f:"analiz",grup:"Öğrenciye",kime:"o"},{k:"uni",ad:"Üniversite ve bölüm karar analizi",f:"uni",grup:"Öğrenciye",kime:"o"},{k:"cetele",ad:"YKS haftalık çetele",f:"cetele",grup:"Öğrenciye",kime:"o"},{k:"motiv",ad:"Akademik motivasyon kaynakları analizi",f:"motiv",grup:"Öğrenciye",kime:"o"}];
   Object.keys(OLCEKLER).forEach(id=>L.push({k:"olcek:"+id,ad:"Ölçek: "+OLCEKLER[id].ad,f:"olcek",ek:id,grup:"Öğrenciye",kime:"o"}));
   onayFdListe().forEach(x=>L.push({k:"fd:"+x.id,ad:x.ad,f:"fd",ek:x.id,grup:"Çalışma ve planlama formları",kime:(x.id==="lgs_hedef"||x.id==="veli_geri")?"v":"o"}));
   return L;
@@ -6677,7 +6856,7 @@ async function cevapIsle(){
 }
 function onayHizliListe(){
   const L = [["Bu haftanın ödev takibi","fd","haftalik_odev","Öğrenciye"],
-    ["Öğrenci taahhüdü","taah",undefined,"Öğrenciye"],["Öz değerlendirme anketi","ozdeg",undefined,"Öğrenciye"],["Öğrencinin sesi","ses",undefined,"Öğrenciye"],["Ders çalışma programı analizi","analiz",undefined,"Öğrenciye"],["Üniversite ve bölüm karar analizi","uni",undefined,"Öğrenciye"],["YKS haftalık çetele","cetele",undefined,"Öğrenciye"]];
+    ["Öğrenci taahhüdü","taah",undefined,"Öğrenciye"],["Öz değerlendirme anketi","ozdeg",undefined,"Öğrenciye"],["Öğrencinin sesi","ses",undefined,"Öğrenciye"],["Ders çalışma programı analizi","analiz",undefined,"Öğrenciye"],["Üniversite ve bölüm karar analizi","uni",undefined,"Öğrenciye"],["YKS haftalık çetele","cetele",undefined,"Öğrenciye"],["Akademik motivasyon kaynakları analizi","motiv",undefined,"Öğrenciye"]];
   Object.keys(OLCEKLER).forEach(k=>L.push(["Ölçek: "+OLCEKLER[k].ad,"olcek",k,"Öğrenciye"]));
   L.unshift(["Koçluk sözleşmesi ve veli onayı","soz",undefined,"Veliye"],["Ön görüşme ve tanıma formu","tanima",undefined,"Veliye"],["Öğrenci kayıt bilgileri","kayit",undefined,"Veliye"]);
   onayFdListe().filter(x=>x.id!=="haftalik_odev").forEach(x=>L.push([x.ad,"fd",x.id,"Çalışma ve planlama formları"]));
@@ -6782,6 +6961,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.14.0", t:"31 Ekim 2026", n:"Yeni analiz: Akademik Motivasyon Kaynakları Analizi (22 madde, 3 sayfa, 1–5 ölçek; maddeler Müfredat Akademi sayfasından). 6 kaynak: merak ve ilgi, ustalaşma isteği, hedefle bağ, süreçten doyum (içten); çevre beklentisi, kaygı ve kaçınma (dışsal). Ters maddeler otomatik işlenir. Sonuçlar ve raporlar’da kaynak skorları, genel denge (içten ağırlıklı / karma / çevre ve kaygı ağırlıklı), bugün taşıyan ve desteklenmeye açık kaynaklar, “bu sonuç nasıl kuruldu”, koçluk görüşmesi soruları, küçük adımlar, 6–8 hafta sonra tekrar ölçüm; koç raporu (PDF) ve yüzdesiz öğrenci/veli bilgilendirme raporu. Öğrenci sonucu görmez. Analizler kütüphanesine kart eklendi."},
   {v:"3.13.0", t:"31 Ekim 2026", n:"Menü sadeleştirildi: 17 sekme ve 7 grup yerine 6 başlık — Bugün, Öğrenci, Program ve takip, Gönder ve değerlendir, Ödemeler, Ayarlar ve yardım. Alt sayfalar üstteki çubukta konu etiketleriyle (Dosya, Görüşme, Plan, Takip, Gönder, Cevaplar) gruplanır; hiçbir özellik silinmedi. Sayfa adları yenilendi (Haftalık takip, Gelen cevaplar, Sonuçlar ve raporlar…). Yeni: hızlı arama (🔍 Ara ya da Ctrl+K; sayfa, öğrenci ve hızlı işlem arar, eski adlarla da bulur), yan menüde son açılan 3 sayfa, telefonda alt menü (Bugün, Öğrenci, Program, Gönder, Daha fazla)."},
   {v:"3.12.0", t:"31 Ekim 2026", n:"YKS çetele (Görüşme ve takip › Uygulama takibi › YKS çetele): haftalık çalışma çizelgesi. Kalemler: konu bitirme (yıllık plandaki o haftanın konuları: yapmadım/yarım/bitti), konu tarama testi, branş denemesi, genel deneme, paragraf, kitap okuma, yanlış defteri, video ders, uyku ve motivasyon. Öğrenci bağlantıyla doldurur ya da yüz yüze girilir; cevap Gelen kutusuna düşer. Öğrenci başına haftalık hedefler, plana uyum yüzdesi (uyku ve motivasyon yüzdeye girmez), koç yorumu, son 6 hafta grafiği, mesaj ve PDF. Bugün ekranında “bu hafta çetelesi girilmeyenler” kartı. Mevcut haftalık uygulama takibinden ayrıdır."},
   {v:"3.11.0", t:"31 Ekim 2026", n:"Yeni analiz: Üniversite ve Bölüm Karar Analizi (28 madde, 4 sayfa, 1–5 ölçek). Öğrenciye bağlantıyla gönderilir ya da yüz yüze doldurulur; öğrenci sonucu görmez. Değerlendirme’de 9 başlıkta skor, karar öncelikleri, önem–bilgi karar matrisi, netleşmeyen noktalar, “bu sonuç nasıl kuruldu”, araştırma listesi (hedef bölüm yazıldıysa ona özel), bu haftanın adımları ve 90 gün sonra tekrar ölçüm önerisi; koç raporu (PDF) ve yüzdesiz öğrenci/veli bilgilendirme raporu. Öğrenci analiz merkezi artık analiz kütüphanesi: her analiz için gönder / yüz yüze doldur; yeni analizler zamanla eklenir."},
@@ -6992,8 +7172,8 @@ async function yedekDosyaIndir(){
 }
 function dosyaOku(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsText(f); }); }
 /* ---------- v3.6: Yedek ve güvenlik merkezi ---------- */
-const OGR_KOL = ["takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz","uni","cetele"];
-const KOL_AD = {takip:"Haftalık uygulama takibi",denetim:"Deneme / denetim",gorusme:"Veli görüşmeleri",kariyer:"Kariyer planlama",odeme:"Ödemeler",okuma:"Okuma takibi",seans:"Seans notları",sozlesme:"Koçluk sözleşmesi",tanima:"Tanıma formu",taahhut:"Taahhütname",olcek:"Ölçekler",fkayit:"Form kayıtları",portfoy:"Portföy",ozel:"Özel ders",karne:"Gelişim karnesi",onay:"Dijital onaylar",discipline:"Çalışma disiplini analizi",analiz:"Ders çalışma programı analizi",uni:"Üniversite ve bölüm karar analizi",cetele:"YKS çetele",weeks:"Haftalık planlar",ajanda:"Ajanda"};
+const OGR_KOL = ["takip","denetim","gorusme","kariyer","odeme","okuma","seans","sozlesme","tanima","taahhut","olcek","fkayit","portfoy","ozel","karne","onay","discipline","analiz","uni","cetele","motiv"];
+const KOL_AD = {takip:"Haftalık uygulama takibi",denetim:"Deneme / denetim",gorusme:"Veli görüşmeleri",kariyer:"Kariyer planlama",odeme:"Ödemeler",okuma:"Okuma takibi",seans:"Seans notları",sozlesme:"Koçluk sözleşmesi",tanima:"Tanıma formu",taahhut:"Taahhütname",olcek:"Ölçekler",fkayit:"Form kayıtları",portfoy:"Portföy",ozel:"Özel ders",karne:"Gelişim karnesi",onay:"Dijital onaylar",discipline:"Çalışma disiplini analizi",analiz:"Ders çalışma programı analizi",uni:"Üniversite ve bölüm karar analizi",cetele:"YKS çetele",motiv:"Akademik motivasyon kaynakları analizi",weeks:"Haftalık planlar",ajanda:"Ajanda"};
 function kopya(x){ return JSON.parse(JSON.stringify(x)); }
 function ogrVeriCikar(db, sid){
   const v = {}; OGR_KOL.forEach(k=>{ if(db[k] && db[k][sid]!==undefined) v[k] = kopya(db[k][sid]); });
