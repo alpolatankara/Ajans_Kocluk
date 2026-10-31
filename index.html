@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<script>(function(){try{if(/^#onay=/.test(location.hash)){window.__ONAY=1;document.documentElement.classList.add("onay-mod");}else if(/^#cevap=/.test(location.hash)){window.__CEVAP=location.hash.slice(7);}}catch(e){}})();</script>
+<script>(function(){try{if(/^#(?:onay|o|p)=/.test(location.hash)){window.__ONAY=1;document.documentElement.classList.add("onay-mod");}else if(/^#cevap=/.test(location.hash)){window.__CEVAP=location.hash.slice(7);}}catch(e){}})();</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,6 +9,19 @@
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#1F5B45">
+<meta name="description" content="Koçunuzun hazırladığı formu ya da onay sayfasını açmak için dokunun.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ajans Koçluk">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="Ajans Koçluk ve Kariyer Planlama">
+<meta property="og:description" content="Koçunuzun hazırladığı formu ya da onay sayfasını açmak için dokunun.">
+<meta property="og:url" content="https://alpolatankara.github.io/Ajans_Kocluk/">
+<meta property="og:image" content="https://alpolatankara.github.io/Ajans_Kocluk/icon-512.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Ajans Koçluk">
+<meta name="twitter:card" content="summary">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -6098,6 +6111,56 @@ async function onayHash(t){
 }
 function onayTel(t){ let d = String(t||"").replace(/\D/g,""); if(!d) return ""; if(d.indexOf("00")===0) d = d.slice(2); else if(d.charAt(0)==="0") d = "90"+d.slice(1); else if(d.length===10) d = "90"+d; return d; }
 function onayWa(tel,msg){ return "https://wa.me/"+onayTel(tel)+"?text="+encodeURIComponent(msg); }
+/* v3.2: kısa bağlantı. Yük, kısa alanlara dökülür; eski #onay= bağlantıları aynen açılmaya devam eder. */
+const ONAY_FK = {soz:"s",taah:"t",tanima:"n",kayit:"k",ozdeg:"z",ses:"e",olcek:"o",analiz:"a",uni:"u",cetele:"c",motiv:"m",fd:"f"};
+const ONAY_GS = "https://script.google.com/macros/s/";
+const ONAY_SURE = {motiv:5, uni:8, analiz:3, cetele:3};
+function onayEs(s){ return String(s).replace(/[^A-Za-z0-9.\-]/gu, ch=> ch===" " ? "_" : (ch.charCodeAt(0)<128 ? "%"+("0"+ch.charCodeAt(0).toString(16)).slice(-2).toUpperCase() : encodeURIComponent(ch))); }
+function onayHexB(h){ const u = new Uint8Array(h.length/2); for(let i=0;i<u.length;i++) u[i] = parseInt(h.substr(i*2,2),16); return b64uBytes(u); }
+function onayBHex(b){ return Array.from(b64uToBytes(b)).map(x=>("0"+x.toString(16)).slice(-2)).join(""); }
+function onayEsit(a,b){ const n = o=>JSON.stringify(Object.keys(o||{}).filter(k=>o[k]!=="" && o[k]!==undefined).sort().map(k=>[k,o[k]])); return n(a)===n(b); }
+function onayLinkCoz(h){
+  const m = /^#(onay|o|p)=([^]*)$/.exec(h||""); if(!m) return null;
+  if(m[1]==="onay") return JSON.parse(b64uD(m[2]));
+  const F = m[1]==="o" ? m[2].split("~").map(a=>decodeURIComponent(a.replace(/_/g," "))) : b64uD(m[2]).split("\u0001");
+  const g = n=>F[n]||""; const ters = {}; Object.keys(ONAY_FK).forEach(a=>{ ters[ONAY_FK[a]] = a; });
+  const f0 = g(0); const t = {v:1, f:f0.charAt(0)==="=" ? f0.slice(1) : (ters[f0]||f0), i:g(1), og:g(4), kt:g(6)}; if(g(3)) t.ko = g(3); if(g(5)) t.ve = g(5);
+  const xs = g(2); const x = xs.charAt(0)==="!" ? parseInt(xs.slice(1),36) : parseInt(xs,36)*1000; if(isFinite(x)) t.x = x;
+  const u = g(7); if(u) t.u = u.charAt(0)==="g" ? ONAY_GS+u.slice(1)+"/exec" : u.slice(1);
+  if(g(9)) t.m = g(9); if(g(8)) t.k = g(8);
+  const hh = g(10); if(hh) t.h = hh.charAt(0)==="x" ? onayBHex(hh.slice(1)) : hh.slice(1);
+  if(g(11)) Object.assign(t, JSON.parse(g(11)));
+  return t;
+}
+function onayKisalt(t){
+  try{
+    if(!t || t.v!==1 || typeof t.f!=="string" || typeof t.i!=="string" || !Number.isInteger(t.x)) return null;
+    const bil = {v:1,f:1,i:1,x:1,ko:1,og:1,ve:1,kt:1,u:1,m:1,k:1,h:1}; const ext = {};
+    Object.keys(t).forEach(a=>{ if(!bil[a]) ext[a] = t[a]; });
+    const x = t.x%1000===0 ? (t.x/1000).toString(36) : "!"+t.x.toString(36);
+    const u = !t.u ? "" : (t.u.indexOf(ONAY_GS)===0 && /\/exec$/.test(t.u) ? "g"+t.u.slice(ONAY_GS.length,-5) : "="+t.u);
+    const h = !t.h ? "" : (/^([0-9a-f]{2})+$/.test(t.h) ? "x"+onayHexB(t.h) : "="+t.h);
+    const F = [ONAY_FK[t.f]||"="+t.f, t.i, x, t.ko||"", t.og||"", t.ve||"", t.kt||"", u, t.k||"", t.m||"", h, Object.keys(ext).length?JSON.stringify(ext):""];
+    while(F.length && F[F.length-1]==="") F.pop();
+    if(F.some(a=>a.indexOf("\u0001")>=0)) return null;
+    const raw = "o="+F.map(onayEs).join("~"), b = "p="+b64uE(F.join("\u0001"));
+    const s = (raw.length<=b.length && !/[.\-]$/.test(raw)) ? raw : b;
+    return onayEsit(onayLinkCoz("#"+s), t) ? s : null;
+  }catch(e){ return null; }
+}
+function onayLink(tb, yuk){ const k = onayKisalt(yuk); return tb+"#"+(k || "onay="+b64uE(JSON.stringify(yuk))); }
+function onayLinkKisa(r){
+  try{
+    const l = String(r.link||""); const i = l.indexOf("#");
+    if(i>0 && /^#onay=/.test(l.slice(i)) && r.yuk && onayEsit(onayLinkCoz(l.slice(i)), r.yuk)){ const k = onayKisalt(r.yuk); if(k) return l.slice(0,i)+"#"+k; }
+  }catch(e){}
+  return r.link;
+}
+function onayGecerliMetin(t){
+  const p = []; const d = ONAY_SURE[t.f]; if(d) p.push("Yaklaşık "+d+" dakika sürer; telefondan doldurabilirsin.");
+  if(t.x){ try{ p.push("Bu bağlantı "+new Date(t.x).toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"})+" tarihine kadar geçerlidir."); }catch(e){} }
+  return p.join(" ");
+}
 function onaySms(tel,msg){ const n = onayTel(tel); return "sms:"+(n?"+"+n:"")+"?&body="+encodeURIComponent(msg); }
 
 /* sözleşme ve taahhüt metinleri — onay sayfası, yazdırma ve özet (hash) aynı kaynaktan */
@@ -6130,7 +6193,7 @@ const KOC_TAAHHUT = "Sözleşme süresince profesyonel koçluk etiğine uygun da
 function onayBaslat(){
   const root = $("onayRoot"); if(!root) return;
   let t = null;
-  try{ t = JSON.parse(b64uD(location.hash.slice(6))); }catch(e){ t = null; }
+  try{ t = onayLinkCoz(location.hash); }catch(e){ t = null; }
   const css = `<style>
     #onayRoot{max-width:720px;margin:0 auto;padding:18px 16px 60px;color:var(--ink);font-family:var(--sans)}
     #onayRoot h1{font-size:22px;margin:6px 0 2px} #onayRoot h2{font-size:16px;margin:0 0 6px}
@@ -6149,7 +6212,7 @@ function onayBaslat(){
   let onceki = null; try{ onceki = localStorage.getItem(anahtar); }catch(e){}
   const baslik = t.f==="soz" ? "Koçluk Sözleşmesi ve Veli Onay Formu" : "Öğrenci Taahhüdü";
   const bol = M.bolum.map(b=>`<div class="on-kart"><h2>${esc(b.b)}</h2>${b.l?`<ul>${b.l.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p>${esc(b.p)}</p>`}${b.o?`<label class="on-chk"><input type="checkbox" data-on-o="${b.k}"><span>Bu maddeyi okudum, anladım.</span></label>`:""}</div>`).join("");
-  root.innerHTML = css+ust+`<h1>${esc(baslik)}</h1><p class="hint">Lütfen metni dikkatle okuyun. Onayınız yalnızca bu form kapsamında kullanılır.</p>${bol}
+  root.innerHTML = css+ust+`<h1>${esc(baslik)}</h1><p class="hint">Lütfen metni dikkatle okuyun. Onayınız yalnızca bu form kapsamında kullanılır. ${esc(onayGecerliMetin(t))}</p>${bol}
     <div class="on-kart"><h2>Onay</h2>
       <div class="field"><label for="onAd">${esc(M.ad)}</label><input id="onAd" type="text" autocomplete="name" style="width:100%"></div>
       <div class="field" style="margin-top:8px"><label for="onTel">Telefon (isteğe bağlı)</label><input id="onTel" type="tel" autocomplete="tel" style="width:100%"></div>
@@ -6244,7 +6307,7 @@ function onayFormBaslat(t, root, css, ust){
     giris = t.f==="tanima" ? "Çocuğunuzu/sizi daha iyi tanımamıza yardımcı olacak bilgileri yazabilirsiniz. Bilmediğiniz ya da yazmak istemediğiniz alanları boş bırakabilirsiniz." : "Kayıt bilgilerini kontrol edip doldurabilirsiniz. Boş bıraktığınız alanlar değiştirilmez.";
     govde = `<div class="on-kart">${ONAY_ALAN[t.f].map(([k,e,tip,sec])=>`<div class="field" style="margin-bottom:10px"><label for="of_${k}">${esc(e)}</label>${tip==="m"?`<textarea id="of_${k}" data-of="${k}" rows="3" style="width:100%"></textarea>`:tip==="sec"?`<select id="of_${k}" data-of="${k}" style="width:100%;min-height:44px"><option value="">Seçiniz</option>${sec.map(x=>`<option>${esc(x)}</option>`).join("")}</select>`:`<input id="of_${k}" data-of="${k}" type="${tip==="date"?"date":tip==="tel"?"tel":"text"}" style="width:100%">`}</div>`).join("")}</div>`;
   }
-  root.innerHTML = css+ek+ust+`<h1>${esc(baslik)}</h1><p class="hint">${esc(t.og?t.og+" için — ":"")}${esc(giris)}</p>${govde}
+  root.innerHTML = css+ek+ust+`<h1>${esc(baslik)}</h1><p class="hint">${esc(t.og?t.og+" için — ":"")}${esc(giris)}</p><p class="hint">${esc(onayGecerliMetin(t))}</p>${govde}
     <div class="on-kart"><div class="field"><label for="ofAd">Formu dolduran kişinin adı soyadı</label><input id="ofAd" type="text" autocomplete="name" style="width:100%"></div>
     <p class="hint" id="ofDurum" role="status"></p><div class="on-btns"><button class="btn primary" id="ofGo" type="button" disabled>Gönder</button></div></div><div id="onSonuc"></div>`;
   const topla = ()=>{
@@ -6551,8 +6614,8 @@ function onayTaban(){ const a = onayAyar(); let b = (a.yayinUrl||"").trim(); if(
 function onayDij(){ const o = sozl(); if(!o.dij || typeof o.dij!=="object") o.dij = {sk:"Haftada 1 gün", dk:"45-60", yr:"Yüz yüze", sr:"", uc:"", od:"", yn:"Banka havalesi"}; return o.dij; }
 function onayYuk(f, ek){
   const s = stu(); const a = onayAyar();
-  const t = {v:1, f, i:yeniId("on"), ko:(s.koc||a.kocAd||"").trim(), og:s.ad, ve:s.veliAd||"", kt:a.kocTel||"", x:Date.now()+ONAY_GUN*86400000};
-  if(f==="soz"){ t.s = Object.assign({}, onayDij()); t.ek = sozl().ek.slice(); }
+  const t = {v:1, f, i:yeniId("on"), og:s.ad, kt:a.kocTel||"", x:Math.floor((Date.now()+ONAY_GUN*86400000)/1000)*1000};
+  if(f==="soz"){ t.ko = (s.koc||a.kocAd||"").trim(); t.ve = s.veliAd||""; t.s = Object.assign({}, onayDij()); t.ek = sozl().ek.slice(); }
   if(f==="olcek") t.o = ek;
   if(f==="cetele") t.ct = cetYuk(s, ek);
   if(f==="fd"){ const sp = fdSpec(ek); t.fd = ek; t.fb = (sp&&sp.baslik)||""; t.sn = s.sinif; t.al = s.alan||""; if(sp && sp.hafta) t.w = W; }
@@ -6584,17 +6647,16 @@ function onayKartHtml(f, baslik, aciklama, alanlar, filtre){
         : `<a class="btn small primary" data-onwa="${esc(r.id)}" href="${esc(onayWa(r.form==="fd"?onayAlici("fd",r.yuk.fd):alici,msg))}" target="_blank" rel="noopener">WhatsApp</a> <a class="btn small" data-onsms="${esc(r.id)}" href="${esc(onaySms(r.form==="fd"?onayAlici("fd",r.yuk.fd):alici,msg))}">SMS</a> <button class="btn small" data-onkop="${esc(r.id)}" type="button">Kopyala</button> <button class="btn small" data-onkod="${esc(r.id)}" type="button">Kodu gir</button> `}<button class="btn small" data-onsil="${esc(r.id)}" type="button">Sil</button></td></tr>`; }).join("")}</tbody></table>`:""}</div>`;
 }
 function onayMesaj(r){
-  const s = stu(); const kocAd = onayAyar().kocAd||s.koc||"";
-  if(r.form==="soz") return "Merhaba "+(s.veliAd||"Sayın veli")+", "+s.ad+" için koçluk sözleşmesini ve veli onay formunu aşağıdaki bağlantıdan okuyup onaylayabilirsiniz (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
-  if(r.form==="taah") return "Merhaba "+s.ad+", öğrenci taahhüdünü aşağıdaki bağlantıdan okuyup onaylayabilirsin (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
-  const ad = onayFormAd(r.yuk);
-  if(r.form==="fd") return (r.yuk.fd==="lgs_hedef" ? "Merhaba, "+s.ad+" ile birlikte" : "Merhaba "+s.ad+",")+" '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilir"+(r.yuk.fd==="lgs_hedef"?"siniz":"sin")+". Telefondan açıp doldurman yeterli. (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  if(r.form==="motiv") return "Merhaba "+s.ad+", çalışma isteğinin nereden geldiğini görmek için kısa bir analiz hazırladım (yaklaşık 5 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  if(r.form==="cetele") return "Merhaba "+s.ad+", bu haftanın çetelesini doldurabilirsin (yaklaşık 3 dakika, telefondan). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  if(r.form==="uni") return "Merhaba "+s.ad+", üniversite ve bölüm tercihine hazırlanırken nelere ağırlık verdiğini görmek için kısa bir analiz hazırladım (yaklaşık 8 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  if(r.form==="analiz") return "Merhaba "+s.ad+", sana özel bir çalışma planı hazırlayabilmem için kısa bir analiz hazırladım (yaklaşık 3 dakika, telefondan doldurabilirsin; doğru ya da yanlış cevap yok). (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  if(r.form==="olcek"||r.form==="ozdeg"||r.form==="ses") return "Merhaba "+s.ad+", '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilirsin. Doğru ya da yanlış cevap yoktur; bu bir sınav değildir. (bağlantı "+ONAY_GUN+" gün geçerlidir)\n"+r.link+"\n"+kocAd;
-  return "Merhaba "+(s.veliAd||"Sayın veli")+", "+s.ad+" için '"+ad+"' formunu aşağıdaki bağlantıdan doldurabilirsiniz (bağlantı "+ONAY_GUN+" gün geçerlidir):\n"+r.link+"\n"+kocAd;
+  const s = stu(); const kocAd = onayAyar().kocAd||s.koc||""; const ilk = (s.ad||"").trim().split(/\s+/)[0]||s.ad||"";
+  const veli = (s.veliAd||"").trim()||"Sayın veli"; const ad = onayFormAd(r.yuk); const fa = "'"+ad+"'"+(/form/i.test(ad)?"":" formu"); const l = onayLinkKisa(r); const f = r.form;
+  const yap = (selam, dokun)=> selam+"\n"+l+"\n"+dokun+(kocAd?"\n"+kocAd:"");
+  if(f==="soz") return yap("Merhaba "+veli+", "+ilk+" için koçluk sözleşmesi ve veli onayı:", "Dokunup okuyabilirsiniz ↑");
+  if(f==="taah") return yap("Merhaba "+ilk+", öğrenci taahhüdün:", "Dokunup okuyabilirsin ↑");
+  if(f==="fd") return r.yuk.fd==="lgs_hedef" ? yap("Merhaba, "+ilk+" ile birlikte "+fa+":", "Dokunup doldurabilirsiniz ↑") : yap("Merhaba "+ilk+", "+fa+":", "Dokunup doldurabilirsin ↑");
+  if(f==="motiv"||f==="analiz"||f==="uni") return yap("Merhaba "+ilk+", kısa bir analiz hazırladım:", "Dokunup başlayabilirsin ↑");
+  if(f==="cetele") return yap("Merhaba "+ilk+", bu haftanın çetelesi:", "Dokunup doldurabilirsin ↑");
+  if(f==="olcek"||f==="ozdeg"||f==="ses") return yap("Merhaba "+ilk+", "+fa+":", "Dokunup doldurabilirsin ↑");
+  return yap("Merhaba "+veli+", "+ilk+" için "+fa+":", "Dokunup doldurabilirsiniz ↑");
 }
 function onayHtml(){
   const a = onayAyar(); const d = onayDij(); const s = stu();
@@ -6740,8 +6802,8 @@ function onayKurulumSihirbazi(){
 }
 const GN = {form:"soz", sablon:"davet", kime:"", sinif:"", durum:"hepsi", metin:null, secili:{}};
 const GN_SABLON = {
-  davet:{ad:"Form daveti", durum:"hepsi", o:"Merhaba {ad}, {form} formunu aşağıdaki bağlantıdan telefonundan doldurabilirsin. Cevapların otomatik olarak bana ulaşır (bağlantı {gun} gün geçerli).\n{link}\n{koc}", v:"Merhaba {veli}, {ad} için {form} formunu aşağıdaki bağlantıdan telefonunuzdan doldurup onaylayabilirsiniz. Cevaplar otomatik olarak bana ulaşır (bağlantı {gun} gün geçerli).\n{link}\n{koc}"},
-  hatirlat:{ad:"Hatırlatma", durum:"yok", o:"Merhaba {ad}, {form} formunu henüz doldurmadığını gördüm; müsait olduğunda şu bağlantıdan tamamlayabilirsin:\n{link}\n{koc}", v:"Merhaba {veli}, {ad} için gönderdiğim {form} formu henüz doldurulmamış görünüyor; müsait olduğunuzda şu bağlantıdan tamamlayabilirsiniz:\n{link}\n{koc}"},
+  davet:{ad:"Form daveti", durum:"hepsi", o:"Merhaba {ad}, {form} formu:\n{link}\nDokunup doldurabilirsin ↑\n{koc}", v:"Merhaba {veli}, {ad} için {form} formu:\n{link}\nDokunup doldurabilirsiniz ↑\n{koc}"},
+  hatirlat:{ad:"Hatırlatma", durum:"yok", o:"Merhaba {ad}, {form} formunu henüz doldurmadığını gördüm; müsait olduğunda:\n{link}\n{koc}", v:"Merhaba {veli}, {ad} için gönderdiğim {form} formu henüz doldurulmamış görünüyor; müsait olduğunuzda:\n{link}\n{koc}"},
   tesekkur:{ad:"Teşekkür", durum:"geldi", linksiz:true, o:"Merhaba {ad}, {form} formunu doldurduğun için teşekkür ederim; cevaplarını aldım.\n{koc}", v:"Merhaba {veli}, {form} formunu doldurduğunuz için teşekkür ederim; cevaplarınızı aldım.\n{koc}"}
 };
 function gnFormListe(){
@@ -6763,7 +6825,7 @@ function gnKayitYarat(sid, item){
     const gecerli = r && r.durum==="bekliyor" && !r.gelen && r.yuk.x>Date.now() && (item.ek!=="haftalik_odev" || +r.yuk.w===+W) && (item.f!=="cetele" || (r.yuk.ct && r.yuk.ct.w===cetPzt(item.ek)));
     if(gecerli) return r;
     const yuk = onayYuk(item.f, item.ek);
-    r = {id:yeniId("or"), form:item.f, ts:Date.now(), yuk, link:tb+"#onay="+b64uE(JSON.stringify(yuk)), durum:"bekliyor", gonderim:[]};
+    r = {id:yeniId("or"), form:item.f, ts:Date.now(), yuk, link:onayLink(tb, yuk), durum:"bekliyor", gonderim:[]};
     (DB.onay[sid] = DB.onay[sid]||[]).push(r); save(); return r;
   });
 }
@@ -6774,7 +6836,7 @@ async function gnSozGaranti(sid){
   if(!v) return false; d.sr = v.sr.trim(); d.uc = v.uc.trim(); save(); return true;
 }
 function gnMesaj(r, s, metin){
-  const d = {ad:(s.ad||"").trim().split(/\s+/)[0]||"", veli:(s.veliAd||"").trim()||"Sayın veli", form:onayFormAd(r.yuk), link:r.link, koc:onayAyar().kocAd||s.koc||"", gun:ONAY_GUN};
+  const d = {ad:(s.ad||"").trim().split(/\s+/)[0]||"", veli:(s.veliAd||"").trim()||"Sayın veli", form:onayFormAd(r.yuk), link:onayLinkKisa(r), koc:onayAyar().kocAd||s.koc||"", gun:ONAY_GUN};
   return metin.replace(/\{(\w+)\}/g,(m,a)=>Object.prototype.hasOwnProperty.call(d,a)?d[a]:m);
 }
 function gnAc(url){ const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
@@ -6880,7 +6942,7 @@ function onayHizliGonder(onsec){
       if(!v) return; d.sr = v.sr.trim(); d.uc = v.uc.trim(); save(); } }
     let r = null;
     if(f==="fd" && ek==="haftalik_odev") r = onayListe().find(q=>q.form==="fd" && q.yuk.fd==="haftalik_odev" && +q.yuk.w===+W && q.durum==="bekliyor" && !q.gelen && q.yuk.x>Date.now());
-    if(!r){ const yuk = onayYuk(f, ek); r = {id:yeniId("or"), form:f, ts:Date.now(), yuk, link:tb+"#onay="+b64uE(JSON.stringify(yuk)), durum:"bekliyor", gonderim:[]}; onayListe().push(r); save(); }
+    if(!r){ const yuk = onayYuk(f, ek); r = {id:yeniId("or"), form:f, ts:Date.now(), yuk, link:onayLink(tb, yuk), durum:"bekliyor", gonderim:[]}; onayListe().push(r); save(); }
     const alici = f==="fd" ? onayAlici("fd", ek) : onayAlici(f); const msg = onayMesaj(r);
     kutu.innerHTML = `<h3 style="margin:0 0 6px">Bağlantı hazır</h3><p style="margin:0 0 4px"><b>${esc(ad)}</b></p><p class="muted" style="margin:0 0 10px">Alıcı telefon: <b>${esc(alici||"kayıtlı değil")}</b>${alici?"":" — WhatsApp/SMS uygulamasında kişi seçersiniz."}</p>
       <div class="actions"><a class="btn primary" id="hgWa" href="${esc(onayWa(alici,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" id="hgSms" href="${esc(onaySms(alici,msg))}">SMS ile gönder</a><button class="btn" id="hgKop" type="button">Mesajı kopyala</button></div>
@@ -6920,7 +6982,7 @@ function onayBagla(){
     const f = b.dataset.onyeni;
     if(f==="soz"){ dkaydet(); const d = onayDij(); if(!d.sr.trim() || !d.uc.trim()){ toast("Sözleşme süresi ve ücreti doldurun"); return; } }
     const yuk = onayYuk(f, f==="olcek" ? $("onOlcek").value : f==="fd" ? $("onFd").value : undefined);
-    onayListe().push({id:yeniId("or"), form:f, ts:Date.now(), yuk, link:tb+"#onay="+b64uE(JSON.stringify(yuk)), durum:"bekliyor", gonderim:[]});
+    onayListe().push({id:yeniId("or"), form:f, ts:Date.now(), yuk, link:onayLink(tb, yuk), durum:"bekliyor", gonderim:[]});
     save(); toast("Bağlantı hazır"); re();
   }));
   if($("onFdHafta")) $("onFdHafta").addEventListener("click",()=>{
@@ -6928,7 +6990,7 @@ function onayBagla(){
     const var_ = onayListe().find(r=>r.form==="fd" && r.yuk.fd==="haftalik_odev" && +r.yuk.w===+W && r.durum==="bekliyor" && !r.gelen && r.yuk.x>Date.now());
     if(var_){ toast("Bu hafta için bağlantı zaten hazır; aşağıdan WhatsApp/SMS'e basın"); return; }
     const yuk = onayYuk("fd","haftalik_odev");
-    onayListe().push({id:yeniId("or"), form:"fd", ts:Date.now(), yuk, link:tb+"#onay="+b64uE(JSON.stringify(yuk)), durum:"bekliyor", gonderim:[]});
+    onayListe().push({id:yeniId("or"), form:"fd", ts:Date.now(), yuk, link:onayLink(tb, yuk), durum:"bekliyor", gonderim:[]});
     save(); toast("Bu haftanın bağlantısı hazır"); re();
   });
   if($("onFd")) $("onFd").addEventListener("change",()=>{});
