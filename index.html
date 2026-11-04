@@ -672,7 +672,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.16.3";
+const SURUM = "3.16.4";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1164,13 +1164,13 @@ function doPost(e) {
       var uz = String(g.url || '');
       if (!/^https:\/\/[^\s]{10,4000}$/.test(uz)) return cevap_({ok: false, hata: 'gecersiz'});
       var al = String(g.alias || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
-      var tb = {url: uz, domain: 'tinyurl.com'};
+      var tb = {url: uz};
       if (al) tb.alias = al;
       var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
       var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
       if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
       var em = JSON.stringify(js.errors || []).toLowerCase();
-      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode()});
+      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode(), ayrinti: em.slice(0, 200)});
     }
     if (a === 'ydk') {
       var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
@@ -6522,11 +6522,11 @@ async function kisalUrl(uzun, ad){
   if(c && a.inboxDrive && a.tinyBetik){
     for(const al of adaylar){
       try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
-        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
+        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+((j&&j.ayrinti)?" "+j.ayrinti:"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
   }
   if(tok){
     for(const al of adaylar){
-      try{ const gv = {url:uzun, domain:"tinyurl.com"}; if(al) gv.alias = al;
+      try{ const gv = {url:uzun}; if(al) gv.alias = al;
         const r = await fetch("https://api.tinyurl.com/create", {method:"POST", headers:{"Authorization":"Bearer "+tok, "Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(gv), signal:zaman()});
         const j = await r.json().catch(()=>({}));
         if(r.ok && j.data && j.data.tiny_url) return j.data.tiny_url;
@@ -7064,6 +7064,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.16.4", t:"5 Kasım 2026", n:"TinyURL isteğinden gereksiz alan kaldırıldı (HTTP 422 düzeltmesi); hata ayrıntısı gösterilir. Drive betiği (Code.gs) güncellendi: yeniden yapıştırıp yeni sürüm dağıtın."},
   {v:"3.16.3", t:"4 Kasım 2026", n:"“Kısaltmayı dene” başarısız olursa nedenini gösterir (Drive betiği / TinyURL yanıtı / ağ)."},
   {v:"3.16.2", t:"4 Kasım 2026", n:"Kısa bağlantı özel ad önekini silince geri gelen \"ajanskocluk\" düzeltildi: ön ek boş bırakılabilir; özel ad kapalıyken ön ek alanı devre dışı."},
   {v:"3.16.1", t:"4 Kasım 2026", n:"Kısa bağlantı artık varsayılan olarak özel ad olmadan (normal tinyurl.com/xxxx) üretilir; ücretsiz hesaplarda özel ad hata verebildiği için. Özel ad (ajanskocluk-ad) isteğe bağlı kutuyla açılır."},
