@@ -672,7 +672,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.15.0";
+const SURUM = "3.16.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1152,6 +1152,26 @@ function doPost(e) {
     if (!yetkili_(g.t)) { hataSay_(); return cevap_({ok: false, hata: 'yetkisiz'}); }
     CacheService.getScriptCache().remove('kilit');
     if (a === 'okping') return cevap_({ok: true, s: 3});
+    if (a === 'tinyayar') {
+      var tk = String(g.token || '').trim();
+      if (tk.length < 20 || tk.length > 200) return cevap_({ok: false, hata: 'gecersiz'});
+      p.setProperty('TINY', tk);
+      return cevap_({ok: true});
+    }
+    if (a === 'kisalt') {
+      var tok = p.getProperty('TINY');
+      if (!tok) return cevap_({ok: false, hata: 'tokenyok'});
+      var uz = String(g.url || '');
+      if (!/^https:\/\/[^\s]{10,4000}$/.test(uz)) return cevap_({ok: false, hata: 'gecersiz'});
+      var al = String(g.alias || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
+      var tb = {url: uz, domain: 'tinyurl.com'};
+      if (al) tb.alias = al;
+      var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
+      var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
+      if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
+      var em = JSON.stringify(js.errors || []).toLowerCase();
+      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode()});
+    }
     if (a === 'ydk') {
       var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
       if (!/^yedek-[0-9]{8,14}\.json$/.test(yad) || typeof g.veri !== 'string' || g.veri.length < 20 || g.veri.length > 6000000) return cevap_({ok: false, hata: 'gecersiz'});
@@ -1443,7 +1463,7 @@ function renderBugun(){
   const git = async x=>{
     if(x.sid){ DB.cur = x.sid; save(); }
     if(x.act==="inc"){ const r = (DB.onay[x.sid]||[]).find(y=>y.id===x.rid); if(r) onayGelenIncele(r); return; }
-    if(x.act==="tek"){ const r = (DB.onay[x.sid]||[]).find(y=>y.id===x.rid); if(!r) return; const msg = onayStuIcin(x.sid,()=>onayMesaj(r)); const tel = onayStuIcin(x.sid,()=>onayAlici(r.form, r.yuk.fd)); gnAc(onayWa(tel,msg)); r.gonderim.push({k:"wa", t:"hatirlat", z:Date.now()}); save(); renderAll(); return; }
+    if(x.act==="tek"){ const r = (DB.onay[x.sid]||[]).find(y=>y.id===x.rid); if(!r) return; if(!r.kisa && kisaAcik()){ onayKisaHazirla(r).then(()=>b.click()); return; } const msg = onayStuIcin(x.sid,()=>onayMesaj(r)); const tel = onayStuIcin(x.sid,()=>onayAlici(r.form, r.yuk.fd)); gnAc(onayWa(tel,msg)); r.gonderim.push({k:"wa", t:"hatirlat", z:Date.now()}); save(); renderAll(); return; }
     if(x.act==="ajbitti"){ const a = (DB.ajanda||[]).find(y=>y.id===x.ajid); if(a){ a.bitti = true; a.goruldu = true; save(); renderAll(); toast("Ajanda işi tamamlandı"); } return; }
     if(x.act==="odendi"){ const o = (DB.odeme[x.sid]||[]).find(y=>y.id===x.oid); if(o){ o.durum = "Ödendi"; o.odenen = ""; save(); renderAll(); toast("Ödendi olarak işaretlendi"); } return; }
     if(x.act==="hat"){ TAB = "odeme"; renderAll(); odemeMesajAc(x.oid, "hatirlat"); return; }
@@ -5153,7 +5173,7 @@ function renderKutu(){
   document.querySelectorAll("[data-kuf]").forEach(b=>b.addEventListener("click",()=>{ KUTU.f = b.dataset.kuf; renderKutu(); }));
   const bul = b=>{ const rec = (DB.onay[b.dataset.sid]||[]).find(x=>x.id===b.dataset.kuinc||x.id===b.dataset.kutek||x.id===b.dataset.kuac); return rec; };
   document.querySelectorAll("[data-kuinc]").forEach(b=>b.addEventListener("click",async()=>{ const r = bul(b); if(!r) return; DB.cur = b.dataset.sid; save(); await onayGelenIncele(r); }));
-  document.querySelectorAll("[data-kutek]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; const msg = onayStuIcin(b.dataset.sid,()=>onayMesaj(r)); const tel = onayStuIcin(b.dataset.sid,()=>onayAlici(r.form, r.yuk.fd)); gnAc(onayWa(tel,msg)); }));
+  document.querySelectorAll("[data-kutek]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; if(!r.kisa && kisaAcik()){ onayKisaHazirla(r).then(()=>b.click()); return; } const msg = onayStuIcin(b.dataset.sid,()=>onayMesaj(r)); const tel = onayStuIcin(b.dataset.sid,()=>onayAlici(r.form, r.yuk.fd)); gnAc(onayWa(tel,msg)); }));
   document.querySelectorAll("[data-kuac]").forEach(b=>b.addEventListener("click",()=>{ const r = bul(b); if(!r) return; DB.cur = b.dataset.sid; save(); if(r.form==="analiz"||r.form==="uni"||r.form==="motiv"){ TAB = "degerlendirme"; } else if(r.form==="cetele"){ TAB = "cetele"; CET.w = (r.yuk.ct||{}).w || CET.w; CET.ekran = "liste"; } else { TAB = "portfoy"; PF_SEK = "onay"; } renderAll(); }));
 }
 
@@ -6481,6 +6501,41 @@ function onayHmacHex(anahtar, mesaj, n){
   const ih = onaySha256(ic); const oc = new Uint8Array(96); oc.set(op); oc.set(ih,64);
   const hex = Array.from(onaySha256(oc)).map(x=>("0"+x.toString(16)).slice(-2)).join(""); return n ? hex.slice(0,n) : hex;
 }
+
+/* ---------- v3.16: TinyURL ile kısa bağlantı ---------- */
+const TINY_ANAHTAR = "akp_tiny_token";
+function tinyToken(){ try{ return localStorage.getItem(TINY_ANAHTAR)||""; }catch(e){ return ""; } }
+function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive && a.tinyBetik); }
+function kisaSlug(ad){ return String(ad||"").toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]/g,""); }
+function kisaRnd(n){ const k = "abcdefghjkmnpqrstuvwxyz23456789"; let o = ""; for(let i=0;i<n;i++) o += k[Math.floor(Math.random()*k.length)]; return o; }
+function kisaAdaylar(ad){
+  const onek = kisaSlug(onayAyar().kisaOnek) || "ajanskocluk"; const sl = kisaSlug(ad); const taban = (onek+(sl?"-"+sl:"")).slice(0,30);
+  const kisa = taban.slice(0,26);
+  return [taban, kisa+"-"+kisaRnd(3), kisa+"-"+kisaRnd(3), ""];
+}
+async function kisalUrl(uzun, ad){
+  const a = onayAyar(); const c = senkCfg(); const tok = tinyToken(); const adaylar = kisaAdaylar(ad);
+  const zaman = ()=>{ try{ return AbortSignal.timeout(15000); }catch(e){ return undefined; } };
+  if(c && a.inboxDrive && a.tinyBetik){
+    for(const al of adaylar){
+      try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
+        if(j && j.ok && j.kisa) return j.kisa; if(j && j.hata==="alias") continue; break; }catch(e){ break; } }
+  }
+  if(tok){
+    for(const al of adaylar){
+      try{ const gv = {url:uzun, domain:"tinyurl.com"}; if(al) gv.alias = al;
+        const r = await fetch("https://api.tinyurl.com/create", {method:"POST", headers:{"Authorization":"Bearer "+tok, "Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(gv), signal:zaman()});
+        const j = await r.json().catch(()=>({}));
+        if(r.ok && j.data && j.data.tiny_url) return j.data.tiny_url;
+        if(/alias/i.test(JSON.stringify(j.errors||[]))) continue; break; }catch(e){ break; } }
+  }
+  return null;
+}
+async function onayKisaHazirla(r){
+  if(!r || r.kisa) return r && r.kisa; if(!kisaAcik()) return null;
+  const k = await kisalUrl(r.link, (r.yuk&&r.yuk.og)||""); if(k){ r.kisa = k; save(); } else toast("Kısaltılamadı; uzun bağlantı kullanılıyor");
+  return k;
+}
 function onayKutuBilgi(){
   const a = onayAyar(); const c = senkCfg();
   if(c && a.inboxDrive) return {url:c.url, mod:"d", t:c.auth};
@@ -6600,7 +6655,7 @@ function onayKartHtml(f, baslik, aciklama, alanlar, filtre){
 }
 function onayMesaj(r){
   const s = stu(); const kocAd = onayAyar().kocAd||s.koc||""; const veli = s.veliAd||"Sayın veli";
-  const m = (cumle, veliye)=>cumle+"\n"+r.link+"\n"+(veliye?"Dokunup açabilirsiniz ↑":"Dokunup başlayabilirsin ↑")+(kocAd?"\n"+kocAd:"");
+  const m = (cumle, veliye)=>cumle+"\n"+(r.kisa||r.link)+"\n"+(veliye?"Dokunup açabilirsiniz ↑":"Dokunup başlayabilirsin ↑")+(kocAd?"\n"+kocAd:"");
   const ad = onayFormAd(r.yuk);
   if(r.form==="soz") return m("Merhaba "+veli+", "+s.ad+" için koçluk sözleşmesini ve veli onay formunu okuyup onaylayabilirsiniz.", true);
   if(r.form==="taah") return m("Merhaba "+s.ad+", öğrenci taahhüdünü okuyup onaylayabilirsin.");
@@ -6622,7 +6677,17 @@ function onayHtml(){
       <div class="field" style="grid-column:1/-1"><label for="onUrl">Panel yayın adresi</label><input id="onUrl" type="text" value="${esc(a.yayinUrl||"")}" placeholder="Örnek: https://kullanici.github.io/panel/"></div>
       <div class="field"><label for="onKocAd">Koç adı (mesajlarda)</label><input id="onKocAd" type="text" value="${esc(a.kocAd||"")}"></div>
       <div class="field"><label for="onKocTel">Koç telefonu (onay kodu bu numaraya gelir)</label><input id="onKocTel" type="tel" value="${esc(a.kocTel||"")}" placeholder="05xx xxx xx xx"></div>
-    </div>${tbn?"":'<p class="kr-uyari" role="status">Yayın adresi yok. Panel dosyasını bir adreste yayınladıysanız yukarıya yazın; aksi halde bağlantı oluşturulamaz.</p>'}
+    </div>
+    <h4 style="margin:12px 0 4px">Kısa bağlantı (TinyURL)</h4>
+    <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). Başarısız olursa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
+    <div class="form">
+      <div class="field"><label for="onTinyTok">TinyURL token ${tinyToken()?'<span class="chip ok">bu cihazda kayıtlı</span>':""}</label><input id="onTinyTok" type="password" autocomplete="off" placeholder="${tinyToken()?"Değiştirmek için yeni token yazın":"Token’ı yapıştırın"}"></div>
+      <div class="field"><label for="onKisaOnek">Kısa ad öneki</label><input id="onKisaOnek" type="text" value="${esc(a.kisaOnek||"ajanskocluk")}" placeholder="ajanskocluk"></div>
+      <div class="field"><label><input id="onKisaAcik" type="checkbox" ${a.kisalt===false?"":"checked"}> Bağlantıları kısalt</label></div>
+    </div>
+    <div class="actions"><button class="btn" id="onTinyKaydet" type="button">Token’ı kaydet</button>${senkCfg()?'<button class="btn" id="onTinyBetik" type="button">Token’ı Drive betiğine de yükle</button>':""}<button class="btn" id="onTinyTest" type="button">Kısaltmayı dene</button>${tinyToken()?'<button class="btn" id="onTinySil" type="button">Token’ı sil</button>':""}</div>
+    <p class="muted" id="onTinyDurum" style="margin:6px 0">${kisaAcik()?"Kısaltma açık"+(a.tinyBetik?" (Drive betiği + bu cihaz)":" (bu cihaz)"):"Kısaltma kapalı: token kaydedin"}</p>
+    ${tbn?"":'<p class="kr-uyari" role="status">Yayın adresi yok. Panel dosyasını bir adreste yayınladıysanız yukarıya yazın; aksi halde bağlantı oluşturulamaz.</p>'}
     <p class="muted" id="onKutuDurum" style="margin:6px 0">${esc(onayKutuDurumMetin())}</p>
     <div class="actions"><button class="btn" id="onAyarKaydet" type="button">Ayarları kaydet</button><button class="btn" id="onKutuTest" type="button">Bağlantıyı test et</button><button class="btn" id="onKutuAl" type="button">Yeni cevapları getir</button><button class="btn" id="onDriveKop" type="button">Drive scriptini güncelle (kodu kopyala)</button></div>
     <details style="margin-top:8px"><summary style="cursor:pointer">Cevaplar nasıl geri gelir? (bir kez yapılacak güncelleme)</summary><ol class="hint" style="padding-left:18px;line-height:1.7">
@@ -6790,7 +6855,7 @@ async function gnSozGaranti(sid){
   if(!v) return false; d.sr = v.sr.trim(); d.uc = v.uc.trim(); save(); return true;
 }
 function gnMesaj(r, s, metin){
-  const d = {ad:(s.ad||"").trim().split(/\s+/)[0]||"", veli:(s.veliAd||"").trim()||"Sayın veli", form:onayFormAd(r.yuk), link:r.link, koc:onayAyar().kocAd||s.koc||"", gun:ONAY_GUN};
+  const d = {ad:(s.ad||"").trim().split(/\s+/)[0]||"", veli:(s.veliAd||"").trim()||"Sayın veli", form:onayFormAd(r.yuk), link:(r.kisa||r.link), koc:onayAyar().kocAd||s.koc||"", gun:ONAY_GUN};
   return metin.replace(/\{(\w+)\}/g,(m,a)=>Object.prototype.hasOwnProperty.call(d,a)?d[a]:m);
 }
 function gnAc(url){ const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
@@ -6807,6 +6872,7 @@ async function gnGonder(sid, kanal){
   const tip = GN.kime || item.kime; let r = null;
   if(sab.linksiz){ r = gnKayit(sid, item); if(!r){ toast("Bu öğrenci için bu forma ait kayıt yok"); return; } }
   else { if(item.f==="soz" && !(await gnSozGaranti(sid))) return; r = gnKayitYarat(sid, item); }
+  if(!sab.linksiz) await onayKisaHazirla(r);
   const msg = gnMesaj(r, s, GN.metin!==null ? GN.metin : sab[tip]); const tel = tip==="v" ? (s.veliTel||"") : (s.tel||s.veliTel||"");
   gnAc(kanal==="sms" ? onaySms(tel,msg) : onayWa(tel,msg));
   r.gonderim.push({k:kanal, t:GN.sablon, z:Date.now()}); save(); renderGonder();
@@ -6897,6 +6963,7 @@ function onayHizliGonder(onsec){
     let r = null;
     if(f==="fd" && ek==="haftalik_odev") r = onayListe().find(q=>q.form==="fd" && q.yuk.fd==="haftalik_odev" && +q.yuk.w===+W && q.durum==="bekliyor" && !q.gelen && q.yuk.x>Date.now());
     if(!r){ const yuk = onayYuk(f, ek); r = {id:yeniId("or"), form:f, ts:Date.now(), yuk, link:tb+"#onay="+onayKodla(yuk), durum:"bekliyor", gonderim:[]}; onayListe().push(r); save(); }
+    await onayKisaHazirla(r);
     const alici = f==="fd" ? onayAlici("fd", ek) : onayAlici(f); const msg = onayMesaj(r);
     kutu.innerHTML = `<h3 style="margin:0 0 6px">Bağlantı hazır</h3><p style="margin:0 0 4px"><b>${esc(ad)}</b></p><p class="muted" style="margin:0 0 10px">Alıcı telefon: <b>${esc(alici||"kayıtlı değil")}</b>${alici?"":" — WhatsApp/SMS uygulamasında kişi seçersiniz."}</p>
       <div class="actions"><a class="btn primary" id="hgWa" href="${esc(onayWa(alici,msg))}" target="_blank" rel="noopener">WhatsApp ile gönder</a><a class="btn" id="hgSms" href="${esc(onaySms(alici,msg))}">SMS ile gönder</a><button class="btn" id="hgKop" type="button">Mesajı kopyala</button></div>
@@ -6911,6 +6978,21 @@ function onayHizliGonder(onsec){
 }
 function onayBagla(){
   const re = ()=>renderPortfoy(); const a = onayAyar(); const s = stu();
+  const tinyDurum = m=>{ const e = $("onTinyDurum"); if(e) e.textContent = m; };
+  $("onKisaAcik").addEventListener("change",()=>{ a.kisalt = $("onKisaAcik").checked; save(); });
+  $("onKisaOnek").addEventListener("change",()=>{ a.kisaOnek = kisaSlug($("onKisaOnek").value)||"ajanskocluk"; save(); });
+  $("onTinyKaydet").addEventListener("click",()=>{ const t = $("onTinyTok").value.trim(); if(t.length<20){ toast("Token çok kısa görünüyor"); return; } try{ localStorage.setItem(TINY_ANAHTAR,t); }catch(e){ toast("Bu tarayıcı token’ı saklayamadı"); return; } toast("Token bu cihaza kaydedildi"); re(); });
+  if($("onTinySil")) $("onTinySil").addEventListener("click",()=>{ try{ localStorage.removeItem(TINY_ANAHTAR); }catch(e){} toast("Token silindi"); re(); });
+  if($("onTinyBetik")) $("onTinyBetik").addEventListener("click",async ()=>{
+    const c = senkCfg(); const t = $("onTinyTok").value.trim() || tinyToken(); if(!c || t.length<20){ toast("Önce token’ı yazın"); return; }
+    tinyDurum("Drive betiğine yükleniyor…");
+    try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"tinyayar", t:c.auth, token:t}), redirect:"follow"}); const j = await r.json();
+      if(j && j.ok){ a.tinyBetik = true; save(); toast("Token Drive betiğine yüklendi ✓"); re(); } else tinyDurum("Betik yanıt vermedi: Code.gs’i yeni sürümle güncelleyip yeniden dağıtın (Drive scriptini güncelle düğmesi)."); }
+    catch(e){ tinyDurum("Drive betiğine ulaşılamadı."); } });
+  $("onTinyTest").addEventListener("click",async ()=>{
+    if(!kisaAcik() && !tinyToken()){ tinyDurum("Önce token kaydedin."); return; }
+    tinyDurum("Deneniyor…"); const k = await kisalUrl("https://example.com/?akp="+Date.now(), "test"+kisaRnd(4));
+    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
   $("onAyarKaydet").addEventListener("click",()=>{
     const u = $("onInbox").value.trim(); if(u && !senkUrlGecerli(u)){ toast("Onay kutusu adresi https://script.google.com/macros/s/…/exec biçiminde olmalı"); return; }
     a.yayinUrl = $("onUrl").value.trim(); a.kocAd = $("onKocAd").value.trim(); a.kocTel = $("onKocTel").value.trim(); a.inboxUrl = u; save(); toast("Ayarlar kaydedildi"); re(); });
@@ -6977,6 +7059,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.16.0", t:"4 Kasım 2026", n:"TinyURL ile kısa bağlantı: öğrenciye/veliye giden bütün form bağlantıları gönderim sırasında otomatik kısalır (tinyurl.com/ajanskocluk-ogrenciadsoyad; ad doluysa kısa bir kod eklenir). Önce Drive betiği (token betikte saklanır), olmazsa tarayıcıdan doğrudan TinyURL denenir; ikisi de olmazsa uzun bağlantı gönderilir. Ayar: Öğrenci dosyası › Portföy › Onay ve gönderim › Kısa bağlantı (token, ön ek, aç/kapat, deneme). Drive betiğine kisalt/tinyayar eylemleri eklendi: betik kodunu yeniden kopyalayıp yeni sürüm dağıtın (dış istek izni istenir)."},
   {v:"3.15.0", t:"2 Kasım 2026", n:"Kısa bağlantı ve sade mesaj: gönderilen bağlantıların uzun kısmı kompakt biçime geçti (alan adları ve boş alanlar çıkarıldı; eski bağlantılar çalışmaya devam eder). WhatsApp/SMS mesajı kısaldı: tek cümle, bağlantı ayrı satırda, altında “Dokunup başlayabilirsin ↑”; “bağlantı 14 gün geçerlidir” bilgisi açılan sayfaya taşındı. WhatsApp önizleme kartı: bağlantı paylaşılınca “Koçundan bir form var” başlıklı kart görünür (hosted kopya yenilenince)."},
   {v:"3.14.0", t:"31 Ekim 2026", n:"Yeni analiz: Akademik Motivasyon Kaynakları Analizi (22 madde, 3 sayfa, 1–5 ölçek; maddeler Müfredat Akademi sayfasından). 6 kaynak: merak ve ilgi, ustalaşma isteği, hedefle bağ, süreçten doyum (içten); çevre beklentisi, kaygı ve kaçınma (dışsal). Ters maddeler otomatik işlenir. Sonuçlar ve raporlar’da kaynak skorları, genel denge (içten ağırlıklı / karma / çevre ve kaygı ağırlıklı), bugün taşıyan ve desteklenmeye açık kaynaklar, “bu sonuç nasıl kuruldu”, koçluk görüşmesi soruları, küçük adımlar, 6–8 hafta sonra tekrar ölçüm; koç raporu (PDF) ve yüzdesiz öğrenci/veli bilgilendirme raporu. Öğrenci sonucu görmez. Analizler kütüphanesine kart eklendi."},
   {v:"3.13.0", t:"31 Ekim 2026", n:"Menü sadeleştirildi: 17 sekme ve 7 grup yerine 6 başlık — Bugün, Öğrenci, Program ve takip, Gönder ve değerlendir, Ödemeler, Ayarlar ve yardım. Alt sayfalar üstteki çubukta konu etiketleriyle (Dosya, Görüşme, Plan, Takip, Gönder, Cevaplar) gruplanır; hiçbir özellik silinmedi. Sayfa adları yenilendi (Haftalık takip, Gelen cevaplar, Sonuçlar ve raporlar…). Yeni: hızlı arama (🔍 Ara ya da Ctrl+K; sayfa, öğrenci ve hızlı işlem arar, eski adlarla da bulur), yan menüde son açılan 3 sayfa, telefonda alt menü (Bugün, Öğrenci, Program, Gönder, Daha fazla)."},
