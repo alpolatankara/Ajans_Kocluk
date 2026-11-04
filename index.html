@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Akademik Koçluk ve Kariyer Planlama Paneli</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -672,7 +673,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.16.4";
+const SURUM = "3.17.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1122,6 +1123,12 @@ function doGet(e) {
   return HtmlService.createHtmlOutput('<p style="font-family:sans-serif;padding:16px">Akademik Koçluk Paneli eşitleme servisi çalışıyor ✅</p>');
 }
 
+/* Bir kez elle çalıştırın: harici bağlantı (kısaltma) izni ister. */
+function izinVer() {
+  var r = UrlFetchApp.fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent('https://example.com/'), {muteHttpExceptions: true});
+  Logger.log(r.getResponseCode() + ' ' + r.getContentText());
+}
+
 function doPost(e) {
   var kilit = LockService.getScriptLock(), tuttu = false;
   try {
@@ -1159,18 +1166,33 @@ function doPost(e) {
       return cevap_({ok: true});
     }
     if (a === 'kisalt') {
-      var tok = p.getProperty('TINY');
-      if (!tok) return cevap_({ok: false, hata: 'tokenyok'});
       var uz = String(g.url || '');
       if (!/^https:\/\/[^\s]{10,4000}$/.test(uz)) return cevap_({ok: false, hata: 'gecersiz'});
+      var tok = p.getProperty('TINY'), tani = [], kk = '';
       var al = String(g.alias || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
-      var tb = {url: uz};
-      if (al) tb.alias = al;
-      var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
-      var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
-      if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
-      var em = JSON.stringify(js.errors || []).toLowerCase();
-      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode(), ayrinti: em.slice(0, 200)});
+      try {
+        if (tok) {
+          var tb = {url: uz, domain: 'tinyurl.com'};
+          if (al) tb.alias = al;
+          var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
+          var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
+          if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
+          if (/alias/.test(JSON.stringify(js.errors || []).toLowerCase())) return cevap_({ok: false, hata: 'alias', kod: rs.getResponseCode()});
+          tani.push('tinyurl-api:' + rs.getResponseCode());
+        }
+        if (uz.length <= 1500) {
+          var r2 = UrlFetchApp.fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(uz), {muteHttpExceptions: true});
+          kk = String(r2.getContentText()).trim();
+          if (!/^https?:\/\/tinyurl\.com\/[A-Za-z0-9_-]{2,40}$/.test(kk)) { tani.push('tinyurl:' + r2.getResponseCode() + ' ' + kk.replace(/\s+/g, ' ').slice(0, 60)); kk = ''; }
+        }
+        if (!kk) {
+          var r3 = UrlFetchApp.fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(uz), {muteHttpExceptions: true});
+          kk = String(r3.getContentText()).trim();
+          if (!/^https?:\/\/is\.gd\/[A-Za-z0-9_-]{2,40}$/.test(kk)) { tani.push('is.gd:' + r3.getResponseCode() + ' ' + kk.replace(/\s+/g, ' ').slice(0, 60)); kk = ''; }
+        }
+      } catch (e8) { return cevap_({ok: false, hata: 'istek', d: String(e8).slice(0, 160)}); }
+      if (kk) return cevap_({ok: true, kisa: kk.replace(/^http:/, 'https:')});
+      return cevap_({ok: false, hata: 'tiny', d: tani.join(' | ')});
     }
     if (a === 'ydk') {
       var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
@@ -6505,7 +6527,7 @@ function onayHmacHex(anahtar, mesaj, n){
 /* ---------- v3.16: TinyURL ile kısa bağlantı ---------- */
 const TINY_ANAHTAR = "akp_tiny_token";
 function tinyToken(){ try{ return localStorage.getItem(TINY_ANAHTAR)||""; }catch(e){ return ""; } }
-function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive && a.tinyBetik); }
+function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive); }
 function kisaSlug(ad){ return String(ad||"").toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]/g,""); }
 function kisaRnd(n){ const k = "abcdefghjkmnpqrstuvwxyz23456789"; let o = ""; for(let i=0;i<n;i++) o += k[Math.floor(Math.random()*k.length)]; return o; }
 function kisaAdaylar(ad){
@@ -6519,14 +6541,14 @@ async function kisalUrl(uzun, ad){
   KISA_HATA = "";
   const a = onayAyar(); const c = senkCfg(); const tok = tinyToken(); const adaylar = kisaAdaylar(ad);
   const zaman = ()=>{ try{ return AbortSignal.timeout(15000); }catch(e){ return undefined; } };
-  if(c && a.inboxDrive && a.tinyBetik){
+  if(c && a.inboxDrive){
     for(const al of adaylar){
       try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
-        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+((j&&j.ayrinti)?" "+j.ayrinti:"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
+        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="istek"&&/izn|izin|permission|authoriz|external_request/i.test(j.d||"")?" – Apps Script’te izinVer işlevini bir kez çalıştırıp izin verin, sonra yeni sürüm dağıtın":"")+(j&&j.d?" ["+String(j.d).slice(0,160)+"]":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
   }
   if(tok){
     for(const al of adaylar){
-      try{ const gv = {url:uzun}; if(al) gv.alias = al;
+      try{ const gv = {url:uzun, domain:"tinyurl.com"}; if(al) gv.alias = al;
         const r = await fetch("https://api.tinyurl.com/create", {method:"POST", headers:{"Authorization":"Bearer "+tok, "Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(gv), signal:zaman()});
         const j = await r.json().catch(()=>({}));
         if(r.ok && j.data && j.data.tiny_url) return j.data.tiny_url;
@@ -6690,7 +6712,7 @@ function onayHtml(){
       <div class="field"><label><input id="onKisaAcik" type="checkbox" ${a.kisalt===false?"":"checked"}> Bağlantıları kısalt</label></div>
     </div>
     <div class="actions"><button class="btn" id="onTinyKaydet" type="button">Token’ı kaydet</button>${senkCfg()?'<button class="btn" id="onTinyBetik" type="button">Token’ı Drive betiğine de yükle</button>':""}<button class="btn" id="onTinyTest" type="button">Kısaltmayı dene</button>${tinyToken()?'<button class="btn" id="onTinySil" type="button">Token’ı sil</button>':""}</div>
-    <p class="muted" id="onTinyDurum" style="margin:6px 0">${kisaAcik()?"Kısaltma açık"+(a.tinyBetik?" (Drive betiği + bu cihaz)":" (bu cihaz)"):"Kısaltma kapalı: token kaydedin"}</p>
+    <p class="muted" id="onTinyDurum" style="margin:6px 0">${kisaAcik()?"Kısaltma açık"+((senkCfg()&&a.inboxDrive)?(tinyToken()?" (Drive betiği + bu cihaz)":" (Drive betiği)"):" (bu cihaz)"):"Kısaltma kapalı: Drive eşitlemesini bağlayın veya token kaydedin"}</p>
     ${tbn?"":'<p class="kr-uyari" role="status">Yayın adresi yok. Panel dosyasını bir adreste yayınladıysanız yukarıya yazın; aksi halde bağlantı oluşturulamaz.</p>'}
     <p class="muted" id="onKutuDurum" style="margin:6px 0">${esc(onayKutuDurumMetin())}</p>
     <div class="actions"><button class="btn" id="onAyarKaydet" type="button">Ayarları kaydet</button><button class="btn" id="onKutuTest" type="button">Bağlantıyı test et</button><button class="btn" id="onKutuAl" type="button">Yeni cevapları getir</button><button class="btn" id="onDriveKop" type="button">Drive scriptini güncelle (kodu kopyala)</button></div>
@@ -6995,9 +7017,9 @@ function onayBagla(){
       if(j && j.ok){ a.tinyBetik = true; save(); toast("Token Drive betiğine yüklendi ✓"); re(); } else tinyDurum("Betik yanıt vermedi: Code.gs’i yeni sürümle güncelleyip yeniden dağıtın (Drive scriptini güncelle düğmesi)."); }
     catch(e){ tinyDurum("Drive betiğine ulaşılamadı."); } });
   $("onTinyTest").addEventListener("click",async ()=>{
-    if(!kisaAcik() && !tinyToken()){ tinyDurum("Önce token kaydedin."); return; }
+    if(!kisaAcik() && !tinyToken()){ tinyDurum("Önce Drive eşitlemesini bağlayın (token zorunlu değil) ya da token kaydedin."); return; }
     tinyDurum("Deneniyor…"); const k = await kisalUrl("https://example.com/?akp="+Date.now(), "test"+kisaRnd(4));
-    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. "+(KISA_HATA||"")+"Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
+    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. "+(KISA_HATA||"")+"Drive scriptini güncelleyip yeni sürüm dağıtın ve izinVer işlevini bir kez çalıştırın."); });
   $("onAyarKaydet").addEventListener("click",()=>{
     const u = $("onInbox").value.trim(); if(u && !senkUrlGecerli(u)){ toast("Onay kutusu adresi https://script.google.com/macros/s/…/exec biçiminde olmalı"); return; }
     a.yayinUrl = $("onUrl").value.trim(); a.kocAd = $("onKocAd").value.trim(); a.kocTel = $("onKocTel").value.trim(); a.inboxUrl = u; save(); toast("Ayarlar kaydedildi"); re(); });
@@ -7064,7 +7086,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
-  {v:"3.16.4", t:"5 Kasım 2026", n:"TinyURL isteğinden gereksiz alan kaldırıldı (HTTP 422 düzeltmesi); hata ayrıntısı gösterilir. Drive betiği (Code.gs) güncellendi: yeniden yapıştırıp yeni sürüm dağıtın."},
+  {v:"3.17.0", t:"5 Kasım 2026", n:"Kısaltma Genç Medeniyet uygulamasıyla aynı: token zorunlu değil, Drive betiği anahtarsız TinyURL’yi dener, olmazsa yedek servis kullanır ve nedenini gösterir (izinVer işlevi eklendi). Güvenlik: Content-Security-Policy eklendi; 15 dakika hareketsizlikte panel kendiliğinden kilitlenir (şifre/PIN varsa)."},
   {v:"3.16.3", t:"4 Kasım 2026", n:"“Kısaltmayı dene” başarısız olursa nedenini gösterir (Drive betiği / TinyURL yanıtı / ağ)."},
   {v:"3.16.2", t:"4 Kasım 2026", n:"Kısa bağlantı özel ad önekini silince geri gelen \"ajanskocluk\" düzeltildi: ön ek boş bırakılabilir; özel ad kapalıyken ön ek alanı devre dışı."},
   {v:"3.16.1", t:"4 Kasım 2026", n:"Kısa bağlantı artık varsayılan olarak özel ad olmadan (normal tinyurl.com/xxxx) üretilir; ücretsiz hesaplarda özel ad hata verebildiği için. Özel ad (ajanskocluk-ad) isteğe bağlı kutuyla açılır."},
@@ -7603,6 +7625,22 @@ async function yedekGeriYukle(id){
       $("lockEnc").querySelector("#gEski").addEventListener('click',()=>{ window.akpClearPin(); unlock(); });
     });
   }
+})();
+
+/* ---------- v3.17: hareketsizlikte otomatik kilit (Genç Medeniyet uygulamasındaki gibi) ---------- */
+(function(){
+  if(window.__ONAY) return;
+  const BOSTA = 15*60*1000; let son = Date.now();
+  ["pointerdown","keydown","touchstart","scroll"].forEach(e=>document.addEventListener(e,()=>{ son = Date.now(); },{passive:true}));
+  setInterval(()=>{
+    try{
+      if(Date.now()-son < BOSTA) return;
+      if(DEPO.kilitli) return;
+      if(!(DEPO.sifreli || (window.akpPinActive && window.akpPinActive()))) return;
+      try{ sessionStorage.removeItem("akp_unlocked"); }catch(e){}
+      Promise.resolve(DEPO.yaz).then(()=>location.reload());
+    }catch(e){}
+  },30000);
 })();
 </script>
 </body>
