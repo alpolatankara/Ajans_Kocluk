@@ -672,7 +672,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.16.0";
+const SURUM = "3.16.3";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -6509,17 +6509,20 @@ function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; re
 function kisaSlug(ad){ return String(ad||"").toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]/g,""); }
 function kisaRnd(n){ const k = "abcdefghjkmnpqrstuvwxyz23456789"; let o = ""; for(let i=0;i<n;i++) o += k[Math.floor(Math.random()*k.length)]; return o; }
 function kisaAdaylar(ad){
-  const onek = kisaSlug(onayAyar().kisaOnek) || "ajanskocluk"; const sl = kisaSlug(ad); const taban = (onek+(sl?"-"+sl:"")).slice(0,30);
+  if(onayAyar().kisaAliasAc!==true) return [""];
+  const ko = onayAyar().kisaOnek; const onek = ko===undefined ? "ajanskocluk" : kisaSlug(ko); const sl = kisaSlug(ad); const taban = [onek,sl].filter(Boolean).join("-").slice(0,30);
   const kisa = taban.slice(0,26);
   return [taban, kisa+"-"+kisaRnd(3), kisa+"-"+kisaRnd(3), ""];
 }
+let KISA_HATA = "";
 async function kisalUrl(uzun, ad){
+  KISA_HATA = "";
   const a = onayAyar(); const c = senkCfg(); const tok = tinyToken(); const adaylar = kisaAdaylar(ad);
   const zaman = ()=>{ try{ return AbortSignal.timeout(15000); }catch(e){ return undefined; } };
   if(c && a.inboxDrive && a.tinyBetik){
     for(const al of adaylar){
       try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
-        if(j && j.ok && j.kisa) return j.kisa; if(j && j.hata==="alias") continue; break; }catch(e){ break; } }
+        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
   }
   if(tok){
     for(const al of adaylar){
@@ -6527,7 +6530,7 @@ async function kisalUrl(uzun, ad){
         const r = await fetch("https://api.tinyurl.com/create", {method:"POST", headers:{"Authorization":"Bearer "+tok, "Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(gv), signal:zaman()});
         const j = await r.json().catch(()=>({}));
         if(r.ok && j.data && j.data.tiny_url) return j.data.tiny_url;
-        if(/alias/i.test(JSON.stringify(j.errors||[]))) continue; break; }catch(e){ break; } }
+        KISA_HATA += "TinyURL: HTTP "+r.status+" "+JSON.stringify(j.errors||j.message||"").slice(0,160)+" · "; if(/alias/i.test(JSON.stringify(j.errors||[]))) continue; break; }catch(e){ KISA_HATA += "Tarayıcıdan TinyURL’ye ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
   }
   return null;
 }
@@ -6682,7 +6685,8 @@ function onayHtml(){
     <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). Başarısız olursa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
     <div class="form">
       <div class="field"><label for="onTinyTok">TinyURL token ${tinyToken()?'<span class="chip ok">bu cihazda kayıtlı</span>':""}</label><input id="onTinyTok" type="password" autocomplete="off" placeholder="${tinyToken()?"Değiştirmek için yeni token yazın":"Token’ı yapıştırın"}"></div>
-      <div class="field"><label for="onKisaOnek">Kısa ad öneki</label><input id="onKisaOnek" type="text" value="${esc(a.kisaOnek||"ajanskocluk")}" placeholder="ajanskocluk"></div>
+      <div class="field"><label><input id="onKisaAlias" type="checkbox" ${a.kisaAliasAc===true?"checked":""}> Özel ad kullan (ücretli TinyURL hesabı gerekebilir)</label></div>
+      <div class="field"><label for="onKisaOnek">Özel ad öneki</label><input id="onKisaOnek" type="text" value="${esc(a.kisaOnek===undefined?"ajanskocluk":a.kisaOnek)}" placeholder="boş bırakılabilir" ${a.kisaAliasAc===true?"":"disabled"}></div>
       <div class="field"><label><input id="onKisaAcik" type="checkbox" ${a.kisalt===false?"":"checked"}> Bağlantıları kısalt</label></div>
     </div>
     <div class="actions"><button class="btn" id="onTinyKaydet" type="button">Token’ı kaydet</button>${senkCfg()?'<button class="btn" id="onTinyBetik" type="button">Token’ı Drive betiğine de yükle</button>':""}<button class="btn" id="onTinyTest" type="button">Kısaltmayı dene</button>${tinyToken()?'<button class="btn" id="onTinySil" type="button">Token’ı sil</button>':""}</div>
@@ -6980,7 +6984,8 @@ function onayBagla(){
   const re = ()=>renderPortfoy(); const a = onayAyar(); const s = stu();
   const tinyDurum = m=>{ const e = $("onTinyDurum"); if(e) e.textContent = m; };
   $("onKisaAcik").addEventListener("change",()=>{ a.kisalt = $("onKisaAcik").checked; save(); });
-  $("onKisaOnek").addEventListener("change",()=>{ a.kisaOnek = kisaSlug($("onKisaOnek").value)||"ajanskocluk"; save(); });
+  $("onKisaAlias").addEventListener("change",()=>{ a.kisaAliasAc = $("onKisaAlias").checked; $("onKisaOnek").disabled = !a.kisaAliasAc; save(); });
+  $("onKisaOnek").addEventListener("change",()=>{ a.kisaOnek = kisaSlug($("onKisaOnek").value); save(); });
   $("onTinyKaydet").addEventListener("click",()=>{ const t = $("onTinyTok").value.trim(); if(t.length<20){ toast("Token çok kısa görünüyor"); return; } try{ localStorage.setItem(TINY_ANAHTAR,t); }catch(e){ toast("Bu tarayıcı token’ı saklayamadı"); return; } toast("Token bu cihaza kaydedildi"); re(); });
   if($("onTinySil")) $("onTinySil").addEventListener("click",()=>{ try{ localStorage.removeItem(TINY_ANAHTAR); }catch(e){} toast("Token silindi"); re(); });
   if($("onTinyBetik")) $("onTinyBetik").addEventListener("click",async ()=>{
@@ -6992,7 +6997,7 @@ function onayBagla(){
   $("onTinyTest").addEventListener("click",async ()=>{
     if(!kisaAcik() && !tinyToken()){ tinyDurum("Önce token kaydedin."); return; }
     tinyDurum("Deneniyor…"); const k = await kisalUrl("https://example.com/?akp="+Date.now(), "test"+kisaRnd(4));
-    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
+    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. "+(KISA_HATA||"")+"Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
   $("onAyarKaydet").addEventListener("click",()=>{
     const u = $("onInbox").value.trim(); if(u && !senkUrlGecerli(u)){ toast("Onay kutusu adresi https://script.google.com/macros/s/…/exec biçiminde olmalı"); return; }
     a.yayinUrl = $("onUrl").value.trim(); a.kocAd = $("onKocAd").value.trim(); a.kocTel = $("onKocTel").value.trim(); a.inboxUrl = u; save(); toast("Ayarlar kaydedildi"); re(); });
@@ -7059,6 +7064,9 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.16.3", t:"4 Kasım 2026", n:"“Kısaltmayı dene” başarısız olursa nedenini gösterir (Drive betiği / TinyURL yanıtı / ağ)."},
+  {v:"3.16.2", t:"4 Kasım 2026", n:"Kısa bağlantı özel ad önekini silince geri gelen \"ajanskocluk\" düzeltildi: ön ek boş bırakılabilir; özel ad kapalıyken ön ek alanı devre dışı."},
+  {v:"3.16.1", t:"4 Kasım 2026", n:"Kısa bağlantı artık varsayılan olarak özel ad olmadan (normal tinyurl.com/xxxx) üretilir; ücretsiz hesaplarda özel ad hata verebildiği için. Özel ad (ajanskocluk-ad) isteğe bağlı kutuyla açılır."},
   {v:"3.16.0", t:"4 Kasım 2026", n:"TinyURL ile kısa bağlantı: öğrenciye/veliye giden bütün form bağlantıları gönderim sırasında otomatik kısalır (tinyurl.com/ajanskocluk-ogrenciadsoyad; ad doluysa kısa bir kod eklenir). Önce Drive betiği (token betikte saklanır), olmazsa tarayıcıdan doğrudan TinyURL denenir; ikisi de olmazsa uzun bağlantı gönderilir. Ayar: Öğrenci dosyası › Portföy › Onay ve gönderim › Kısa bağlantı (token, ön ek, aç/kapat, deneme). Drive betiğine kisalt/tinyayar eylemleri eklendi: betik kodunu yeniden kopyalayıp yeni sürüm dağıtın (dış istek izni istenir)."},
   {v:"3.15.0", t:"2 Kasım 2026", n:"Kısa bağlantı ve sade mesaj: gönderilen bağlantıların uzun kısmı kompakt biçime geçti (alan adları ve boş alanlar çıkarıldı; eski bağlantılar çalışmaya devam eder). WhatsApp/SMS mesajı kısaldı: tek cümle, bağlantı ayrı satırda, altında “Dokunup başlayabilirsin ↑”; “bağlantı 14 gün geçerlidir” bilgisi açılan sayfaya taşındı. WhatsApp önizleme kartı: bağlantı paylaşılınca “Koçundan bir form var” başlıklı kart görünür (hosted kopya yenilenince)."},
   {v:"3.14.0", t:"31 Ekim 2026", n:"Yeni analiz: Akademik Motivasyon Kaynakları Analizi (22 madde, 3 sayfa, 1–5 ölçek; maddeler Müfredat Akademi sayfasından). 6 kaynak: merak ve ilgi, ustalaşma isteği, hedefle bağ, süreçten doyum (içten); çevre beklentisi, kaygı ve kaçınma (dışsal). Ters maddeler otomatik işlenir. Sonuçlar ve raporlar’da kaynak skorları, genel denge (içten ağırlıklı / karma / çevre ve kaygı ağırlıklı), bugün taşıyan ve desteklenmeye açık kaynaklar, “bu sonuç nasıl kuruldu”, koçluk görüşmesi soruları, küçük adımlar, 6–8 hafta sonra tekrar ölçüm; koç raporu (PDF) ve yüzdesiz öğrenci/veli bilgilendirme raporu. Öğrenci sonucu görmez. Analizler kütüphanesine kart eklendi."},
