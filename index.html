@@ -533,6 +533,8 @@ body{display:flex;flex-direction:column}
 .gm-tile b{font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}.gm-tile span{font-size:12.5px;color:var(--ink-3)}
 .gm-tile.r b{color:var(--redpen)}.gm-tile.on{border-color:var(--accent,#1d7a55);box-shadow:0 0 0 2px rgba(29,122,85,.25);background:var(--paper-2)}
 .gm-tile:hover{border-color:var(--accent,#1d7a55)}
+@media(max-width:760px){.topbar{gap:6px;min-width:0}.topbar-clock{display:none}.kayit-durum{padding:3px 8px;margin-right:0;font-size:14px;flex:0 0 auto}.kayit-durum .kd-t{display:none}#kilitBtn .kb-t{display:none}.topbar .side-theme{padding:7px 9px}.topbar #senkBtn{max-width:140px;overflow:hidden;text-overflow:ellipsis}}
+html,body{max-width:100%;overflow-x:hidden}
 @media print{.topbar,.app{display:none!important}}
 </style>
 </head>
@@ -560,9 +562,9 @@ body{display:flex;flex-direction:column}
   <button class="side-burger" id="sideBurger" type="button" aria-label="Menüyü aç/kapat" aria-expanded="false">☰</button>
   <div class="topbar-clock" id="sideClock" aria-live="off"></div>
   <button class="btn side-theme" id="araBtn" type="button" aria-label="Hızlı arama (Ctrl+K)">🔍 Ara</button>
-  <button class="kayit-durum" id="kayitDurum" type="button" aria-live="polite" title="Açık alanı uygula ve kalıcı kaydet">✓ Kaydedildi</button>
+  <button class="kayit-durum" id="kayitDurum" type="button" aria-live="polite" title="Açık alanı uygula ve kalıcı kaydet"><span class="kd-i">✓</span><span class="kd-t"> Kaydedildi</span></button>
   <button class="btn side-theme" id="senkBtn" type="button" aria-label="Google Drive ile eşitleme">☁️ Drive: <span id="senkYazi">Kapalı</span></button>
-  <button class="btn side-theme" id="kilitBtn" type="button" aria-label="Paneli kilitle" title="Paneli şimdi kilitle" hidden>🔒 Kilitle</button>
+  <button class="btn side-theme" id="kilitBtn" type="button" aria-label="Paneli kilitle" title="Paneli şimdi kilitle" hidden>🔒<span class="kb-t"> Kilitle</span></button>
   <button class="btn side-theme" id="themeToggle" type="button" aria-label="Karanlık / aydınlık görünümü değiştir">🌓 Görünüm</button>
 </header>
 <div class="app">
@@ -708,7 +710,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.20.0";
+const SURUM = "3.20.1";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -952,11 +954,11 @@ window.addEventListener("pagehide", acikAlaniIsle); window.addEventListener("bef
 /* kaydedildi göstergesi */
 function kaydedildiYaz(){
   const e = document.getElementById("kayitDurum"); if(!e) return;
-  const t = new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); e.textContent = "✓ Kaydedildi "+t; e.title = "Veriler bu cihaza kalıcı olarak yazıldı"; e.classList.remove("flash","kirli"); void e.offsetWidth; e.classList.add("flash");
+  const t = new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); e.querySelector(".kd-i").textContent = "✓"; e.querySelector(".kd-t").textContent = " Kaydedildi "+t; e.title = "Veriler bu cihaza kalıcı olarak yazıldı"; e.classList.remove("flash","kirli"); void e.offsetWidth; e.classList.add("flash");
 }
 (function(){
   const e = document.getElementById("kayitDurum"); if(!e) return;
-  const kirli = ()=>{ if(!e.classList.contains("kirli")){ e.classList.add("kirli"); e.textContent = "● Kaydet"; e.title = "Yazdığın alan henüz kaydedilmedi. Dokun: kalıcı kaydet"; } };
+  const kirli = ()=>{ if(!e.classList.contains("kirli")){ e.classList.add("kirli"); e.querySelector(".kd-i").textContent = "●"; e.querySelector(".kd-t").textContent = " Kaydet"; e.title = "Yazdığın alan henüz kaydedilmedi. Dokun: kalıcı kaydet"; } };
   const pn = document.getElementById("panel"); if(pn) pn.addEventListener("input",ev=>{ if(/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName) && ev.target.type!=="search") kirli(); });
   e.addEventListener("click",()=>{ acikAlaniIsle(); save(); toast("Kaydedildi: veriler kalıcı olarak yazıldı"); });
 })();
@@ -7818,6 +7820,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.20.1", t:"9 Kasım 2026", n:"Telefonda üst çubuk taşıp sayfayı genişletiyordu (Kaydedildi göstergesi); düzeltildi: telefonda gösterge simgeye iner, saat gizlenir, sayfa yana kaymaz."},
   {v:"3.20.0", t:"8 Kasım 2026", n:"Bugün sayfasına görev merkezi: tıklanabilir sayaçlar (Gecikmiş, Bugün, Bu hafta, Ödeme, Gelen form, Ertelenen/yapılan); her işte Yapıldı, Ertele, Düzenle, Sil/Aç ve Geri al; ertelenenler geri getirilebilir. Güvenlik: otomatik kilit (Yedek ve güvenlik › süre seçilir) ve üst çubukta Kilitle düğmesi, yanlış şifre bekleme süresi sayfa yenilense de sıfırlanmaz (eski PIN girişi dahil), 7 gündür yedek alınmadıysa günde bir kez hatırlatma."},
   {v:"3.19.0", t:"8 Kasım 2026", n:"Yeni ana logo (Öğrenci Kariyeri · Ajans Koçluk Ankara); ek logo kaydetme, varsayılan logo seçimi, belge yazdırırken belge başına logo/logosuz seçici. Belgelerin altında web sitesi ve Instagram kare kodları (tek renkli, vektör), mesajlara web adresi. Yeni marka renkli giriş ekranı. Veri güvenliği: silinen kayıtlar Drive eşitlemesinde geri gelmez (silme izi), kayıt bazlı değişiklik zamanı ile yerel düzenleme uzak kopyayla ezilmez; her silmede 10 sn Geri al, 30 gün saklayan Çöp kutusu; üst çubukta Kaydedildi göstergesi; sayfa kapanırken yazılmamış alan uygulanır."},
   {v:"3.18.0", t:"8 Kasım 2026", n:"Muhasebe bölümü (Ödemeler menüsü artık “Muhasebe”): Genel bakış (bu ay tahsilat/tahakkuk, toplam ve geciken alacak, gider, net, son 6 ay grafiği), Alacaklar (kimden ne kadar; kardeşler aile adıyla toplanır; 0–30/31–60/61+ gün yaşlandırma; tek tek ve toplu hatırlatma; antetli liste ve CSV), Ödeme takibi (mevcut ödeme ekranı), Giderler (kategori, ekleme/düzenleme, CSV), Raporlar (bu ay/geçen ay/son 3 ay/yıl/aralık; aylık, hizmet türü ve öğrenci bazında; antetli PDF ve CSV), Veli ekstresi ve makbuz (antetli PDF, özet mesajı, hatırlatma, numaralı tahsilat makbuzu) ve Antetli kâğıt ayarı (logo, ad, iletişim, alt not). IBAN/banka bilgisi antette ve veliye giden belgelerde yer almaz. Belgeler bilgi amaçlıdır; resmî fatura değildir."},
