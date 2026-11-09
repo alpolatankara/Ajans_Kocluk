@@ -507,6 +507,7 @@ body{display:flex;flex-direction:column}
 #gTip{position:fixed;z-index:10000;background:var(--paper-2);color:var(--ink);border:1px solid var(--line-2);border-radius:6px;padding:6px 9px;font-size:12px;pointer-events:none;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .kayit-durum{font:inherit;font-size:12px;color:var(--ink-3);white-space:nowrap;margin-right:auto;background:transparent;border:1px solid transparent;border-radius:999px;padding:3px 10px;cursor:pointer}.kayit-durum.kirli{color:#7a4b00;background:#ffe7b3;border-color:#f5a300;font-weight:600}.kayit-durum.flash{animation:kdf 1.4s ease}@keyframes kdf{0%{color:var(--ok,#1d7a46);font-weight:600}100%{color:var(--ink-3)}}
 .pprev-logo select{color:#14283a;background:#fff;border-radius:6px;padding:4px 6px}
+tr.vurgu td{background:#fff3cf}
 .logo-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
 .logo-sec{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);border-radius:10px;padding:8px;cursor:pointer;font-size:13px;background:var(--paper)}
 .logo-sec.on{border-color:var(--accent,#1d7a55);box-shadow:0 0 0 2px rgba(29,122,85,.25)}
@@ -710,7 +711,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.20.1";
+const SURUM = "3.20.2";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -2956,6 +2957,7 @@ function renderOdeme(){
   const buAyKayit = L.find(x=>x.ay===buAy && (x.periyot||"Aylık")==="Aylık");
   let list=L.slice().sort((a,b)=>(b.tarih||b.ay||"").localeCompare(a.tarih||a.ay||""));
   if(OD_FIL==="buay") list = list.filter(x=>x.ay===buAy); else if(OD_FIL==="bekleyen") list = list.filter(x=>x.durum!=="Ödendi");
+  if(MH.ay) list = list.filter(x=>mhAy(x.bas || (x.ay ? x.ay+"-01" : "") || x.tarih || "")===MH.ay);
   const top = L.reduce((a,x)=>a+odTutar(x),0), tah = L.reduce((a,x)=>a+odOdenen(x),0), kal = Math.max(0,top-tah);
   const saatT = L.reduce((a,x)=>a+(+x.saat||0),0), dersN = L.reduce((a,x)=>a+odGunlukOku(x).filter(g=>g.t).length,0);
   const kardes = s.aile ? aktifler().filter(o=>o.aile && o.aile===s.aile) : [];
@@ -3007,7 +3009,7 @@ function renderOdeme(){
       <div class="field" style="margin-top:8px"><label for="oNot">Not (isteğe bağlı)</label><input id="oNot" type="text" placeholder="Örnek: Havale gelecek hafta" value="${esc(ed?ed.not||"":"")}"></div>
       <div class="actions"><button class="btn primary" id="oSave">${ed?"Güncelle":"Kaydet"}</button>${ed?`<button class="btn" id="oVazgec">Vazgeç</button>`:""}</div>
     </div>
-    ${L.length?`<div class="colhead no" style="margin-top:14px"><h3 style="margin:0">Ödeme kayıtları (${list.length}/${L.length})</h3><select id="oFil" aria-label="Süz" style="max-width:180px"><option value="hepsi"${OD_FIL==="hepsi"?" selected":""}>Tüm kayıtlar</option><option value="buay"${OD_FIL==="buay"?" selected":""}>Bu ay</option><option value="bekleyen"${OD_FIL==="bekleyen"?" selected":""}>Bekleyenler</option></select></div>`:""}
+    ${L.length?`<div class="colhead no" style="margin-top:14px"><h3 style="margin:0">Ödeme kayıtları (${list.length}/${L.length})</h3><select id="oFil" aria-label="Süz" style="max-width:180px"><option value="hepsi"${OD_FIL==="hepsi"?" selected":""}>Tüm kayıtlar</option><option value="buay"${OD_FIL==="buay"?" selected":""}>Bu ay</option><option value="bekleyen"${OD_FIL==="bekleyen"?" selected":""}>Bekleyenler</option></select></div><div class="form no" style="margin:6px 0">${mhAySecici("oAy", s.id, "Dönem ayı")}</div>`:""}
     ${list.length?`<div class="tscroll"><table class="ttab"><thead><tr><th>Dönem / tür</th><th>Ders saati</th><th>Tutar</th><th>Ödenen</th><th>Durum</th><th>Tarih</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">${L.length?"Bu süzgeçte kayıt yok.":"Bu öğrenci için henüz ödeme kaydı yok."}</div>`}`;
   const ucAyar = (id,anahtar,tur)=>$(id).addEventListener('change',()=>{ s[anahtar]=$(id).value.trim(); if(anahtar==="ucretOzel") s.ucretSaat = s[anahtar]; save(); if($("oTur").value===tur){ $("oSaatUcret").value = s[anahtar]; hesap(); } else hesap(); });
   let tutarElle = !!(ed && ed.tutar && ed.brut===undefined);
@@ -3088,6 +3090,7 @@ function renderOdeme(){
   });
   if($("oVazgec")) $("oVazgec").addEventListener('click',()=>{ OD_EDIT=null; OD_GUN=[]; renderOdeme(); });
   if($("oFil")) $("oFil").addEventListener('change',e=>{ OD_FIL = e.target.value; renderOdeme(); });
+  mhAyBagla("oAy", renderOdeme);
   document.querySelectorAll('[data-odel]').forEach(b=>b.addEventListener('click',()=>armDel(b,()=>{
     DB.odeme[s.id]=L.filter(y=>y.id!==b.dataset.odel); if(OD_EDIT===b.dataset.odel){ OD_EDIT=null; OD_GUN=[]; } save(); renderOdeme(); toast("Kayıt silindi");
   })));
@@ -7021,7 +7024,7 @@ function renderAiyorum(){
 
 /* ---------- v3.18: MUHASEBE (genel bakış, alacaklar, giderler, raporlar, ekstre/makbuz, antet) ---------- */
 const GIDER_KAT = ["Kitap / kaynak","Baskı / kırtasiye","Reklam / tanıtım","Kira / ofis","Ulaşım","Yazılım / abonelik","Vergi / harç","Diğer"];
-const MH = {rapor:"buay", bas:"", bit:"", gid:null, grup:"", kapsam:"son6", sadeceAcik:false, soloGeciken:false};
+const MH = {ay:"", rapor:"buay", bas:"", bit:"", gid:null, grup:"", kapsam:"son6", sadeceAcik:false, soloGeciken:false};
 function mhAy(iso){ return String(iso||"").slice(0,7); }
 function mhFark(a,b){ return Math.floor((new Date(a+"T12:00:00")-new Date(b+"T12:00:00"))/86400000); }
 function mhKisi(){ const a = onayAyar(); return (antetAyar().kisi||a.kocAd||"").trim(); }
@@ -7045,7 +7048,7 @@ function muhGruplar(S){
     o.gec = Math.max(-1, ...o.sat.filter(r=>r.kal>0).map(r=>r.gec)); o.eskiVade = o.sat.filter(r=>r.kal>0 && r.ref).map(r=>r.ref).sort()[0] || ""; return o; });
 }
 function mhSayfa(baslik, govde){ return `<div class="colhead"><h2 style="margin:0">${baslik}</h2></div>${govde}`; }
-const MH_CSS = `.mh-pg{font-family:"Lexend",system-ui,sans-serif;color:#14283a;font-size:10pt}.mh-ant{display:flex;align-items:center;gap:14px;padding-bottom:10px}.mh-ant img{height:17mm;width:auto}.mh-am{flex:1}.mh-am b{display:block;font-family:"Literata",Georgia,serif;font-size:15pt;color:#14283a}.mh-am span{font-size:8.5pt;color:#5d7082}.mh-ar{text-align:right;font-size:8.5pt;color:#34495c;line-height:1.5}.mh-line{height:3px;background:linear-gradient(90deg,#14283a 0 70%,#e0a92c 70% 100%);margin-bottom:14px}.mh-t{font-family:"Literata",Georgia,serif;font-size:15pt;margin:4px 0 2px}.mh-sub{color:#5d7082;font-size:9pt;margin:0 0 10px}.mh-pg table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9pt}.mh-pg th{background:#f3f6f8;text-align:left;padding:5px 6px;border-bottom:2px solid #14283a;font-weight:600}.mh-pg td{padding:5px 6px;border-bottom:1px solid #c9d3dc}.mh-pg .r{text-align:right;white-space:nowrap}.mh-pg tfoot td{font-weight:700;border-top:2px solid #14283a;border-bottom:0}.mh-box{border:1px solid #c9d3dc;border-radius:6px;padding:8px 10px;margin:8px 0;background:#f9fbfc}.mh-ft{margin-top:18px;padding-top:6px;border-top:1px solid #c9d3dc;font-size:8pt;color:#5d7082;display:flex;justify-content:space-between;gap:10px}.mh-imza{display:flex;justify-content:flex-end;margin-top:26px}.mh-imza div{width:60mm;border-top:1px solid #14283a;text-align:center;padding-top:3px;font-size:8.5pt}.mh-ozet{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.mh-ozet div{flex:1;min-width:30mm;border:1px solid #c9d3dc;border-radius:6px;padding:6px 8px}.mh-ozet small{display:block;color:#5d7082;font-size:8pt}.mh-ozet b{font-size:12pt}`;
+const MH_CSS = `tr.vurgu td{background:#fff3cf!important}.mh-pg{font-family:"Lexend",system-ui,sans-serif;color:#14283a;font-size:10pt}.mh-ant{display:flex;align-items:center;gap:14px;padding-bottom:10px}.mh-ant img{height:17mm;width:auto}.mh-am{flex:1}.mh-am b{display:block;font-family:"Literata",Georgia,serif;font-size:15pt;color:#14283a}.mh-am span{font-size:8.5pt;color:#5d7082}.mh-ar{text-align:right;font-size:8.5pt;color:#34495c;line-height:1.5}.mh-line{height:3px;background:linear-gradient(90deg,#14283a 0 70%,#e0a92c 70% 100%);margin-bottom:14px}.mh-t{font-family:"Literata",Georgia,serif;font-size:15pt;margin:4px 0 2px}.mh-sub{color:#5d7082;font-size:9pt;margin:0 0 10px}.mh-pg table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9pt}.mh-pg th{background:#f3f6f8;text-align:left;padding:5px 6px;border-bottom:2px solid #14283a;font-weight:600}.mh-pg td{padding:5px 6px;border-bottom:1px solid #c9d3dc}.mh-pg .r{text-align:right;white-space:nowrap}.mh-pg tfoot td{font-weight:700;border-top:2px solid #14283a;border-bottom:0}.mh-box{border:1px solid #c9d3dc;border-radius:6px;padding:8px 10px;margin:8px 0;background:#f9fbfc}.mh-ft{margin-top:18px;padding-top:6px;border-top:1px solid #c9d3dc;font-size:8pt;color:#5d7082;display:flex;justify-content:space-between;gap:10px}.mh-imza{display:flex;justify-content:flex-end;margin-top:26px}.mh-imza div{width:60mm;border-top:1px solid #14283a;text-align:center;padding-top:3px;font-size:8.5pt}.mh-ozet{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.mh-ozet div{flex:1;min-width:30mm;border:1px solid #c9d3dc;border-radius:6px;padding:6px 8px}.mh-ozet small{display:block;color:#5d7082;font-size:8pt}.mh-ozet b{font-size:12pt}`;
 function antetHtml(){ const a = antetAyar(); const sag = [a.kisi, a.tel, a.eposta, a.adres, a.web].filter(Boolean).map(esc).join("<br>");
   return `<div class="mh-ant">${logoImg()}<div class="mh-am"><b>${esc(a.ad)}</b><span>${esc(a.alt)}</span></div><div class="mh-ar">${sag}</div></div><div class="mh-line"></div>`; }
 function mhBelge(baslik, alt, govde, imza){ const a = antetAyar();
@@ -7112,13 +7115,32 @@ function renderMuhasebe(){
   document.querySelectorAll("[data-mhe]").forEach(b=>b.addEventListener("click",()=>{ MH.grup = b.dataset.mhe; TAB = "ekstre"; renderTab(); }));
 }
 /* --- Alacaklar --- */
+/* ---------- v3.20.1: dönem ayı seçici (Alacaklar, Ödeme takibi, Ekstre) ---------- */
+function ayEkle(ym, n){ const [y,m] = ym.split("-").map(Number); const d = new Date(y, m-1+n, 1); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+function mhAyListe(ogrId){
+  const S = new Set([todayIso().slice(0,7)]);
+  (ogrId ? [ogrId] : DB.students.map(s=>s.id)).forEach(id=>(DB.odeme[id]||[]).forEach(x=>{ const a = mhAy(x.bas || (x.ay ? x.ay+"-01" : "") || x.tarih || ""); if(/^\d{4}-\d{2}$/.test(a)) S.add(a); }));
+  if(MH.ay) S.add(MH.ay); return [...S].sort().reverse();
+}
+function mhAySecici(id, ogrId, etiket){
+  const L = mhAyListe(ogrId);
+  return `<div class="field mh-ay"><label for="${id}">${etiket||"Dönem ayı"}</label><div class="row" style="gap:6px;align-items:center;flex-wrap:nowrap"><button class="btn small" id="${id}O" type="button" aria-label="Önceki ay">‹</button><select id="${id}" style="min-width:0;flex:1"><option value="">Tüm aylar</option>${L.map(a=>`<option value="${a}"${MH.ay===a?" selected":""}>${esc(odemeAyAdi(a))}</option>`).join("")}</select><button class="btn small" id="${id}S" type="button" aria-label="Sonraki ay">›</button></div></div>`;
+}
+function mhAyBagla(id, yenile){
+  const s = $(id); if(!s) return;
+  s.addEventListener("change",()=>{ MH.ay = s.value; yenile(); });
+  $(id+"O").addEventListener("click",()=>{ MH.ay = ayEkle(MH.ay || todayIso().slice(0,7), MH.ay ? -1 : 0); yenile(); });
+  $(id+"S").addEventListener("click",()=>{ MH.ay = ayEkle(MH.ay || todayIso().slice(0,7), MH.ay ? 1 : 0); yenile(); });
+}
+function mhVurgu(r){ return MH.ay && r.don===MH.ay ? ' class="vurgu"' : ""; }
 function renderAlacak(){
-  const S = muhSatirlar().filter(r=>r.kal>0); const sepet = [["Vadesi gelmedi",r=>r.gec<=0],["1–30 gün",r=>r.gec>=1&&r.gec<=30],["31–60 gün",r=>r.gec>=31&&r.gec<=60],["61+ gün",r=>r.gec>60]];
+  const S = muhSatirlar().filter(r=>r.kal>0 && (!MH.ay || r.don===MH.ay)); const sepet = [["Vadesi gelmedi",r=>r.gec<=0],["1–30 gün",r=>r.gec>=1&&r.gec<=30],["31–60 gün",r=>r.gec>=31&&r.gec<=60],["61+ gün",r=>r.gec>60]];
   let G = muhGruplar(S).sort((a,b)=>b.gec-a.gec||b.kal-a.kal); if(MH.soloGeciken) G = G.filter(g=>g.gec>0);
-  $("panel").innerHTML = mhSayfa("🧾 Muhasebe · Alacaklar", `<p class="muted" style="margin:0 0 8px">Kimden ne kadar alacak var. Kardeşler aile adıyla tek kişi olarak toplanır.</p>
+  $("panel").innerHTML = mhSayfa("🧾 Muhasebe · Alacaklar", `<p class="muted" style="margin:0 0 8px">Kimden ne kadar alacak var. Kardeşler aile adıyla tek kişi olarak toplanır. ${MH.ay?"Yalnızca <b>"+esc(odemeAyAdi(MH.ay))+"</b> dönemine ait açık kayıtlar gösteriliyor.":"Tüm dönemlerin açık kayıtları gösteriliyor."}</p><div class="form" style="margin-bottom:8px">${mhAySecici("alAy")}</div>
     <div class="od-ozet no">${mhKart("Toplam alacak", tlYaz(S.reduce((a,r)=>a+r.kal,0)), "od-r")}${sepet.map(([ad,f])=>mhKart(ad, tlYaz(S.filter(f).reduce((a,r)=>a+r.kal,0)), ad==="61+ gün"?"od-r":"")).join("")}</div>
     <div class="actions" style="margin:6px 0 10px;flex-wrap:wrap"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="alGec" ${MH.soloGeciken?"checked":""}> Yalnızca geciken</label><button class="btn small primary" id="alToplu" type="button">📨 Toplu hatırlatma listesi</button><button class="btn small" id="alCsv" type="button">Excel (CSV)</button><button class="btn small" id="alYaz" type="button">🖨 Antetli liste</button></div>
     ${G.length ? `<div class="tscroll"><table class="stable"><thead><tr><th>Kişi / öğrenci</th><th>Açık kayıt</th><th>Kalan</th><th>En eski vade</th><th>Gecikme</th><th></th></tr></thead><tbody>${G.map(g=>`<tr><td>${esc(g.ad)}</td><td>${g.sat.length}</td><td><b>${tlYaz(g.kal)}</b></td><td>${g.eskiVade?trDate(g.eskiVade):"—"}</td><td>${g.gec>0?'<span class="od-d r">'+g.gec+' gün</span>':'<span class="muted">vadesi gelmedi</span>'}</td><td style="text-align:right;white-space:nowrap"><button class="btn small" data-alh="${esc(g.key)}" type="button">Hatırlat</button> <button class="btn small" data-ale="${esc(g.key)}" type="button">Ekstre</button> <button class="btn small" data-alo="${esc(g.sat[0].sid)}" type="button">Ödeme kaydı</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="empty">Gösterilecek alacak yok.</div>'}`);
+  mhAyBagla("alAy", renderAlacak);
   $("alGec").addEventListener("change",()=>{ MH.soloGeciken = $("alGec").checked; renderAlacak(); });
   document.querySelectorAll("[data-alh]").forEach(b=>b.addEventListener("click",()=>{ const g = G.find(x=>x.key===b.dataset.alh); if(g) mhMsjModal("Hatırlatma · "+g.ad, mhAlacakMesaj(g), g.tel, g.sat.map(r=>r.x)); }));
   document.querySelectorAll("[data-ale]").forEach(b=>b.addEventListener("click",()=>{ MH.grup = b.dataset.ale; TAB = "ekstre"; renderTab(); }));
@@ -7127,8 +7149,8 @@ function renderAlacak(){
     const bg = modalAc(`<h3 style="margin:0 0 6px">Toplu hatırlatma</h3><p class="hint">Tarayıcılar aynı anda birden fazla WhatsApp penceresi açmaya izin vermez; kişileri sırayla tek tek gönderin.${G.some(g=>g.gec>0)?" Yalnızca geciken kişiler listelendi.":""}</p><div style="max-height:55vh;overflow:auto">${L.map((g,i)=>`<div class="dk-satir"><div><div class="dk-ad">${esc(g.ad)}</div><div class="dk-alt">${tlYaz(g.kal)}${g.gec>0?" · "+g.gec+" gün gecikme":""}${g.tel?"":" · telefon yok"}</div></div><button class="btn small primary" data-tp="${i}" type="button"${g.tel?"":" disabled"}>WhatsApp</button></div>`).join("")}</div><div class="actions" style="margin-top:8px"><button class="btn" id="tpX" type="button">Kapat</button></div>`);
     bg.querySelector("#tpX").addEventListener("click",()=>{ bg.remove(); renderAlacak(); });
     bg.querySelectorAll("[data-tp]").forEach(b=>b.addEventListener("click",()=>{ const g = L[+b.dataset.tp]; gnAc(onayWa(g.tel, mhAlacakMesaj(g))); g.sat.forEach(r=>{ r.x.mesaj = (r.x.mesaj||[]).concat([{t:"hatirlat",k:"wa",z:Date.now()}]); }); save(); b.textContent = "Açıldı ✓"; b.disabled = true; })); });
-  $("alCsv").addEventListener("click",()=>{ const h = ["Kişi / öğrenci","Telefon","Dönem","Hizmet","Tutar","Ödenen","Kalan","Son ödeme günü","Gecikme (gün)"]; const rows = [h]; G.forEach(g=>g.sat.forEach(r=>rows.push([g.ad,g.tel,odemeDonemEtiket(r.x),r.x.tur||"",odSayi(r.tut),odSayi(r.od),odSayi(r.kal),r.x.vade?trDate(r.x.vade):"",r.gec>0?r.gec:0]))); dosyaIndir("alacaklar-"+todayIso()+".csv", mhCsv(rows), "text/csv;charset=utf-8"); });
-  $("alYaz").addEventListener("click",()=>{ PRINT_AD = "Alacak listesi"; doPrint(mhBelge("Alacak listesi", "Düzenlenme tarihi itibarıyla açık alacaklar", `<div class="mh-ozet"><div><small>Toplam alacak</small><b>${tlYaz(G.reduce((a,g)=>a+g.kal,0))}</b></div><div><small>Kişi sayısı</small><b>${G.length}</b></div></div><table><thead><tr><th>Kişi / öğrenci</th><th class="r">Kalan</th><th>En eski vade</th><th class="r">Gecikme</th></tr></thead><tbody>${G.map(g=>`<tr><td>${esc(g.ad)}</td><td class="r">${tlYaz(g.kal)}</td><td>${g.eskiVade?trDate(g.eskiVade):"—"}</td><td class="r">${g.gec>0?g.gec+" gün":"—"}</td></tr>`).join("")}</tbody></table>`, false), "portrait"); });
+  $("alCsv").addEventListener("click",()=>{ const h = ["Kişi / öğrenci","Telefon","Dönem","Hizmet","Tutar","Ödenen","Kalan","Son ödeme günü","Gecikme (gün)"]; const rows = [h]; G.forEach(g=>g.sat.forEach(r=>rows.push([g.ad,g.tel,odemeDonemEtiket(r.x),r.x.tur||"",odSayi(r.tut),odSayi(r.od),odSayi(r.kal),r.x.vade?trDate(r.x.vade):"",r.gec>0?r.gec:0]))); dosyaIndir("alacaklar-"+(MH.ay||todayIso())+".csv", mhCsv(rows), "text/csv;charset=utf-8"); });
+  $("alYaz").addEventListener("click",()=>{ PRINT_AD = "Alacak listesi"; doPrint(mhBelge("Alacak listesi", "Düzenlenme tarihi itibarıyla açık alacaklar"+(MH.ay?" · Dönem: "+odemeAyAdi(MH.ay):""), `<div class="mh-ozet"><div><small>Toplam alacak</small><b>${tlYaz(G.reduce((a,g)=>a+g.kal,0))}</b></div><div><small>Kişi sayısı</small><b>${G.length}</b></div></div><table><thead><tr><th>Kişi / öğrenci</th><th class="r">Kalan</th><th>En eski vade</th><th class="r">Gecikme</th></tr></thead><tbody>${G.map(g=>`<tr><td>${esc(g.ad)}</td><td class="r">${tlYaz(g.kal)}</td><td>${g.eskiVade?trDate(g.eskiVade):"—"}</td><td class="r">${g.gec>0?g.gec+" gün":"—"}</td></tr>`).join("")}</tbody></table>`, false), "portrait"); });
 }
 /* --- Giderler --- */
 function renderGider(){
@@ -7187,7 +7209,7 @@ function mhEkstreSatirlar(g){
 function mhEkstreHtml(g, L){
   const tt = L.reduce((a,r)=>a+r.tut,0), to = L.reduce((a,r)=>a+r.od,0), tk = L.reduce((a,r)=>a+r.kal,0); const tel = antetAyar().tel;
   return mhBelge("Hesap özeti (ekstre)", "Sayın <b>"+esc(g.veli||g.ogr.join(", "))+"</b> · Öğrenci: "+esc(g.ogr.join(", "))+" · Tarih: "+trDate(todayIso()),
-    `<table><thead><tr><th>Dönem</th><th>Hizmet</th><th class="r">Ders saati</th><th class="r">Tutar</th><th class="r">Ödenen</th><th class="r">Kalan</th><th>Durum</th></tr></thead><tbody>${L.map(r=>`<tr><td>${esc(odemeDonemEtiket(r.x))}${g.ogr.length>1?`<br><small>${esc(r.st.ad)}</small>`:""}</td><td>${esc(r.x.tur||"")}</td><td class="r">${r.x.saat?odSayi(r.x.saat):""}</td><td class="r">${tlYaz(r.tut)}</td><td class="r">${tlYaz(r.od)}</td><td class="r">${tlYaz(r.kal)}</td><td>${esc(r.x.durum)}${r.kal>0&&r.x.vade?`<br><small>son ödeme günü ${trDate(r.x.vade)}</small>`:""}</td></tr>`).join("")}</tbody><tfoot><tr><td colspan="3">Toplam</td><td class="r">${tlYaz(tt)}</td><td class="r">${tlYaz(to)}</td><td class="r">${tlYaz(tk)}</td><td></td></tr></tfoot></table>
+    `<table><thead><tr><th>Dönem</th><th>Hizmet</th><th class="r">Ders saati</th><th class="r">Tutar</th><th class="r">Ödenen</th><th class="r">Kalan</th><th>Durum</th></tr></thead><tbody>${L.map(r=>`<tr${mhVurgu(r)}><td>${esc(odemeDonemEtiket(r.x))}${g.ogr.length>1?`<br><small>${esc(r.st.ad)}</small>`:""}</td><td>${esc(r.x.tur||"")}</td><td class="r">${r.x.saat?odSayi(r.x.saat):""}</td><td class="r">${tlYaz(r.tut)}</td><td class="r">${tlYaz(r.od)}</td><td class="r">${tlYaz(r.kal)}</td><td>${esc(r.x.durum)}${r.kal>0&&r.x.vade?`<br><small>son ödeme günü ${trDate(r.x.vade)}</small>`:""}</td></tr>`).join("")}</tbody><tfoot><tr><td colspan="3">Toplam</td><td class="r">${tlYaz(tt)}</td><td class="r">${tlYaz(to)}</td><td class="r">${tlYaz(tk)}</td><td></td></tr></tfoot></table>
     <div class="mh-box">${tk>0 ? "Kalan tutar: <b>"+tlYaz(tk)+"</b>. Ödeme ve sorularınız için lütfen "+esc(mhKisi()||"bizimle")+(tel?" ("+esc(tel)+")":"")+" ile iletişime geçiniz." : "Görünen açık ödeme yoktur. Teşekkür ederiz."}</div>`, true);
 }
 function mhMakbuzNo(x){ if(!x.makbuzNo){ const a = onayAyar(); a.makbuzSayac = (+a.makbuzSayac||0)+1; x.makbuzNo = "M-"+todayIso().slice(0,4)+"-"+String(a.makbuzSayac).padStart(4,"0"); save(); } return x.makbuzNo; }
@@ -7203,10 +7225,11 @@ function renderEkstre(){
   $("panel").innerHTML = mhSayfa("🧾 Muhasebe · Veli ekstresi ve makbuz", `<p class="muted" style="margin:0 0 8px">Veliye hesap özeti ve tahsilat makbuzu; antetli kâğıtta yazdırılır ya da mesaj olarak gönderilir. Banka/IBAN bilgisi belgelerde yer almaz.</p>
     <div class="form"><div class="field"><label for="ekKisi">Kişi / öğrenci</label><select id="ekKisi">${G.map(x=>`<option value="${esc(x.key)}"${x.key===g.key?" selected":""}>${esc(x.ad)}</option>`).join("")}</select></div>
     <div class="field"><label for="ekKaps">Kapsam</label><select id="ekKaps"><option value="son6"${MH.kapsam==="son6"?" selected":""}>Son 6 ay + açık kayıtlar</option><option value="yil"${MH.kapsam==="yil"?" selected":""}>Bu yıl + açık kayıtlar</option><option value="hepsi"${MH.kapsam==="hepsi"?" selected":""}>Tümü</option></select></div>
-    <div class="field"><label><input type="checkbox" id="ekAcik" ${MH.sadeceAcik?"checked":""}> Yalnızca açık (ödenmemiş) kayıtlar</label></div></div>
-    <div class="box"><h3 style="margin:0 0 4px">Hesap özeti</h3>${L.length?`<div class="tscroll"><table class="stable"><thead><tr><th>Dönem</th><th>Hizmet</th><th>Tutar</th><th>Ödenen</th><th>Kalan</th><th>Durum</th></tr></thead><tbody>${L.map(r=>`<tr><td>${esc(odemeDonemEtiket(r.x))}${g.ogr.length>1?`<br><span class="muted">${esc(r.st.ad)}</span>`:""}</td><td>${esc(r.x.tur||"")}</td><td>${tlYaz(r.tut)}</td><td>${tlYaz(r.od)}</td><td>${tlYaz(r.kal)}</td><td><span class="od-d ${odDurumSinif(r.x.durum)}">${esc(r.x.durum)}</span></td></tr>`).join("")}</tbody></table></div><p style="margin:6px 0"><b>Kalan toplam: ${tlYaz(tk)}</b></p>`:'<div class="empty">Seçilen kapsamda kayıt yok.</div>'}
+    <div class="field"><label><input type="checkbox" id="ekAcik" ${MH.sadeceAcik?"checked":""}> Yalnızca açık (ödenmemiş) kayıtlar</label></div>${mhAySecici("ekAy", null, "Vurgulanacak dönem")}</div>${MH.ay?`<p class="hint" style="margin:-4px 0 8px">Sarı satırlar ${esc(odemeAyAdi(MH.ay))} dönemine aittir. Ekstre tüm açık borçları göstermeye devam eder.</p>`:""}
+    <div class="box"><h3 style="margin:0 0 4px">Hesap özeti</h3>${L.length?`<div class="tscroll"><table class="stable"><thead><tr><th>Dönem</th><th>Hizmet</th><th>Tutar</th><th>Ödenen</th><th>Kalan</th><th>Durum</th></tr></thead><tbody>${L.map(r=>`<tr${mhVurgu(r)}><td>${esc(odemeDonemEtiket(r.x))}${g.ogr.length>1?`<br><span class="muted">${esc(r.st.ad)}</span>`:""}</td><td>${esc(r.x.tur||"")}</td><td>${tlYaz(r.tut)}</td><td>${tlYaz(r.od)}</td><td>${tlYaz(r.kal)}</td><td><span class="od-d ${odDurumSinif(r.x.durum)}">${esc(r.x.durum)}</span></td></tr>`).join("")}</tbody></table></div><p style="margin:6px 0"><b>Kalan toplam: ${tlYaz(tk)}</b></p>`:'<div class="empty">Seçilen kapsamda kayıt yok.</div>'}
     <div class="actions" style="flex-wrap:wrap"><button class="btn primary" id="ekYaz" type="button"${L.length?"":" disabled"}>🖨 Antetli ekstre (PDF)</button><button class="btn" id="ekMsj" type="button">💬 Özet mesajı</button><button class="btn" id="ekHat" type="button"${tk>0?"":" disabled"}>📨 Ödeme hatırlatması</button></div></div>
     <div class="box"><h3 style="margin:0 0 4px">Tahsilat makbuzu</h3>${odenmis.length?`<div class="tscroll"><table class="stable"><thead><tr><th>Dönem</th><th>Ödenen</th><th>Tarih</th><th>Makbuz no</th><th></th></tr></thead><tbody>${odenmis.map((r,i)=>`<tr><td>${esc(odemeDonemEtiket(r.x))}${g.ogr.length>1?`<br><span class="muted">${esc(r.st.ad)}</span>`:""}</td><td>${tlYaz(r.od)}</td><td>${r.x.tarih?trDate(r.x.tarih):""}</td><td>${esc(r.x.makbuzNo||"—")}</td><td style="text-align:right"><button class="btn small" data-mk="${i}" type="button">🖨 Makbuz</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Henüz tahsilat yok.</div>'}</div>`);
+  mhAyBagla("ekAy", renderEkstre);
   $("ekKisi").addEventListener("change",()=>{ MH.grup = $("ekKisi").value; renderEkstre(); }); $("ekKaps").addEventListener("change",()=>{ MH.kapsam = $("ekKaps").value; renderEkstre(); }); $("ekAcik").addEventListener("change",()=>{ MH.sadeceAcik = $("ekAcik").checked; renderEkstre(); });
   $("ekYaz").addEventListener("click",()=>{ PRINT_AD = "Ekstre "+g.ogr.join(" "); doPrint(mhEkstreHtml(g, L), "portrait"); });
   $("ekMsj").addEventListener("click",()=>{ const kisi = mhKisi(); let m = (g.veli?"Merhaba "+g.veli+",":"Merhaba,")+"\n"+g.ogr.join(", ")+" için hesap özeti:\n"; L.slice(-6).forEach(r=>{ m += "• "+odemeDonemEtiket(r.x)+": "+tlYaz(r.tut)+" – "+r.x.durum+(r.kal>0?" (kalan "+tlYaz(r.kal)+")":"")+"\n"; }); m += (tk>0?"Toplam kalan: "+tlYaz(tk):"Açık ödeme görünmüyor")+"\nİlginiz için teşekkür ederim."+(kisi?"\n"+kisi:"")+mesajWeb(); mhMsjModal("Özet mesajı · "+g.ad, m, g.tel, []); });
@@ -7820,6 +7843,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.20.2", t:"9 Kasım 2026", n:"Alacaklar, Ödeme takibi ve Veli ekstresi sayfalarına dönem ayı seçici (‹ Ay ›, Tüm aylar). Alacaklar seçilen dönemin açık kayıtlarını, toplu hatırlatma ve CSV/antetli liste de aynı ayı kapsar; ekstre tüm açık borcu gösterir, seçilen dönemi sarı vurgular."},
   {v:"3.20.1", t:"9 Kasım 2026", n:"Telefonda üst çubuk taşıp sayfayı genişletiyordu (Kaydedildi göstergesi); düzeltildi: telefonda gösterge simgeye iner, saat gizlenir, sayfa yana kaymaz."},
   {v:"3.20.0", t:"8 Kasım 2026", n:"Bugün sayfasına görev merkezi: tıklanabilir sayaçlar (Gecikmiş, Bugün, Bu hafta, Ödeme, Gelen form, Ertelenen/yapılan); her işte Yapıldı, Ertele, Düzenle, Sil/Aç ve Geri al; ertelenenler geri getirilebilir. Güvenlik: otomatik kilit (Yedek ve güvenlik › süre seçilir) ve üst çubukta Kilitle düğmesi, yanlış şifre bekleme süresi sayfa yenilense de sıfırlanmaz (eski PIN girişi dahil), 7 gündür yedek alınmadıysa günde bir kez hatırlatma."},
   {v:"3.19.0", t:"8 Kasım 2026", n:"Yeni ana logo (Öğrenci Kariyeri · Ajans Koçluk Ankara); ek logo kaydetme, varsayılan logo seçimi, belge yazdırırken belge başına logo/logosuz seçici. Belgelerin altında web sitesi ve Instagram kare kodları (tek renkli, vektör), mesajlara web adresi. Yeni marka renkli giriş ekranı. Veri güvenliği: silinen kayıtlar Drive eşitlemesinde geri gelmez (silme izi), kayıt bazlı değişiklik zamanı ile yerel düzenleme uzak kopyayla ezilmez; her silmede 10 sn Geri al, 30 gün saklayan Çöp kutusu; üst çubukta Kaydedildi göstergesi; sayfa kapanırken yazılmamış alan uygulanır."},
