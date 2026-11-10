@@ -505,7 +505,7 @@ body{display:flex;flex-direction:column}
 .gtile{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
 .gtl{font-size:12.5px;color:var(--ink-2)} .gtv{font-size:26px;font-weight:600;margin:2px 0} .gts{font-size:12px;color:var(--ink-2)}
 #gTip{position:fixed;z-index:10000;background:var(--paper-2);color:var(--ink);border:1px solid var(--line-2);border-radius:6px;padding:6px 9px;font-size:12px;pointer-events:none;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-.kayit-durum{font:inherit;font-size:12px;color:var(--ink-3);white-space:nowrap;margin-right:auto;background:transparent;border:1px solid transparent;border-radius:999px;padding:3px 10px;cursor:pointer}.kayit-durum.kirli{color:#7a4b00;background:#ffe7b3;border-color:#f5a300;font-weight:600}.kayit-durum.flash{animation:kdf 1.4s ease}@keyframes kdf{0%{color:var(--ok,#1d7a46);font-weight:600}100%{color:var(--ink-3)}}
+.kayit-durum{font:inherit;font-size:12px;color:var(--ink-3);white-space:nowrap;margin-right:auto;background:transparent;border:1px solid transparent;border-radius:999px;padding:3px 10px;cursor:pointer}.kayit-durum.hata{color:#fff;background:#b3261e;border-color:#b3261e;font-weight:600}.kayit-durum.kirli{color:#7a4b00;background:#ffe7b3;border-color:#f5a300;font-weight:600}.kayit-durum.flash{animation:kdf 1.4s ease}@keyframes kdf{0%{color:var(--ok,#1d7a46);font-weight:600}100%{color:var(--ink-3)}}
 .pprev-logo select{color:#14283a;background:#fff;border-radius:6px;padding:4px 6px}
 tr.vurgu td{background:#fff3cf}
 .logo-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
@@ -534,8 +534,9 @@ tr.vurgu td{background:#fff3cf}
 .gm-tile b{font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}.gm-tile span{font-size:12.5px;color:var(--ink-3)}
 .gm-tile.r b{color:var(--redpen)}.gm-tile.on{border-color:var(--accent,#1d7a55);box-shadow:0 0 0 2px rgba(29,122,85,.25);background:var(--paper-2)}
 .gm-tile:hover{border-color:var(--accent,#1d7a55)}
-@media(max-width:760px){.topbar{gap:6px;min-width:0}.topbar-clock{display:none}.kayit-durum{padding:3px 8px;margin-right:0;font-size:14px;flex:0 0 auto}.kayit-durum .kd-t{display:none}#kilitBtn .kb-t{display:none}.topbar .side-theme{padding:7px 9px}.topbar #senkBtn{max-width:140px;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:760px){.kayit-durum.hata .kd-t{display:inline}.topbar{gap:6px;min-width:0}.topbar-clock{display:none}.kayit-durum{padding:3px 8px;margin-right:0;font-size:14px;flex:0 0 auto}.kayit-durum .kd-t{display:none}#kilitBtn .kb-t{display:none}.topbar .side-theme{padding:7px 9px}.topbar #senkBtn{max-width:140px;overflow:hidden;text-overflow:ellipsis}}
 html,body{max-width:100%;overflow-x:hidden}
+@media(pointer:coarse){#panel input:not([type=checkbox]):not([type=radio]):not([type=range]),#panel select{min-height:38px}}
 @media print{.topbar,.app{display:none!important}}
 </style>
 </head>
@@ -711,7 +712,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.20.2";
+const SURUM = "3.21.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -842,13 +843,15 @@ DB = dbNormalize(DB);       // şifreliyse geçici boş yer tutucu; kilitliyken 
 function depoYaz(){
   if(DEPO.kilitli) return;
   const json = JSON.stringify(DB);
-  if(!DEPO.sifreli){ try{ localStorage.setItem(LS, json); }catch(e){} otoYedekGerekirse(); return; }
+  if(!DEPO.sifreli){ try{ localStorage.setItem(LS, json); DEPO.hata = ""; }catch(e){ DEPO.hata = String(e&&e.name||e&&e.message||"yazılamadı"); } otoYedekGerekirse(); return; }
   DEPO.yaz = DEPO.yaz.then(async()=>{
     try{
       const o = await aesSifrele(DEPO.dek, _te.encode(json));
       localStorage.setItem(LS, ENC_PREFIX+JSON.stringify(o));
+      DEPO.hata = "";
       otoYedekGerekirse();
-    }catch(e){ DEPO.hata = String(e&&e.message||e); }
+    }catch(e){ DEPO.hata = String(e&&e.name||e&&e.message||"yazılamadı"); }
+    kaydedildiYaz();
   });
 }
 /* ---------- v3.19: veri güvenliği (silme izi, kayıt zaman damgası, çöp kutusu, geri al) ---------- */
@@ -953,8 +956,14 @@ function acikAlaniIsle(){ const a = document.activeElement; if(a && a!==document
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") acikAlaniIsle(); });
 window.addEventListener("pagehide", acikAlaniIsle); window.addEventListener("beforeunload", acikAlaniIsle);
 /* kaydedildi göstergesi */
+let KAYIT_UYARI = 0;
 function kaydedildiYaz(){
   const e = document.getElementById("kayitDurum"); if(!e) return;
+  if(DEPO.hata){
+    e.classList.remove("flash","kirli"); e.classList.add("hata"); e.querySelector(".kd-i").textContent = "⚠"; e.querySelector(".kd-t").textContent = " Kaydedilemedi"; e.title = "Veriler bu cihaza yazılamadı (depolama dolu olabilir). Hemen yedek alın.";
+    if(Date.now()-KAYIT_UYARI > 60000){ KAYIT_UYARI = Date.now(); toast("⚠ Veriler kaydedilemedi: tarayıcı depolaması dolu olabilir. Hemen yedek al.", {label:"Yedek al", duration:20000, onClick:()=>{ TAB = "yedek"; renderAll(); }}); }
+    return; }
+  e.classList.remove("hata");
   const t = new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); e.querySelector(".kd-i").textContent = "✓"; e.querySelector(".kd-t").textContent = " Kaydedildi "+t; e.title = "Veriler bu cihaza kalıcı olarak yazıldı"; e.classList.remove("flash","kirli"); void e.offsetWidth; e.classList.add("flash");
 }
 (function(){
@@ -975,7 +984,7 @@ function renderCop(){
   const bb = $("copBos"); if(bb) bb.addEventListener("click",()=>armDel(bb,()=>{ DB.cop = []; save(); renderCop(); toast("Çöp kutusu boşaltıldı"); }));
 }
 
-function save(){ if(DEPO.kilitli) return; silTakip(); depoYaz(); senkIsaretle(); kaydedildiYaz(); }
+function save(){ if(DEPO.kilitli) return; silTakip(); depoYaz(); senkIsaretle(); if(!DEPO.sifreli) kaydedildiYaz(); }
 function aktifler(){ return DB.students.filter(s=>!s.arsiv); }
 function stu(){ return DB.students.find(s=>s.id===DB.cur && !s.arsiv) || aktifler()[0] || DB.students[0]; }
 
@@ -1708,6 +1717,14 @@ function denemeYaz(o){ try{ localStorage.setItem(DENEME_ANAHTAR, JSON.stringify(
 function denemeBekleme(){ const o = denemeOku(); const k = Math.ceil((o.u-Date.now())/1000); return k>0 ? k : 0; }
 function denemeYanlis(){ const o = denemeOku(); o.n++; if(o.n>=3) o.u = Date.now()+Math.min(300,Math.pow(2,o.n-2)*5)*1000; denemeYaz(o); return denemeBekleme(); }
 function denemeSifirla(){ denemeYaz({n:0,u:0}); }
+
+function sifreOner(){
+  try{
+    if(DEPO.kilitli || korumaVarMi()) return; const n = +(localStorage.getItem("akp_sifre_oner")||0); const t = todayIso();
+    if(n>=3 || localStorage.getItem("akp_sifre_oner_gun")===t) return; localStorage.setItem("akp_sifre_oner", n+1); localStorage.setItem("akp_sifre_oner_gun", t);
+    setTimeout(()=>toast("Öğrenci ve veli bilgileri şifresiz saklanıyor. Şifre koymanı öneririm.", {label:"Şifre koy", duration:15000, onClick:()=>{ TAB = "yedek"; renderAll(); }}), 4000);
+  }catch(e){}
+}
 function yedekHatirlat(){
   try{
     if(DEPO.kilitli) return; const lb = localStorage.getItem("akp-last-backup"); const t = todayIso();
@@ -1715,6 +1732,23 @@ function yedekHatirlat(){
     if(localStorage.getItem("akp_yedek_hat")===t) return; localStorage.setItem("akp_yedek_hat", t);
     setTimeout(()=>toast(lb ? gun+" gündür yedek alınmadı" : "Henüz yedek alınmadı", {label:"Yedek al", duration:12000, onClick:()=>{ TAB = "yedek"; renderAll(); }}), 1200);
   }catch(e){}
+}
+
+function depoKullanim(){
+  let n = 0; try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); n += (k||"").length + (localStorage.getItem(k)||"").length; } }catch(e){}
+  const SINIR = 5*1024*1024; return {n, sinir:SINIR, oran:Math.min(1, n/SINIR)};
+}
+function depoOlcerHtml(){
+  const d = depoKullanim(); const mb = x=>(x/1048576).toFixed(2).replace(".",","); const yuz = Math.round(d.oran*100);
+  const renk = d.oran>.9 ? "#b3261e" : d.oran>.7 ? "#c77700" : "#1d7a55";
+  return `<div class="box" style="margin-top:14px"><h3>💾 Depolama durumu</h3><p class="hint">Veriler tarayıcının bu cihazdaki depolamasında tutulur ve sınırı yaklaşık 5 MB’tır (tahmini). Dolmaya yaklaşırsa logo, çöp kutusu ve eski kayıtlar için yer açmak gerekir.</p>
+    <div style="height:10px;border-radius:999px;background:var(--line-2,#ddd);overflow:hidden"><div style="width:${Math.max(2,yuz)}%;height:100%;background:${renk}"></div></div>
+    <p style="margin:6px 0 0"><b>${mb(d.n)} MB</b> / ~5 MB (%${yuz})${d.oran>.7?` — <span style="color:${renk};font-weight:600">${d.oran>.9?"neredeyse dolu, hemen yedek alın ve eski kayıtları temizleyin":"dolmaya yaklaşıyor"}</span>`:""}</p>
+    ${DEPO.hata?`<p class="hint" style="color:#b3261e;font-weight:600">Son kayıt denemesi başarısız oldu (${esc(DEPO.hata)}). Yedek alıp eski kayıtları temizleyin.</p>`:""}</div>`;
+}
+function depoUyar(){
+  try{ const d = depoKullanim(); if(d.oran<.8) return; const t = todayIso(); if(localStorage.getItem("akp_depo_uyari")===t) return; localStorage.setItem("akp_depo_uyari", t);
+    setTimeout(()=>toast("Depolama %"+Math.round(d.oran*100)+" dolu. Yedek alıp eski kayıtları temizle.", {label:"Aç", duration:12000, onClick:()=>{ TAB = "yedek"; renderAll(); }}), 2500); }catch(e){}
 }
 function otoKilitHtml(){
   const dk = otoKilitDakika(); const kor = korumaVarMi();
@@ -3623,7 +3657,9 @@ document.querySelector('.main').addEventListener('click',()=>{ if($("side").clas
 
 /* ---------- PWA: service worker kaydı (çevrimdışı çalışma + "Uygulamayı yükle") ---------- */
 if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  const SW_VARDI = !!navigator.serviceWorker.controller; let SW_YENILE = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(SW_VARDI && !SW_YENILE){ SW_YENILE = true; setTimeout(()=>toast("Yeni sürüm hazır.", {label:"Yenile", duration:60000, onClick:()=>location.reload()}), 600); } });
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').then(r=>{ try{ r.update(); }catch(e){} }).catch(()=>{}); });
 }
 
 save();
@@ -6865,7 +6901,7 @@ Başarı göstergeleri: tekrarlayan hata sayısındaki değişim, hata nedenini 
 ## Bilimsel dürüstlük
 Model sahada denenmiş, geçerliliği/güvenirliği gösterilmiş standart bir ölçme aracı değil, bir uygulama modeli taslağıdır. Evrensel eşik yoktur: "üç yanlış = kalıcı eksik", "kayıpların %80'i müfredatın %20'sinden", "3 ve 7 gün tekrar" gibi kesin kurallar kullanılmaz; öğrencinin kendi verisi incelenir. Doğru cevap yanlış düşünceye dayanabilir (tahminle doğru). Deneme sınavı performansı, soru bankası öğrenme sürecini gösterir.
 `;
-const AI_ANAHTAR = "akp_gemini_key"; const AI_MODEL_VARSAYILAN = "gemini-2.5-flash";
+const AI_ANAHTAR = "akp_gemini_key"; const AI_MODEL_VARSAYILAN = "gemini-3.8-flash";
 function aiKey(){ try{ return localStorage.getItem(AI_ANAHTAR)||""; }catch(e){ return ""; } }
 function aiModel(){ return (DB.ayar && DB.ayar.aiModel) || AI_MODEL_VARSAYILAN; }
 function pusulaMd(md){
@@ -6943,7 +6979,9 @@ async function geminiCagir(sistem, kullanici, opt){
     const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json","x-goog-api-key":key}, body:JSON.stringify(govde(sema)), signal:zs});
     const j = await r.json().catch(()=>({})); return {r, j};
   };
+  const bekle = ms=>new Promise(res=>setTimeout(res,ms));
   let {r, j} = await dene(true);
+  for(let t=0; !r.ok && [429,500,502,503,504].includes(r.status) && t<2; t++){ if(opt.durum) opt.durum("Google yoğun (HTTP "+r.status+"), yeniden deneniyor "+(t+1)+"/2…"); await bekle(t===0?3000:7000); ({r, j} = await dene(true)); }
   if(!r.ok && opt.json && r.status===400 && /schema|responseSchema|mime/i.test((j.error&&j.error.message)||"")) ({r, j} = await dene(false));
   if(!r.ok) throw new Error("HTTP "+r.status+": "+((j.error&&j.error.message)||"yanıt yok").slice(0,220));
   const c = j.candidates && j.candidates[0]; const m = c && c.content && c.content.parts ? c.content.parts.map(p=>p.text||"").join("") : "";
@@ -6973,7 +7011,7 @@ function aiBaslat(v){
     const kn = q("aiKocNot").value.trim(); const oncOn = q("aiOnc") && q("aiOnc").checked;
     const kullanici = "Analiz türü: "+AI_TUR_AD[v.tur]+"\nÖğrenci: "+(GLABEL[s.sinif]||s.sinif)+(s.alan&&(s.sinif==="11"||s.sinif==="12")?", alan "+s.alan:"")+"\nBugünün tarihi: "+new Date().toLocaleDateString("tr-TR")+(kn?"\nKoçun notu/sorusu: "+aiAnonim(kn,s):"")+(oncOn?"\n\nÖNCEKİ YORUMLARIN ÖZETİ (gelişimi karşılaştır):\n"+onc.map(y=>"["+new Date(y.ts).toLocaleDateString("tr-TR")+" · "+y.baslik+"] "+(y.sonuc.ozet||"")+" "+String(y.sonuc.modelAnalizi||"").slice(0,1200)).join("\n---\n"):"")+"\n\nVERİ:\n"+temiz;
     try{
-      const m = await geminiCagir(aiSistem(), kullanici, {json:true}); const sonuc = aiSonucCoz(m);
+      const m = await geminiCagir(aiSistem(), kullanici, {json:true, durum:t=>{ q("aiDurum").textContent = t; }}); const sonuc = aiSonucCoz(m);
       const kay = {id:yeniId("ai"), ts:Date.now(), tur:v.tur, baslik:v.baslik, model:aiModel(), sonuc, veli:sonuc.veliMesaji};
       (DB.aiYorumlar[s.id] = DB.aiYorumlar[s.id] || []).push(kay); save(); bg.remove(); aiSonucGoster(kay);
     }catch(e){ q("aiGo").disabled = false; q("aiDurum").textContent = "Başarısız: "+(e&&e.message||e)+(/HTTP 4(0[13]|29)/.test(String(e&&e.message))?" — anahtarı/kotayı kontrol edin.":""); }
@@ -7843,6 +7881,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.21.0", t:"9 Kasım 2026", n:"Veri güvenliği: tarayıcı depolaması dolu ya da yazma başarısızsa artık ✓ Kaydedildi yazmaz, kırmızı ⚠ Kaydedilemedi uyarısı ve Yedek al yönlendirmesi çıkar; Yedek ve güvenlik sayfasında Depolama durumu ölçeri ve %80 üzeri uyarı. Güncelleme: panel dosyası artık ağdan önce alınır, yeni sürüm gelince Yeni sürüm hazır · Yenile bildirimi çıkar. Şifre yoksa (en çok 3 kez, günde bir) şifre koyma önerisi. Gemini varsayılan modeli gemini-3.8-flash; 429/503 yoğunlukta otomatik 2 yeniden deneme. Telefonda giriş alanları daha rahat dokunulur."},
   {v:"3.20.2", t:"9 Kasım 2026", n:"Alacaklar, Ödeme takibi ve Veli ekstresi sayfalarına dönem ayı seçici (‹ Ay ›, Tüm aylar). Alacaklar seçilen dönemin açık kayıtlarını, toplu hatırlatma ve CSV/antetli liste de aynı ayı kapsar; ekstre tüm açık borcu gösterir, seçilen dönemi sarı vurgular."},
   {v:"3.20.1", t:"9 Kasım 2026", n:"Telefonda üst çubuk taşıp sayfayı genişletiyordu (Kaydedildi göstergesi); düzeltildi: telefonda gösterge simgeye iner, saat gizlenir, sayfa yana kaymaz."},
   {v:"3.20.0", t:"8 Kasım 2026", n:"Bugün sayfasına görev merkezi: tıklanabilir sayaçlar (Gecikmiş, Bugün, Bu hafta, Ödeme, Gelen form, Ertelenen/yapılan); her işte Yapıldı, Ertele, Düzenle, Sil/Aç ve Geri al; ertelenenler geri getirilebilir. Güvenlik: otomatik kilit (Yedek ve güvenlik › süre seçilir) ve üst çubukta Kilitle düğmesi, yanlış şifre bekleme süresi sayfa yenilense de sıfırlanmaz (eski PIN girişi dahil), 7 gündür yedek alınmadıysa günde bir kez hatırlatma."},
@@ -8231,6 +8270,7 @@ function renderYedekMerkezi(){
     ${ars.length?`<h4 style="margin:14px 0 4px">Arşivdekiler (${ars.length})</h4>${ars.map(x=>`<div class="yk-kart"><div class="yk-t"><b>${esc(x.ad)}</b><small>${esc(GLABEL[x.sinif]||x.sinif||"")} · arşive alınma ${new Date(x.arsiv).toLocaleDateString("tr-TR")}</small></div><button class="btn" data-ykpaket="${x.id}" type="button">Paket indir</button><button class="btn primary" data-ykgeri="${x.id}" type="button">Arşivden geri al</button></div>`).join("")}`:""}
   </div>
   ${guvenlikHtml()}
+  ${depoOlcerHtml()}
   ${otoKilitHtml()}
   <div class="box" style="margin-top:14px"><h3>Verileri nasıl koruyoruz?</h3>
     <ul class="hint" style="margin:0;padding-left:18px">
@@ -8317,7 +8357,7 @@ async function yedekGeriYukle(id){
     try{ sessionStorage.setItem(SK,"1"); }catch(e){}
     if(timer){ clearInterval(timer); timer=null; }
     $("lockScreen").style.display="none";
-    renderAll(); ajKontrol(); cevapIsle(); yedekHatirlat();
+    renderAll(); ajKontrol(); cevapIsle(); yedekHatirlat(); depoUyar(); sifreOner();
     if(DEPO.sifreli) senkronla(true);
   }
   async function dekUygula(raw){
@@ -8397,7 +8437,7 @@ async function yedekGeriYukle(id){
   if(!DEPO.kilitli) renderAll();
   if(!DEPO.kilitli) ajKontrol();
   if(!DEPO.kilitli) setTimeout(()=>{ try{ if(senkCfg()) onayDriveDene().then(ok=>{ if(ok || onayKutuBilgi()) onayKutuGetir(true); }); else if(onayKutuBilgi()) onayKutuGetir(true); }catch(e){} },1500);
-  if(!DEPO.kilitli && isUnlocked()){ cevapIsle(); yedekHatirlat(); }
+  if(!DEPO.kilitli && isUnlocked()){ cevapIsle(); yedekHatirlat(); depoUyar(); sifreOner(); }
   if(!isUnlocked()){
     const lg=document.querySelector('.side-logo'); if(lg && lg.src) $("lockLogo").src=lg.src;
     $("lockScreen").style.display="flex";

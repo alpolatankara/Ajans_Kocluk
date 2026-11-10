@@ -1,6 +1,6 @@
 /* Akademik Koçluk Paneli — basit önbellekleme service worker'ı.
    Çevrimdışı açılabilmesi ve tarayıcının "Uygulamayı yükle" seçeneğini göstermesi için gerekli. */
-const CACHE = "akp-cache-v39";
+const CACHE = "akp-cache-v40";
 const DOSYALAR = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", e => {
@@ -17,6 +17,18 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  const sayfa = e.request.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith("index.html");
+  if (sayfa) {
+    /* Panel dosyası: önce ağ (yeni sürüm hemen görünsün), çevrimdışıysa önbellek */
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.ok) { const c = res.clone(); caches.open(CACHE).then(cc => cc.put(e.request, c)); }
+        return res;
+      }).catch(() => caches.match(e.request).then(m => m || caches.match("./index.html")))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => {
       const ag = fetch(e.request).then(res => {
