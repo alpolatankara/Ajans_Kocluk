@@ -62,7 +62,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:650;margin:0;letter-spacing:-.005e
 .controls{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end}
 .field{display:flex;flex-direction:column;gap:3px}
 .field label{font-size:11.5px;color:var(--ink-3)}
-select,input[type=text],input[type=number],input[type=tel],input[type=date],input[type=email],input[type=search],textarea{background:var(--paper);border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;min-height:36px}
+select,input[type=text],input[type=number],input[type=tel],input[type=date],input[type=email],input[type=search],input[type=password],textarea{background:var(--paper);border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;min-height:36px}
 textarea{width:100%;resize:vertical;min-height:64px}
 .btn{border:1px solid var(--line-2);background:var(--paper);border-radius:6px;padding:7px 13px;min-height:36px;cursor:pointer}
 .btn:hover{border-color:var(--ink-3)}
@@ -751,7 +751,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.23.0";
+const SURUM = "3.23.1";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -8008,6 +8008,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.23.1", t:"12 Kasım 2026", n:"Tüm şifre kutularına göster/gizle (göz) düğmesi: açılış ekranı, şifre belirleme/değiştirme, yedek şifreleri, Drive eşitleme şifresi, Gemini ve TinyURL anahtarı. Varsayılan gizli; sayfa arka plana alınınca yeniden gizlenir."},
   {v:"3.23.0", t:"12 Kasım 2026", n:"Drive asıl kopya oldu: Yedek ve güvenlik sayfasının başına Veri güvenliği ekranı eklendi (cihaz kaydı, Drive eşitleme, günlük yedek, kalıcı depolama, şifreleme, çakışma durumu); Drive scripti her gece 03:00’te günlük yedek alır (30 gün) ve panelden geri yüklenebilir; boş/silinmiş cihaz açılışta Drive'dan veriyi çeker (boş veri Drive'ın üzerine yazılmaz); Bugün ekranında Drive/yedek uyarısı; başka cihazla birleşme bildirimi. Drive scriptini güncelleyip gunlukKur işlevini bir kez çalıştırmanız gerekir."},
   {v:"3.22.0", t:"10 Kasım 2026", n:"Ana veri artık IndexedDB’de (geniş depolama): ilk açılışta eski veri doğrulamalı olarak taşınır, taşıma öncesi otomatik bir yedek Yedek sayfasına konur; IndexedDB açılamazsa eski localStorage ile çalışmaya devam eder. Depolama ölçeri gerçek tarayıcı kotasını gösterir, kalıcı depolama izni istenir."},
   {v:"3.21.0", t:"9 Kasım 2026", n:"Veri güvenliği: tarayıcı depolaması dolu ya da yazma başarısızsa artık ✓ Kaydedildi yazmaz, kırmızı ⚠ Kaydedilemedi uyarısı ve Yedek al yönlendirmesi çıkar; Yedek ve güvenlik sayfasında Depolama durumu ölçeri ve %80 üzeri uyarı. Güncelleme: panel dosyası artık ağdan önce alınır, yeni sürüm gelince Yeni sürüm hazır · Yenile bildirimi çıkar. Şifre yoksa (en çok 3 kez, günde bir) şifre koyma önerisi. Gemini varsayılan modeli gemini-3.8-flash; 429/503 yoğunlukta otomatik 2 yeniden deneme. Telefonda giriş alanları daha rahat dokunulur."},
@@ -8376,6 +8377,35 @@ async function yedekDosyaYukle(f){
   }
   save(); renderAll(); if(mod==="degistir") toast("Yedek yüklendi");
 }
+/* ---- v3.23.1: her şifre kutusuna göster/gizle düğmesi ---- */
+(function(){
+  const css=document.createElement("style");
+  css.textContent=".pw-sar{position:relative;display:block;min-width:0}.pw-sar>input{width:100%;box-sizing:border-box;padding-right:44px!important}.pw-goz{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:38px;height:38px;min-height:0!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted,#5b6b7a);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center}.pw-goz:hover{background:rgba(0,0,0,.07)!important}.pw-goz:focus-visible{outline:2px solid var(--accent,#1f4e79)}.pw-goz svg{width:20px;height:20px;pointer-events:none}.pw-sar>input[type=text]{letter-spacing:normal!important}";
+  document.head.appendChild(css);
+  const GOZ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const KAPA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12A3 3 0 1 1 9.88 9.88"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  function durum(i,b,ac){ i.type=ac?"text":"password"; b.innerHTML=ac?KAPA:GOZ; b.setAttribute("aria-pressed",ac?"true":"false"); b.setAttribute("aria-label",ac?"Şifreyi gizle":"Şifreyi göster"); b.title=ac?"Şifreyi gizle":"Şifreyi göster"; }
+  function sar(i){
+    if(i.dataset.pwGoz||!i.parentNode) return; i.dataset.pwGoz="1";
+    const cs=getComputedStyle(i), w=document.createElement("span"); w.className="pw-sar";
+    if(cs.maxWidth!=="none") w.style.maxWidth=cs.maxWidth;
+    if(i.style.width && i.style.width.indexOf("%")<0) w.style.width=i.style.width;
+    if(cs.flexGrow!=="0") w.style.flex=cs.flex; else if(i.parentNode && /flex/.test(getComputedStyle(i.parentNode).display)) w.style.flex="1 1 auto";
+    const foc=document.activeElement===i, p=i.selectionStart;
+    i.parentNode.insertBefore(w,i); w.appendChild(i);
+    const b=document.createElement("button"); b.type="button"; b.className="pw-goz"; b.tabIndex=0; durum(i,b,false);
+    b.addEventListener("mousedown",e=>e.preventDefault());
+    b.addEventListener("click",()=>{ durum(i,b,i.type==="password"); i.focus(); });
+    w.appendChild(b); if(foc){ i.focus(); try{ i.setSelectionRange(p,p); }catch(e){} }
+  }
+  function tara(){ document.querySelectorAll("input[type=password]:not([data-pw-goz])").forEach(sar); }
+  function gizleHepsi(){ document.querySelectorAll("input[data-pw-goz]").forEach(i=>{ if(i.type==="text"){ const b=i.parentNode&&i.parentNode.querySelector(".pw-goz"); if(b) durum(i,b,false); } }); }
+  let bekle=0; const mo=new MutationObserver(()=>{ if(bekle) return; bekle=requestAnimationFrame(()=>{ bekle=0; tara(); }); });
+  mo.observe(document.documentElement,{childList:true,subtree:true}); tara();
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) gizleHepsi(); });
+  window.addEventListener("pagehide",gizleHepsi);
+})();
+
 /* ---- v3.23: Veri güvenliği ekranı (Drive = asıl kopya) ---- */
 const VG = { gun:null, yuk:false, hata:"", liste:false };
 async function vgYukle(zorla){
