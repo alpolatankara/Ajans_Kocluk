@@ -751,7 +751,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.23.1";
+const SURUM = "3.23.2";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1415,7 +1415,7 @@ function doPost(e) {
     if (kilitli_()) return cevap_({ok: false, hata: 'kilitli'});
     if (!yetkili_(g.t)) { hataSay_(); return cevap_({ok: false, hata: 'yetkisiz'}); }
     CacheService.getScriptCache().remove('kilit');
-    if (a === 'okping') return cevap_({ok: true, s: 4});
+    if (a === 'okping') return cevap_({ok: true, s: 5});
     if (a === 'gunlist') {
       var gl = gunlukListe_().map(function (f) { return {ad: f.getName(), b: f.getSize(), z: f.getLastUpdated().getTime()}; });
       var gs = null; try { gs = JSON.parse(p.getProperty('GUN_SON') || 'null'); } catch (e8) {}
@@ -1436,18 +1436,27 @@ function doPost(e) {
       return cevap_({ok: true});
     }
     if (a === 'kisalt') {
-      var tok = p.getProperty('TINY');
-      if (!tok) return cevap_({ok: false, hata: 'tokenyok'});
       var uz = String(g.url || '');
       if (!/^https:\/\/[^\s]{10,4000}$/.test(uz)) return cevap_({ok: false, hata: 'gecersiz'});
       var al = String(g.alias || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
-      var tb = {url: uz};
-      if (al) tb.alias = al;
-      var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
-      var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
-      if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
-      var em = JSON.stringify(js.errors || []).toLowerCase();
-      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode(), ayrinti: em.slice(0, 200)});
+      var tok = p.getProperty('TINY'), cc = CacheService.getScriptCache(), not = '';
+      if (tok && !cc.get('tinydolu')) {
+        var tb = {url: uz};
+        if (al) tb.alias = al;
+        var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
+        var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
+        if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url, kaynak: 'tinyurl'});
+        var em = JSON.stringify(js.errors || []).toLowerCase();
+        if (/limit/.test(em)) { cc.put('tinydolu', '1', 21600); not = 'TinyURL kotası dolu, is.gd kullanıldı'; }
+        else not = 'TinyURL reddetti (' + rs.getResponseCode() + ' ' + em.slice(0, 80) + '), is.gd kullanıldı';
+      } else if (tok) not = 'TinyURL kotası dolu, is.gd kullanıldı';
+      else not = 'TinyURL anahtarı yok, is.gd kullanıldı';
+      var ig = 'https://is.gd/create.php?format=json&url=' + encodeURIComponent(uz), ial = al.replace(/-/g, '_');
+      if (ial.length >= 5) ig += '&shorturl=' + encodeURIComponent(ial);
+      var ri = UrlFetchApp.fetch(ig, {muteHttpExceptions: true}), ji = {}; try { ji = JSON.parse(ri.getContentText()); } catch (e8) {}
+      if (ji.shorturl) return cevap_({ok: true, kisa: ji.shorturl, kaynak: 'isgd', not: not});
+      if (ji.errorcode === 2 && ial.length >= 5) return cevap_({ok: false, hata: 'alias', ayrinti: String(ji.errormessage || '').slice(0, 100)});
+      return cevap_({ok: false, hata: 'kisaltici', kod: ri.getResponseCode(), ayrinti: (not + ' · is.gd: ' + String(ji.errormessage || ri.getContentText())).slice(0, 220)});
     }
     if (a === 'ydk') {
       var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
@@ -7449,7 +7458,7 @@ function renderAntet(){
 /* ---------- v3.16: TinyURL ile kısa bağlantı ---------- */
 const TINY_ANAHTAR = "akp_tiny_token";
 function tinyToken(){ try{ return localStorage.getItem(TINY_ANAHTAR)||""; }catch(e){ return ""; } }
-function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive && a.tinyBetik); }
+function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive); }
 function kisaSlug(ad){ return String(ad||"").toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]/g,""); }
 function kisaRnd(n){ const k = "abcdefghjkmnpqrstuvwxyz23456789"; let o = ""; for(let i=0;i<n;i++) o += k[Math.floor(Math.random()*k.length)]; return o; }
 function kisaAdaylar(ad){
@@ -7458,15 +7467,15 @@ function kisaAdaylar(ad){
   const kisa = taban.slice(0,26);
   return [taban, kisa+"-"+kisaRnd(3), kisa+"-"+kisaRnd(3), ""];
 }
-let KISA_HATA = "";
+let KISA_HATA = "", KISA_NOT = "";
 async function kisalUrl(uzun, ad){
-  KISA_HATA = "";
+  KISA_HATA = ""; KISA_NOT = "";
   const a = onayAyar(); const c = senkCfg(); const tok = tinyToken(); const adaylar = kisaAdaylar(ad);
   const zaman = ()=>{ try{ return AbortSignal.timeout(15000); }catch(e){ return undefined; } };
-  if(c && a.inboxDrive && a.tinyBetik){
+  if(c && a.inboxDrive){
     for(const al of adaylar){
       try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
-        if(j && j.ok && j.kisa) return j.kisa; KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+((j&&j.ayrinti)?" "+j.ayrinti:"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
+        if(j && j.ok && j.kisa){ KISA_NOT = j.not||""; return j.kisa; } KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+((j&&j.ayrinti)?" "+j.ayrinti:"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
   }
   if(tok){
     for(const al of adaylar){
@@ -7480,7 +7489,7 @@ async function kisalUrl(uzun, ad){
 }
 async function onayKisaHazirla(r){
   if(!r || r.kisa) return r && r.kisa; if(!kisaAcik()) return null;
-  const k = await kisalUrl(r.link, (r.yuk&&r.yuk.og)||""); if(k){ r.kisa = k; save(); } else toast("Kısaltılamadı; uzun bağlantı kullanılıyor");
+  const k = await kisalUrl(r.link, (r.yuk&&r.yuk.og)||""); if(k){ r.kisa = k; save(); } else toast("Kısaltılamadı, uzun bağlantı kullanılıyor"+(KISA_HATA?": "+KISA_HATA.replace(/ · $/,"").slice(0,140):""), {duration:9000});
   return k;
 }
 function onayKutuBilgi(){
@@ -7626,7 +7635,7 @@ function onayHtml(){
       <div class="field"><label for="onKocTel">Koç telefonu (onay kodu bu numaraya gelir)</label><input id="onKocTel" type="tel" value="${esc(a.kocTel||"")}" placeholder="05xx xxx xx xx"></div>
     </div>
     <h4 style="margin:12px 0 4px">Kısa bağlantı (TinyURL)</h4>
-    <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). Başarısız olursa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
+    <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). TinyURL kotası dolarsa ya da reddederse Drive betiği ücretsiz is.gd ile kısaltır; ikisi de olmazsa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
     <div class="form">
       <div class="field"><label for="onTinyTok">TinyURL token ${tinyToken()?'<span class="chip ok">bu cihazda kayıtlı</span>':""}</label><input id="onTinyTok" type="password" autocomplete="off" placeholder="${tinyToken()?"Değiştirmek için yeni token yazın":"Token’ı yapıştırın"}"></div>
       <div class="field"><label><input id="onKisaAlias" type="checkbox" ${a.kisaAliasAc===true?"checked":""}> Özel ad kullan (ücretli TinyURL hesabı gerekebilir)</label></div>
@@ -7940,8 +7949,8 @@ function onayBagla(){
     catch(e){ tinyDurum("Drive betiğine ulaşılamadı."); } });
   $("onTinyTest").addEventListener("click",async ()=>{
     if(!kisaAcik() && !tinyToken()){ tinyDurum("Önce token kaydedin."); return; }
-    tinyDurum("Deneniyor…"); const k = await kisalUrl("https://example.com/?akp="+Date.now(), "test"+kisaRnd(4));
-    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k : "Kısaltılamadı. "+(KISA_HATA||"")+"Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
+    tinyDurum("Deneniyor…"); const k = await kisalUrl("https://example.com/?akp=test", "");
+    tinyDurum(k ? "Çalışıyor ✓ Örnek kısa bağlantı: "+k+(KISA_NOT?" ("+KISA_NOT+")":"") : "Kısaltılamadı. "+(KISA_HATA||"")+"Token’ı kontrol edin; tarayıcı doğrudan bağlantıyı engelliyorsa token’ı Drive betiğine yükleyin."); });
   $("onAyarKaydet").addEventListener("click",()=>{
     const u = $("onInbox").value.trim(); if(u && !senkUrlGecerli(u)){ toast("Onay kutusu adresi https://script.google.com/macros/s/…/exec biçiminde olmalı"); return; }
     a.yayinUrl = $("onUrl").value.trim(); a.kocAd = $("onKocAd").value.trim(); a.kocTel = $("onKocTel").value.trim(); a.inboxUrl = u; save(); toast("Ayarlar kaydedildi"); re(); });
@@ -8008,6 +8017,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.23.2", t:"12 Kasım 2026", n:"Kısa bağlantı: TinyURL kotası dolu ya da reddederse Drive betiği otomatik olarak ücretsiz is.gd ile kısaltır (TinyURL anahtarı olmasa da çalışır); kota dolduğunda 6 saat boyunca TinyURL denenmez; test düğmesi artık her seferinde yeni bağlantı üretmez; kısaltma başarısız olursa bildirimde sebep yazar. Drive scriptini güncelleyip yeniden dağıtmanız gerekir."},
   {v:"3.23.1", t:"12 Kasım 2026", n:"Tüm şifre kutularına göster/gizle (göz) düğmesi: açılış ekranı, şifre belirleme/değiştirme, yedek şifreleri, Drive eşitleme şifresi, Gemini ve TinyURL anahtarı. Varsayılan gizli; sayfa arka plana alınınca yeniden gizlenir."},
   {v:"3.23.0", t:"12 Kasım 2026", n:"Drive asıl kopya oldu: Yedek ve güvenlik sayfasının başına Veri güvenliği ekranı eklendi (cihaz kaydı, Drive eşitleme, günlük yedek, kalıcı depolama, şifreleme, çakışma durumu); Drive scripti her gece 03:00’te günlük yedek alır (30 gün) ve panelden geri yüklenebilir; boş/silinmiş cihaz açılışta Drive'dan veriyi çeker (boş veri Drive'ın üzerine yazılmaz); Bugün ekranında Drive/yedek uyarısı; başka cihazla birleşme bildirimi. Drive scriptini güncelleyip gunlukKur işlevini bir kez çalıştırmanız gerekir."},
   {v:"3.22.0", t:"10 Kasım 2026", n:"Ana veri artık IndexedDB’de (geniş depolama): ilk açılışta eski veri doğrulamalı olarak taşınır, taşıma öncesi otomatik bir yedek Yedek sayfasına konur; IndexedDB açılamazsa eski localStorage ile çalışmaya devam eder. Depolama ölçeri gerçek tarayıcı kotasını gösterir, kalıcı depolama izni istenir."},
