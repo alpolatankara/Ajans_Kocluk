@@ -751,7 +751,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.23.2";
+const SURUM = "3.24.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1436,27 +1436,21 @@ function doPost(e) {
       return cevap_({ok: true});
     }
     if (a === 'kisalt') {
+      var tok = p.getProperty('TINY');
+      if (!tok) return cevap_({ok: false, hata: 'tokenyok'});
       var uz = String(g.url || '');
       if (!/^https:\/\/[^\s]{10,4000}$/.test(uz)) return cevap_({ok: false, hata: 'gecersiz'});
       var al = String(g.alias || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
-      var tok = p.getProperty('TINY'), cc = CacheService.getScriptCache(), not = '';
-      if (tok && !cc.get('tinydolu')) {
-        var tb = {url: uz};
-        if (al) tb.alias = al;
-        var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
-        var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
-        if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url, kaynak: 'tinyurl'});
-        var em = JSON.stringify(js.errors || []).toLowerCase();
-        if (/limit/.test(em)) { cc.put('tinydolu', '1', 21600); not = 'TinyURL kotası dolu, is.gd kullanıldı'; }
-        else not = 'TinyURL reddetti (' + rs.getResponseCode() + ' ' + em.slice(0, 80) + '), is.gd kullanıldı';
-      } else if (tok) not = 'TinyURL kotası dolu, is.gd kullanıldı';
-      else not = 'TinyURL anahtarı yok, is.gd kullanıldı';
-      var ig = 'https://is.gd/create.php?format=json&url=' + encodeURIComponent(uz), ial = al.replace(/-/g, '_');
-      if (ial.length >= 5) ig += '&shorturl=' + encodeURIComponent(ial);
-      var ri = UrlFetchApp.fetch(ig, {muteHttpExceptions: true}), ji = {}; try { ji = JSON.parse(ri.getContentText()); } catch (e8) {}
-      if (ji.shorturl) return cevap_({ok: true, kisa: ji.shorturl, kaynak: 'isgd', not: not});
-      if (ji.errorcode === 2 && ial.length >= 5) return cevap_({ok: false, hata: 'alias', ayrinti: String(ji.errormessage || '').slice(0, 100)});
-      return cevap_({ok: false, hata: 'kisaltici', kod: ri.getResponseCode(), ayrinti: (not + ' · is.gd: ' + String(ji.errormessage || ri.getContentText())).slice(0, 220)});
+      var cc = CacheService.getScriptCache();
+      if (cc.get('tinydolu')) return cevap_({ok: false, hata: 'tiny', kod: 422, ayrinti: 'TinyURL kotasi dolu (6 saat denenmeyecek)'});
+      var tb = {url: uz};
+      if (al) tb.alias = al;
+      var rs = UrlFetchApp.fetch('https://api.tinyurl.com/create', {method: 'post', contentType: 'application/json', headers: {Authorization: 'Bearer ' + tok, Accept: 'application/json'}, payload: JSON.stringify(tb), muteHttpExceptions: true});
+      var js = {}; try { js = JSON.parse(rs.getContentText()); } catch (e7) {}
+      if (rs.getResponseCode() === 200 && js.data && js.data.tiny_url) return cevap_({ok: true, kisa: js.data.tiny_url});
+      var em = JSON.stringify(js.errors || []).toLowerCase();
+      if (/limit/.test(em)) cc.put('tinydolu', '1', 21600);
+      return cevap_({ok: false, hata: /alias/.test(em) ? 'alias' : 'tiny', kod: rs.getResponseCode(), ayrinti: em.slice(0, 200)});
     }
     if (a === 'ydk') {
       var yad = String(g.ad || '').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
@@ -1701,8 +1695,11 @@ function bgKartlarHam(){
   if(yk.length) K.push({k:"yaklasan", ikon:"⏭️", baslik:"Yaklaşan ("+E.yaklasanGun+" gün)", say:yk.length, sat:yk.map(x=>({sid:x.sid, ad:x.baslik||"(başlıksız)", alt:trDate(x.tarih)+" "+(x.saat||"")+" · "+ajOgrAd(x.sid), act:"tab", tab:"ajanda", ajid:x.id, tarih:x.tarih, et:"Ajanda"}))});
   // 4 ödeme (kayıt bazlı)
   const od = [];
-  ak.forEach(st=>{ (DB.odeme[st.id]||[]).forEach(x=>{ const k = odKalan(x); if(!k) return; const vade = x.vade || (x.tarih ? ajIsoEkle(x.tarih, E.odemeGun) : ""); const gecikti = x.vade ? vade<bugun : (vade && vade<=bugun); if(gecikti) od.push({sid:st.id, ad:st.ad, alt:odemeDonemEtiket(x)+" · kalan "+tlYaz(k)+(x.vade?" · vade "+trDate(x.vade):""), act:"odendi", oid:x.id, et:"Ödendi yap", ek:{et:"Hatırlat", act:"hat", oid:x.id}}); }); });
+  ak.forEach(st=>{ const acik = blokAcikKimlikler(st); (DB.odeme[st.id]||[]).forEach(x=>{ const k = odKalan(x); if(!k || acik.has(x.id)) return; const vade = x.vade || (x.tarih ? ajIsoEkle(x.tarih, E.odemeGun) : ""); const gecikti = x.vade ? vade<bugun : (vade && vade<=bugun); if(gecikti) od.push({sid:st.id, ad:st.ad, alt:odemeDonemEtiket(x)+" · kalan "+tlYaz(k)+(x.vade?" · vade "+trDate(x.vade):""), act:"odendi", oid:x.id, et:"Ödendi yap", ek:{et:"Hatırlat", act:"hat", oid:x.id}}); }); });
   if(od.length) K.push({k:"odeme", ikon:"💳", baslik:"Ödemesi geciken", say:od.length, sat:od});
+  const bl = [];
+  ak.forEach(st=>{ const B = blokTamBekleyen(st); if(B.length){ const top = B.reduce((a,b)=>a+b.kal,0); bl.push({sid:st.id, ad:st.ad, alt:blokN(st)+" haftalık dönem tamamlandı · talep edilecek "+tlYaz(top), act:"tab", tab:"odeme", et:"Ödeme takibi"}); } });
+  if(bl.length) K.push({k:"odeme", ikon:"🧾", baslik:"Toplu ödeme talebi zamanı", say:bl.length, sat:bl});
   // 5 seans notu
   if(hg>=E.seansGun){ const l = ak.filter(st=>!(DB.seans[st.id]||[]).some(x=>(x.tarih||"")>=hbasi && (x.tarih||"")<=bugun)).map(st=>({sid:st.id, ad:st.ad, alt:(DB.seans[st.id]||[]).length?"bu hafta seans notu yok":"hiç seans notu yok", act:"tab", tab:"seans", et:"Seans notu"})); if(l.length) K.push({k:"seans", ikon:"💬", baslik:"Bu hafta seans notu girilmemiş", say:l.length, sat:l}); }
   // 6 uygulama takibi
@@ -2305,6 +2302,9 @@ function renderOgrenci(){
         <div class="field"><label for="fVeliTel">Veli telefonu</label><input id="fVeliTel" type="tel"></div>
         <div class="field"><label for="fKoc">Koç / öğretmen</label><input id="fKoc" type="text"></div>
         <div class="field"><label for="fOzel">Özel ders de alıyor mu?</label><select id="fOzel"><option value="hayir">Hayır</option><option value="evet">Evet</option></select></div>
+        <div class="field"><label for="fOdSik">Ödeme sıklığı</label><select id="fOdSik"><option value="">Haftalık (her hafta)</option><option value="blok">Toplu (birkaç haftada bir)</option></select></div>
+        <div class="field" id="fBlokF" style="display:none"><label for="fBlokH">Kaç haftada bir toplu ödeme</label><select id="fBlokH">${[2,3,4,5,6].map(n=>`<option value="${n}"${n===4?" selected":""}>${n} hafta</option>`).join("")}</select></div>
+        <div class="field" id="fBlokBF" style="display:none"><label for="fBlokB">Toplu dönem sayımı şu tarihten başlasın <span class="muted">(isteğe bağlı)</span></label><input id="fBlokB" type="date"></div>
         <div class="field"><label for="fAile">Aile / kardeş etiketi</label><input id="fAile" type="text" placeholder="Örnek: Yılmaz ailesi"></div>
         <div class="field fact"><button class="btn primary" id="fSave">Öğrenciyi kaydet</button> <button class="btn" id="fBosForm">Boş kayıt formu yazdır</button></div>
       </div></div>
@@ -2315,12 +2315,14 @@ function renderOgrenci(){
       <p class="hint">Şifreli yedek, paylaşma, Drive yedeği, öğrenci arşivi ve şifre ayarları <b>Yardım › Yedek ve güvenlik</b> sayfasında toplandı.</p>
       ${backupNote()}
       <div class="actions"><button class="btn primary" id="bkGit" type="button">Yedek ve güvenliğe git</button></div></div>`;
+  const blokFormGoster = ()=>{ const b = $("fOdSik").value==="blok"; $("fBlokF").style.display = b?"":"none"; $("fBlokBF").style.display = b?"":"none"; };
+  $("fOdSik").addEventListener("change",blokFormGoster);
   let editing = null;
   $("ogrSearch").addEventListener('input',e=>{ OGR_Q = e.target.value; renderOgrenci(); });
   $("fSave").addEventListener('click',()=>{
     const ad = $("fAd").value.trim(); if(!ad){ toast("Öğrencinin adını yazın"); $("fAd").focus(); return; }
     const data = {ad, sinif:$("fSinif").value, alan:$("fAlan").value, okul:$("fOkul").value.trim(), koc:$("fKoc").value.trim(),
-      tel:$("fTel").value.trim(), veliAd:$("fVeliAd").value.trim(), veliTel:$("fVeliTel").value.trim(), dogum:$("fDogum").value, kayit:$("fKayit").value, ilce:$("fIlce").value.trim(), adres:$("fAdres").value.trim(), aile:$("fAile").value.trim(), ozelDers:$("fOzel").value};
+      tel:$("fTel").value.trim(), veliAd:$("fVeliAd").value.trim(), veliTel:$("fVeliTel").value.trim(), dogum:$("fDogum").value, kayit:$("fKayit").value, ilce:$("fIlce").value.trim(), adres:$("fAdres").value.trim(), aile:$("fAile").value.trim(), ozelDers:$("fOzel").value, odemeSik:$("fOdSik").value, blokHafta:$("fOdSik").value==="blok"?$("fBlokH").value:"", blokBas:$("fOdSik").value==="blok"?$("fBlokB").value:""};
     if(editing){ Object.assign(DB.students.find(s=>s.id===editing), data); toast("Öğrenci güncellendi"); }
     else { const id=yeniId("s"); DB.students.push(Object.assign({id},data)); DB.cur=id; toast("Öğrenci kaydedildi"); }
     save(); renderAll();
@@ -2331,7 +2333,7 @@ function renderOgrenci(){
   document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
     const s = DB.students.find(x=>x.id===b.dataset.edit); editing = s.id;
     $("fTitle").textContent = "Öğrenciyi düzenle: "+s.ad; $("fAd").value=s.ad; $("fSinif").value=s.sinif; $("fAlan").value=s.alan||"SAY"; $("fOkul").value=s.okul||""; $("fKoc").value=s.koc||"";
-    $("fTel").value=s.tel||""; $("fVeliAd").value=s.veliAd||""; $("fVeliTel").value=s.veliTel||""; $("fDogum").value=s.dogum||""; $("fKayit").value=s.kayit||""; $("fIlce").value=s.ilce||""; $("fAdres").value=s.adres||""; $("fAile").value=s.aile||""; $("fOzel").value=s.ozelDers==="evet"?"evet":"hayir";
+    $("fTel").value=s.tel||""; $("fVeliAd").value=s.veliAd||""; $("fVeliTel").value=s.veliTel||""; $("fDogum").value=s.dogum||""; $("fKayit").value=s.kayit||""; $("fIlce").value=s.ilce||""; $("fAdres").value=s.adres||""; $("fAile").value=s.aile||""; $("fOzel").value=s.ozelDers==="evet"?"evet":"hayir"; $("fOdSik").value=s.odemeSik==="blok"?"blok":""; $("fBlokH").value=String(blokN(s)); $("fBlokB").value=s.blokBas||""; blokFormGoster();
     $("fSave").textContent = "Değişiklikleri kaydet"; $("fAd").focus();
   }));
   document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
@@ -3085,6 +3087,7 @@ function odKalan(x){ return Math.max(0, odTutar(x)-odOdenen(x)); }
 function tlYaz(n){ return (Math.round((+n||0)*100)/100).toLocaleString("tr-TR")+" ₺"; }
 function odDurumSinif(d){ return d==="Ödendi" ? "g" : d==="Kısmi" ? "y" : "r"; }
 function odemeMesajMetni(s, x, tur){
+  if(tur==="blok") return blokMesajMetni(s);
   const hitap = s.veliAd ? "Merhaba "+s.veliAd+"," : "Merhaba,"; const don = odemeDonemEtiket(x); const kalan = odKalan(x); const koc = (s.koc||"").trim();
   if(tur==="ozet"){
     const g = odGunlukOku(x).filter(r=>r.t||r.not).sort((p,q)=>String(p.t).localeCompare(String(q.t)));
@@ -3105,7 +3108,7 @@ function odemeMesajAc(id, tur0){
   const s = stu(); const x = (DB.odeme[s.id]||[]).find(y=>y.id===id); if(!x) return;
   let tur = tur0 || (x.durum==="Ödendi" ? "ozet" : "hatirlat"); let metin = odemeMesajMetni(s,x,tur);
   const bg = modalAc(`<h3 style="margin:0 0 8px">Veliye mesaj · ${esc(odemeDonemEtiket(x))}</h3>
-    <div class="field" style="margin-bottom:8px"><label for="omTur">Mesaj türü</label><select id="omTur"><option value="hatirlat"${tur==="hatirlat"?" selected":""}>Ödeme hatırlatması</option><option value="ozet"${tur==="ozet"?" selected":""}>Dönem / ders özeti</option></select></div>
+    <div class="field" style="margin-bottom:8px"><label for="omTur">Mesaj türü</label><select id="omTur"><option value="hatirlat"${tur==="hatirlat"?" selected":""}>Ödeme hatırlatması</option><option value="ozet"${tur==="ozet"?" selected":""}>Dönem / ders özeti</option>${blokAktif(s)?`<option value="blok"${tur==="blok"?" selected":""}>Toplu ödeme talebi</option>`:""}</select></div>
     <div class="field" style="margin-bottom:8px"><label for="omKime">Kime</label><select id="omKime"><option value="v">Veli ${s.veliTel?"("+esc(s.veliTel)+")":"(numara yok)"}</option><option value="o">Öğrenci ${s.tel?"("+esc(s.tel)+")":"(numara yok)"}</option></select></div>
     <div class="field"><label for="omMetin">Mesaj (düzenleyebilirsiniz)</label><textarea id="omMetin" rows="9" style="width:100%">${esc(metin)}</textarea></div>
     <div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="omWa" type="button">WhatsApp'ta aç</button><button class="btn" id="omSms" type="button">SMS</button><button class="btn" id="omKopya" type="button">Kopyala</button><button class="btn" id="omKapat" type="button">Kapat</button></div>`);
@@ -3118,6 +3121,77 @@ function odemeMesajAc(id, tur0){
   q("omKopya").addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText(q("omMetin").value); toast("Mesaj kopyalandı"); }catch(e){ q("omMetin").select(); toast("Metni seçip kopyalayın"); } });
   q("omKapat").addEventListener('click',()=>bg.remove());
 }
+/* ---- v3.24.0: ödeme sıklığı ve blok (4 haftalık toplu) ödeme ---- */
+function blokAktif(s){ return !!s && s.odemeSik==="blok"; }
+function blokN(s){ return Math.min(6,Math.max(2,parseInt(s&&s.blokHafta,10)||4)); }
+function blokKayitlar(s){
+  const bas = s.blokBas||"";
+  return (DB.odeme[s.id]||[]).filter(x=>(x.periyot||"Aylık")==="Haftalık" && (!bas || (x.bas||"")>=bas)).slice().sort((a,b)=>String(a.bas||a.ay||"").localeCompare(String(b.bas||b.ay||""))||String(a.id).localeCompare(String(b.id)));
+}
+function blokler(s){
+  const L = blokKayitlar(s), n = blokN(s), out = [];
+  for(let i=0;i<L.length;i+=n){ const k = L.slice(i,i+n);
+    const b = {no:out.length+1, k, tam:k.length>=n, n, bas:k[0].bas||"", bit:k[k.length-1].bas||"", tut:k.reduce((a,x)=>a+odTutar(x),0), od:k.reduce((a,x)=>a+odOdenen(x),0)};
+    b.kal = Math.max(0,b.tut-b.od); out.push(b); }
+  return out;
+}
+function blokAcikKimlikler(s){ if(!blokAktif(s)) return new Set(); const B = blokler(s); const son = B[B.length-1]; return new Set(son && !son.tam ? son.k.map(x=>x.id) : []); }
+function blokTamBekleyen(s){ return blokAktif(s) ? blokler(s).filter(b=>b.tam && b.kal>0.004) : []; }
+function r2(n){ return Math.round((+n||0)*100)/100; }
+function tahsilatUygula(s, tutar, tarih, sekil){
+  const g = yeniId("t"); let kalan = r2(tutar);
+  const L = (DB.odeme[s.id]||[]).filter(x=>odKalan(x)>0.004).sort((a,b)=>String(a.bas||a.ay||a.tarih||"").localeCompare(String(b.bas||b.ay||b.tarih||""))||String(a.id).localeCompare(String(b.id)));
+  const topKalan = r2(L.reduce((a,x)=>a+odKalan(x),0));
+  if(kalan<=0) return {hata:"Tutarı yazın"}; if(kalan>topKalan+0.004) return {hata:"Tutar toplam kalandan ("+tlYaz(topKalan)+") fazla"};
+  for(const x of L){ if(kalan<=0.004) break; const pay = r2(Math.min(kalan, odKalan(x)));
+    if(x.tah===undefined){ x.tahTaban = odOdenen(x); x.tah = []; }
+    x.tah.push({g, t:tarih, tut:pay, sekil:sekil||""}); tahsilatDurum(x); x.tarih = tarih; if(sekil) x.sekil = sekil; kalan = r2(kalan-pay); }
+  save(); return {g, tutar:r2(tutar)};
+}
+function tahsilatDurum(x){
+  const top = r2((x.tahTaban||0)+(x.tah||[]).reduce((a,t)=>a+(+t.tut||0),0)), T = odTutar(x);
+  if(T>0 && top>=T-0.005){ x.durum = "Ödendi"; x.odenen = ""; } else if(top>0){ x.durum = "Kısmi"; x.odenen = String(top); } else { x.durum = "Ödenmedi"; x.odenen = ""; }
+}
+function tahsilatGeriAl(s, g){
+  (DB.odeme[s.id]||[]).forEach(x=>{ if(!Array.isArray(x.tah)) return; const n = x.tah.length; x.tah = x.tah.filter(t=>t.g!==g); if(x.tah.length===n) return;
+    tahsilatDurum(x); if(!x.tah.length){ delete x.tah; delete x.tahTaban; } });
+  save();
+}
+function tahsilatGruplari(s){
+  const m = {}; (DB.odeme[s.id]||[]).forEach(x=>(x.tah||[]).forEach(t=>{ const o = m[t.g] = m[t.g]||{g:t.g, t:t.t, tut:0, sekil:t.sekil||"", n:0}; o.tut = r2(o.tut+(+t.tut||0)); o.n++; }));
+  return Object.values(m).sort((a,b)=>String(b.t).localeCompare(String(a.t))).slice(0,6);
+}
+function blokDonemMetin(b){ return trDate(b.bas)+" – "+trDate(b.bit)+" · "+b.k.length+" hafta"; }
+function blokMesajMetni(s){
+  const hitap = s.veliAd ? "Merhaba "+s.veliAd+"," : "Merhaba,"; const B = blokTamBekleyen(s); const koc = (s.koc||"").trim();
+  if(!B.length) return hitap+"\n"+s.ad+" için şu an bekleyen toplu ödeme yok.";
+  let m = hitap+"\n"+s.ad+" için "+blokN(s)+" haftalık dönem tamamlandı:\n";
+  B.forEach(b=>{ m += "• "+trDate(b.bas)+" – "+trDate(b.bit)+": "+tlYaz(b.tut)+(b.od>0?" (ödenen "+tlYaz(b.od)+", kalan "+tlYaz(b.kal)+")":"")+"\n"; });
+  const top = B.reduce((a,b)=>a+b.kal,0); m += "Toplam ödenecek tutar: "+tlYaz(top)+"\nMüsait olduğunuzda iletirseniz çok sevinirim."+(koc?"\n"+koc:"")+mesajWeb();
+  return m;
+}
+function blokKutuHtml(s){
+  if(!blokAktif(s)) return "";
+  const B = blokler(s), son = B.slice(-4).reverse(), bek = blokTamBekleyen(s), kalT = r2((DB.odeme[s.id]||[]).reduce((a,x)=>a+odKalan(x),0)), tg = tahsilatGruplari(s);
+  const sat = son.map(b=>{ const dur = b.kal<=0.004&&b.tam?"Ödendi":b.tam?(b.od>0?"Kısmi":"Talep edin"):"Devam ediyor", sn = b.kal<=0.004&&b.tam?"g":b.od>0?"y":b.tam?"r":""; return `<tr><td><b>${b.no}. dönem</b><br><span class="muted">${esc(blokDonemMetin(b))}${b.tam?"":" ("+b.k.length+"/"+b.n+")"}</span><br><span class="od-d ${sn}">${dur}</span></td><td>${tlYaz(b.tut)}</td><td>${b.od?tlYaz(b.od):"—"}</td><td><b>${tlYaz(b.kal)}</b></td></tr>`; }).join("");
+  return `<div class="box no" id="blokKutu"><h3 style="margin:0 0 4px">🧾 ${blokN(s)} haftalık toplu ödeme</h3>
+    <p class="hint" style="margin:0 0 8px">Dersler haftalık girilir; her ${blokN(s)} ders haftasında bir dönem tamamlanır ve ücret toplu talep edilir. Tahsilat en eski haftadan başlayarak düşülür, kalan borç devam eder.</p>
+    ${B.length?`<div class="tscroll"><table class="ttab"><thead><tr><th>Dönem</th><th>Tutar</th><th>Ödenen</th><th>Kalan</th></tr></thead><tbody>${sat}</tbody></table></div>`:`<p class="muted">Henüz haftalık ödeme kaydı yok. Aşağıdan <b>Haftalık</b> periyotla kayıt ekleyin.</p>`}
+    <div class="form" style="margin-top:10px">
+      <div class="field"><label for="btTut">Tahsil edilen tutar (₺)</label><input id="btTut" type="number" min="0" placeholder="${bek.length?esc(String(r2(bek[0].kal))):""}" value=""></div>
+      <div class="field"><label for="btTar">Tarih</label><input id="btTar" type="date" value="${todayIso()}"></div>
+      <div class="field"><label for="btSek">Ödeme şekli</label><select id="btSek"><option value="">Belirtilmedi</option>${ODEME_SEKIL.map(d=>`<option>${d}</option>`).join("")}</select></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="btAl" type="button">Tahsilatı kaydet</button><button class="btn" id="btMsj" type="button"${bek.length?"":" disabled"}>Veliye talep mesajı</button><span class="muted">Toplam kalan: <b>${tlYaz(kalT)}</b></span></div>
+    ${tg.length?`<h4 class="od-h">Son tahsilatlar</h4>${tg.map(o=>`<div class="yk-kart" style="padding:6px 0"><div class="yk-t"><b>${tlYaz(o.tut)}</b><small>${trDate(o.t)}${o.sekil?" · "+esc(o.sekil):""} · ${o.n} haftaya dağıtıldı</small></div><button class="btn small" data-btgeri="${esc(o.g)}" type="button">Geri al</button></div>`).join("")}`:""}</div>`;
+}
+function blokBagla(s){
+  const al = $("btAl"); if(!al) return;
+  al.addEventListener("click",()=>{ const v = +$("btTut").value || (blokTamBekleyen(s)[0]||{}).kal || 0; const r = tahsilatUygula(s, v, $("btTar").value||todayIso(), $("btSek").value); if(r.hata){ toast(r.hata); return; } toast(tlYaz(r.tutar)+" tahsilat kaydedildi", {label:"Geri al", duration:10000, onClick:()=>{ tahsilatGeriAl(s,r.g); renderOdeme(); }}); renderOdeme(); });
+  document.querySelectorAll("[data-btgeri]").forEach(b=>b.addEventListener("click",async()=>{ if(await onayAl("Tahsilatı geri al","Bu tahsilatın düştüğü haftalar eski durumuna döner.","Geri al")){ tahsilatGeriAl(s,b.dataset.btgeri); renderOdeme(); } }));
+  const mj = $("btMsj"); if(mj) mj.addEventListener("click",()=>{ const x = (blokTamBekleyen(s)[0]||{k:[]}).k[0]; if(x) odemeMesajAc(x.id,"blok"); });
+}
+
 function renderOdeme(){
   const s=stu(); const L=(DB.odeme[s.id]=DB.odeme[s.id]||[]);
   const buAy = todayIso().slice(0,7);
@@ -3142,6 +3216,7 @@ function renderOdeme(){
       <span class="muted">Bu ay (${esc(odemeAyAdi(buAy))}): ${buAyKayit?esc(buAyKayit.durum):"kayıt yok"}</span></div>
     ${L.length?`<div class="od-ozet no">${kart("Toplam tutar",tlYaz(top))}${kart("Tahsil edilen",tlYaz(tah),"od-g")}${kart("Kalan",tlYaz(kal),kal?"od-r":"")}${kart("Yapılan ders",saatT?(odSayi(saatT)+" ders saati · "+odSayi(saatT/2)+" seans"):"–")}</div>
     ${aileKal!==null?`<p class="hint no" style="margin:-4px 0 10px">Aile toplamı (${kardes.length} kardeş, "${esc(s.aile)}"): kalan <b>${tlYaz(aileKal)}</b></p>`:""}`:""}
+    ${blokKutuHtml(s)}
     <div class="box no"><h4 class="od-h" style="margin-top:0">Birim ücretler <span class="muted" style="font-weight:400">(₺ / ders saati · 1 ders saati = 40 dk · 1 seans = 2 ders saati)</span></h4><div class="row" style="gap:16px;flex-wrap:wrap">
       <div class="field" style="max-width:200px"><label for="ucOzel">Özel ders birim ücreti</label><input id="ucOzel" type="number" min="0" value="${esc(s.ucretOzel||s.ucretSaat||"")}"></div>
       <div class="field" style="max-width:200px"><label for="ucKoc">Koçluk birim ücreti</label><input id="ucKoc" type="number" min="0" value="${esc(s.ucretKoc||"")}"></div>
@@ -3151,7 +3226,7 @@ function renderOdeme(){
       <h4 class="od-h">1 · Ne için</h4>
       <div class="form">
         <div class="field"><label for="oTur">Hizmet türü</label><select id="oTur">${ed&&!ed.tur?`<option value="">Belirtilmedi</option>`:""}${odTurler().map(t=>`<option ${t===(ed?ed.tur:(s.ozelDers==="evet"?"Özel ders":"Koçluk"))?"selected":""}>${esc(t)}</option>`).join("")}<option value="__yeni">➕ Yeni tür ekle…</option></select></div>
-        <div class="field"><label for="oPeriyot">Periyot</label><select id="oPeriyot">${(ed&&ed.periyot==="Paket"?PERIYOT.concat(["Paket"]):PERIYOT).map(p=>`<option ${p===(ed?ed.periyot||"Aylık":"Aylık")?"selected":""}>${p}</option>`).join("")}</select></div>
+        <div class="field"><label for="oPeriyot">Periyot</label><select id="oPeriyot">${(ed&&ed.periyot==="Paket"?PERIYOT.concat(["Paket"]):PERIYOT).map(p=>`<option ${p===(ed?ed.periyot||"Aylık":(blokAktif(s)?"Haftalık":"Aylık"))?"selected":""}>${p}</option>`).join("")}</select></div>
         <div class="field"><label for="oBas">Dönem tarihi</label><input id="oBas" type="date" value="${esc(ed?(ed.bas||(ed.ay?ed.ay+"-01":todayIso())):todayIso())}"></div>
         <div class="field" id="oDonemEtiketF" style="display:none"><label for="oDonemEtiket">Dönem açıklaması</label><input id="oDonemEtiket" type="text" placeholder="İsteğe bağlı; yazarsan günlerin yerine görünür" value="${esc(ed?ed.donemEtiket||"":"")}"></div>
       </div>
@@ -3200,6 +3275,7 @@ function renderOdeme(){
     $("oDsOz").textContent = saat ? odSeansMetin(saat)+(karma?" (günlük satırlarından)":"") : (karma?"Karma kayıtta ders saatleri aşağıdaki günlük satırlarından toplanır.":"");
     document.querySelectorAll('[data-ds]').forEach(b=>b.classList.toggle("primary", +b.dataset.ds===saat));
   }
+  blokBagla(s);
   ucAyar("ucOzel","ucretOzel","Özel ders"); ucAyar("ucKoc","ucretKoc","Koçluk"); ucAyar("ucDan","ucretDan","Tercih danışmanlığı");
   const ayAl = ()=>($("oBas").value||todayIso()).slice(0,7);
   function periyotDegisti(){ $("oDonemEtiketF").style.display = $("oPeriyot").value==="Haftalık" ? "" : "none"; }
@@ -3255,7 +3331,7 @@ function renderOdeme(){
       tutar:$("oTutar").value.trim(), durum:$("oDurum").value, odenen:$("oDurum").value==="Kısmi"?$("oOdenen").value.trim():"", sekil:$("oSekil").value, tarih:$("oTarih").value,
       gunluk:gun, dersTarihleri:gun.map(g=>g.t).filter(Boolean).join(", "), not:$("oNot").value.trim()};
     OD_GUN = []; 
-    if(ed){ Object.assign(ed, veri); OD_EDIT=null; save(); renderOdeme(); toast("Ödeme kaydı güncellendi"); }
+    if(ed){ Object.assign(ed, veri); delete ed.tah; delete ed.tahTaban; OD_EDIT=null; save(); renderOdeme(); toast("Ödeme kaydı güncellendi"); }
     else { L.push(Object.assign({id:yeniId("o")}, veri)); save(); renderOdeme(); toast("Ödeme kaydedildi"); }
   });
   if($("oVazgec")) $("oVazgec").addEventListener('click',()=>{ OD_EDIT=null; OD_GUN=[]; renderOdeme(); });
@@ -7206,10 +7282,10 @@ function antetAyar(){ const a = onayAyar(); const t = Object.assign({}, (a.antet
   return Object.assign({ad:"Ajans Koçluk ve Kariyer Planlama", alt:"Akademik koçluk · özel ders · danışmanlık", kisi:a.kocAd||"", tel:a.kocTel||"", eposta:"", adres:"", web:"ajanskocluk.com", insta:"@ajanskocluk", qr:true, mesajWeb:true, logoSec:"", not:"Bu belge bilgi amaçlıdır; resmî fatura veya e-makbuz yerine geçmez.", logo:true}, t, {}); }
 function muhSatirlar(){
   const t = todayIso(), gunE = (typeof bgEsik==="function" ? bgEsik().odemeGun : 7); const out = [];
-  DB.students.forEach(st=>{ (DB.odeme[st.id]||[]).forEach(x=>{
+  DB.students.forEach(st=>{ const acik = blokAcikKimlikler(st); (DB.odeme[st.id]||[]).forEach(x=>{
     const tut = odTutar(x), od = odOdenen(x), kal = odKalan(x); const bas = x.bas || (x.ay ? x.ay+"-01" : "") || x.tarih || "";
     const ref = x.vade || (x.tarih ? ajIsoEkle(x.tarih, gunE) : bas);
-    out.push({sid:st.id, st, x, tut, od, kal, bas, ref, don:mhAy(bas), tay:mhAy(x.tarih||bas), gec: kal>0 && ref ? mhFark(t, ref) : -1});
+    out.push({sid:st.id, st, x, tut, od, kal, bas, ref, don:mhAy(bas), tay:mhAy(x.tarih||bas), gec: kal>0 && ref && !acik.has(x.id) ? mhFark(t, ref) : -1, blokBek: acik.has(x.id)});
   }); });
   return out;
 }
@@ -7458,7 +7534,7 @@ function renderAntet(){
 /* ---------- v3.16: TinyURL ile kısa bağlantı ---------- */
 const TINY_ANAHTAR = "akp_tiny_token";
 function tinyToken(){ try{ return localStorage.getItem(TINY_ANAHTAR)||""; }catch(e){ return ""; } }
-function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive); }
+function kisaAcik(){ const a = onayAyar(); if(a.kisalt===false) return false; return !!tinyToken() || !!(senkCfg() && a.inboxDrive && a.tinyBetik); }
 function kisaSlug(ad){ return String(ad||"").toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]/g,""); }
 function kisaRnd(n){ const k = "abcdefghjkmnpqrstuvwxyz23456789"; let o = ""; for(let i=0;i<n;i++) o += k[Math.floor(Math.random()*k.length)]; return o; }
 function kisaAdaylar(ad){
@@ -7472,7 +7548,7 @@ async function kisalUrl(uzun, ad){
   KISA_HATA = ""; KISA_NOT = "";
   const a = onayAyar(); const c = senkCfg(); const tok = tinyToken(); const adaylar = kisaAdaylar(ad);
   const zaman = ()=>{ try{ return AbortSignal.timeout(15000); }catch(e){ return undefined; } };
-  if(c && a.inboxDrive){
+  if(c && a.inboxDrive && a.tinyBetik){
     for(const al of adaylar){
       try{ const r = await fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({a:"kisalt", t:c.auth, url:uzun, alias:al}), redirect:"follow", signal:zaman()}); const j = await r.json();
         if(j && j.ok && j.kisa){ KISA_NOT = j.not||""; return j.kisa; } KISA_HATA += "Drive betiği: "+((j&&j.hata)||"bilinmeyen")+((j&&j.kod)?" (HTTP "+j.kod+")":"")+((j&&j.ayrinti)?" "+j.ayrinti:"")+(j&&j.hata==="bilinmeyen"?" – betik eski sürüm olabilir":"")+(j&&j.hata==="tokenyok"?" – token betiğe yüklenmemiş":"")+" · "; if(j && j.hata==="alias") continue; break; }catch(e){ KISA_HATA += "Drive betiğine ulaşılamadı ("+(e&&e.message||e)+") · "; break; } }
@@ -7635,7 +7711,7 @@ function onayHtml(){
       <div class="field"><label for="onKocTel">Koç telefonu (onay kodu bu numaraya gelir)</label><input id="onKocTel" type="tel" value="${esc(a.kocTel||"")}" placeholder="05xx xxx xx xx"></div>
     </div>
     <h4 style="margin:12px 0 4px">Kısa bağlantı (TinyURL)</h4>
-    <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). TinyURL kotası dolarsa ya da reddederse Drive betiği ücretsiz is.gd ile kısaltır; ikisi de olmazsa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
+    <p class="hint" style="margin:0 0 6px">Öğrenciye giden bağlantı otomatik kısalır (örn. tinyurl.com/ajanskocluk-elifpolat). Başarısız olursa uzun bağlantı gönderilir. tinyurl.com’da ücretsiz hesap açıp “API token” oluşturun. Kısaltma servisi bağlantının içeriğini görür.</p>
     <div class="form">
       <div class="field"><label for="onTinyTok">TinyURL token ${tinyToken()?'<span class="chip ok">bu cihazda kayıtlı</span>':""}</label><input id="onTinyTok" type="password" autocomplete="off" placeholder="${tinyToken()?"Değiştirmek için yeni token yazın":"Token’ı yapıştırın"}"></div>
       <div class="field"><label><input id="onKisaAlias" type="checkbox" ${a.kisaAliasAc===true?"checked":""}> Özel ad kullan (ücretli TinyURL hesabı gerekebilir)</label></div>
@@ -8017,6 +8093,8 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.24.0", t:"15 Kasım 2026", n:"Ödeme sıklığı: öğrenci kartında Haftalık ya da Toplu (2–6 haftada bir, varsayılan 4) seçilir. Toplu öğrencide dersler yine haftalık girilir; her 4 ders haftasında bir dönem tamamlanır, Bugün’de ‘Toplu ödeme talebi zamanı’ çıkar, açık dönemdeki haftalar gecikmiş sayılmaz. Ödeme takibinde dönem tablosu, tahsilatı en eski haftadan düşen ‘Tahsilatı kaydet’, Geri al ve veliye talep mesajı eklendi. Tahsilat kısmi olabilir, kalan borç devam eder."},
+  {v:"3.23.3", t:"15 Kasım 2026", n:"is.gd yedeği kaldırıldı (Türkiye’de bazı ağlarda açılmıyordu). Kısaltma yalnızca TinyURL ile çalışır; kota dolarsa ya da TinyURL reddederse uzun bağlantı gönderilir (her zaman açılır). TinyURL kotası dolunca betik 6 saat boyunca denemez. Drive scriptini güncelleyip yeniden dağıtın."},
   {v:"3.23.2", t:"12 Kasım 2026", n:"Kısa bağlantı: TinyURL kotası dolu ya da reddederse Drive betiği otomatik olarak ücretsiz is.gd ile kısaltır (TinyURL anahtarı olmasa da çalışır); kota dolduğunda 6 saat boyunca TinyURL denenmez; test düğmesi artık her seferinde yeni bağlantı üretmez; kısaltma başarısız olursa bildirimde sebep yazar. Drive scriptini güncelleyip yeniden dağıtmanız gerekir."},
   {v:"3.23.1", t:"12 Kasım 2026", n:"Tüm şifre kutularına göster/gizle (göz) düğmesi: açılış ekranı, şifre belirleme/değiştirme, yedek şifreleri, Drive eşitleme şifresi, Gemini ve TinyURL anahtarı. Varsayılan gizli; sayfa arka plana alınınca yeniden gizlenir."},
   {v:"3.23.0", t:"12 Kasım 2026", n:"Drive asıl kopya oldu: Yedek ve güvenlik sayfasının başına Veri güvenliği ekranı eklendi (cihaz kaydı, Drive eşitleme, günlük yedek, kalıcı depolama, şifreleme, çakışma durumu); Drive scripti her gece 03:00’te günlük yedek alır (30 gün) ve panelden geri yüklenebilir; boş/silinmiş cihaz açılışta Drive'dan veriyi çeker (boş veri Drive'ın üzerine yazılmaz); Bugün ekranında Drive/yedek uyarısı; başka cihazla birleşme bildirimi. Drive scriptini güncelleyip gunlukKur işlevini bir kez çalıştırmanız gerekir."},
