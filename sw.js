@@ -1,7 +1,7 @@
 /* Akademik Koçluk Paneli — basit önbellekleme service worker'ı.
    Çevrimdışı açılabilmesi ve tarayıcının "Uygulamayı yükle" seçeneğini göstermesi için gerekli. */
-const CACHE = "akp-cache-v46";
-const DOSYALAR = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
+const CACHE = "akp-cache-v47";
+const DOSYALAR = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-192.png", "./icon-maskable-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(DOSYALAR)).catch(()=>{}));
