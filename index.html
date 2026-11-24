@@ -253,7 +253,9 @@ html.onay-mod body>*:not(#onayRoot){display:none!important}
   :root{--ink:#14283a;--ink-2:#34495c;--ink-3:#5d7082;--paper:#fff;--paper-2:#f3f6f8;--line:#c9d3dc;--line-2:#aebbc7;--chalk:#2f6f5e;--pencil:#e0a92c;--redpen:#b8432f}
   body{background:#fff;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .topbar,.app,.toast,.pprev{display:none!important}
-  #print-root{display:block}
+  html,body{height:auto!important;min-height:0!important;overflow:visible!important;max-width:none!important}
+  body{display:block!important}
+  #print-root{display:block;overflow:visible}
   .pg{page-break-after:always;break-after:page}
   .pg:last-child{page-break-after:auto;break-after:auto}
   .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.6pt solid #14283a;padding-bottom:5pt;margin-bottom:7pt}
@@ -751,7 +753,7 @@ function dbNormalize(db){
   return db;
 }
 /* ---------- Depolama katmanı: şifreli saklama + otomatik yedek ---------- */
-const SURUM = "3.24.0";
+const SURUM = "3.25.0";
 const LS_ENV = "akp_env_v1";          // anahtar zarfı: veri anahtarı (DEK) şifre / güvenlik sorusu / kurtarma kodu ile sarılır
 const LS_DEVKEY = "akp_devkey_v1";    // "şifre sorulmasın" tercihinde cihazda saklanan veri anahtarı
 const LS_SURUM = "akp_surum";
@@ -1702,6 +1704,7 @@ function bgKartlarHam(){
   if(bl.length) K.push({k:"odeme", ikon:"🧾", baslik:"Toplu ödeme talebi zamanı", say:bl.length, sat:bl});
   // 5 seans notu
   if(hg>=E.seansGun){ const l = ak.filter(st=>!(DB.seans[st.id]||[]).some(x=>(x.tarih||"")>=hbasi && (x.tarih||"")<=bugun)).map(st=>({sid:st.id, ad:st.ad, alt:(DB.seans[st.id]||[]).length?"bu hafta seans notu yok":"hiç seans notu yok", act:"tab", tab:"seans", et:"Seans notu"})); if(l.length) K.push({k:"seans", ikon:"💬", baslik:"Bu hafta seans notu girilmemiş", say:l.length, sat:l}); }
+  { const gl = []; ak.forEach(st=>{ const n = snAcikGorevler(DB.seans[st.id]||[]).length; if(n) gl.push({sid:st.id, ad:st.ad, alt:n+" açık seans görevi", act:"tab", tab:"seans", et:"Seans notları"}); }); if(gl.length) K.push({k:"seans", ikon:"☐", baslik:"Açık seans görevleri", say:gl.length, sat:gl}); }
   // 6 uygulama takibi
   if(hg>=E.takipGun){ const wk = cetPzt(todayIso()); const l2 = ak.filter(st=>{ const C = (DB.cetele||{})[st.id]; return !(C && C.haf && C.haf[wk]); }).map(st=>({sid:st.id, ad:st.ad, alt:"bu haftanın çetelesi girilmedi", act:"tab", tab:"cetele", et:"Çetele"})); if(l2.length) K.push({k:"cetele", ikon:"📋", baslik:"Bu hafta çetelesi girilmeyenler", say:l2.length, sat:l2}); }
   if(hg>=E.takipGun){ const l = ak.filter(st=>{ const r = (DB.takip[st.id]||{})[W_BUGUN]; return !r || hesaplaNet(r)===""; }).map(st=>({sid:st.id, ad:st.ad, alt:W_BUGUN+". hafta takibi boş", act:"tab", tab:"takip", et:"Takip"})); if(l.length) K.push({k:"takip", ikon:"✅", baslik:"Bu hafta uygulama takibi boş", say:l.length, sat:l}); }
@@ -2389,10 +2392,10 @@ function renderKilavuz(){
 }
 
 /* ---------- Yazdırma ---------- */
-function setPage(orient){
+function setPage(orient, opt){
   let st = document.getElementById("pagestyle");
   if(!st){ st = document.createElement("style"); st.id="pagestyle"; document.head.appendChild(st); }
-  st.textContent = `@page{size:A4 ${orient};margin:9mm}`;
+  st.textContent = opt&&opt.sayfaNo ? `@page{size:A4 ${orient};margin:9mm 9mm 13mm}@page{@bottom-right{content:"Sayfa " counter(page) " / " counter(pages);font:8pt Lexend,sans-serif;color:#5d7082}}` : `@page{size:A4 ${orient};margin:9mm}`;
 }
 const PPREV_CSS = `
   :root{--ink:#14283a;--ink-2:#34495c;--ink-3:#5d7082;--paper:#fff;--paper-2:#f3f6f8;--line:#c9d3dc;--line-2:#aebbc7;--chalk:#2f6f5e;--pencil:#e0a92c;--redpen:#b8432f;--serif:"Literata",Georgia,"Times New Roman",serif}
@@ -2440,8 +2443,8 @@ function PPREV_DOC(html){ return `<!DOCTYPE html><html lang="tr"><head><meta cha
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Literata:opsz,wght@7..72,500;7..72,650&display=swap" rel="stylesheet">
     <style>${PPREV_CSS}</style></head><body>${html}</body></html>`; }
-function doPrint(html, orient){
-  setPage(orient);
+function doPrint(html, orient, opt){
+  setPage(orient, opt);
   BELGE_LOGO = null; html = sosyalEkle(html);
   PPREV_HTML = html;
   { const st = stu(); const ad = PRINT_AD!==null ? PRINT_AD : (st&&st.ad||""); PRINT_AD = null; PPREV_TITLE = printBaslik(html, ad);
@@ -2484,7 +2487,7 @@ function sosyalBlok(){
   return `<div class="akp-sos" style="display:flex;gap:18pt;flex-wrap:wrap;align-items:center;margin-top:12pt;padding-top:8pt;border-top:0.6pt solid #b9c4cc;page-break-inside:avoid;break-inside:avoid">${parca.join("")}</div>`;
 }
 function sosyalEkle(html){ if(/class="akp-sos"/.test(html)) return html; const s = sosyalBlok(); if(!s) return html;
-  const i = html.indexOf('<div class="mh-ft">'); return i>=0 ? html.slice(0,i)+s+html.slice(i) : html+s; }
+  let i = html.indexOf('<div class="mh-ft">'); if(i<0) i = html.lastIndexOf('<div class="pfoot">'); return i>=0 ? html.slice(0,i)+s+html.slice(i) : html+s; }
 function mesajWeb(){ const a = antetAyar(); if(a.mesajWeb===false) return ""; const w = String(a.web||"").replace(/^https?:\/\//,"").replace(/\/+$/,""); return w ? "\n"+w : ""; }
 function pprevLogoUygula(sec){
   PPREV_HTML = PPREV_HTML.replace(/<img data-akp-logo[^>]*>/g, logoEtiket(sec));
@@ -2708,54 +2711,135 @@ function printVeli(){
 let SN_EDIT = null;
 function renderSeans(){
   const s=stu(); const L=(DB.seans[s.id]=DB.seans[s.id]||[]); const bugun=todayIso();
-  const list=L.slice().sort((a,b)=>(b.tarih||"").localeCompare(a.tarih||""));
+  const list=L.slice().sort((a,b)=>(b.tarih||"").localeCompare(a.tarih||"")||String(b.id).localeCompare(String(a.id)));
   const bekleyen=L.filter(x=>x.sonraki&&!x.bitti).length;
   const ed = SN_EDIT ? L.find(x=>x.id===SN_EDIT) : null;
   if(SN_EDIT && !ed) SN_EDIT=null;
-  const items=list.map(x=>{
-    const gec = x.sonraki && x.sonTarih && !x.bitti && x.sonTarih<bugun;
-    return `<div class="box gl${gec?" late":""}"><div class="colhead"><h3>${trDate(x.tarih)} · ${esc(x.kanal)}</h3><div class="actions" style="margin:0"><button class="btn small" data-snedit="${x.id}">Düzenle</button><button class="btn small" data-sndel="${x.id}">Sil</button></div></div>
-      ${x.konu?`<div class="muted"><b>Odak:</b> ${esc(x.konu)}</div>`:""}
-      <div class="txt">${esc(x.gozlem)}</div>
-      ${x.sonraki?`<div class="muted">Sonraki seans planı: ${esc(x.sonraki)}${x.sonTarih?" ("+trDate(x.sonTarih)+")":""}${gec?" · tarihi geçti":""}</div>
-      <label class="done"><input type="checkbox" data-sndone="${x.id}" ${x.bitti?"checked":""}> Tamamlandı</label>`:""}</div>`;
+  const ac = snAcikGorevler(L), C = SN_CIKTI;
+  const items=list.map((x,ix)=>{
+    const gec = x.sonraki && x.sonTarih && !x.bitti && x.sonTarih<bugun, gl = snGorevler(x), gd = gl.filter(g=>g.d).length;
+    return `<details class="box gl${gec?" late":""}"${ix===0?" open":""}><summary style="cursor:pointer;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><b>${trDate(x.tarih)}</b><span class="muted">${esc(x.kanal||"")}${x.sure?" · "+esc(String(x.sure))+" dk":""}</span>${x.konu?`<span style="flex:1 1 160px">${esc(x.konu)}</span>`:""}${gl.length?`<span class="badge">${gd}/${gl.length} görev</span>`:""}${gec?`<span class="badge" style="background:var(--redpen);color:#fff">plan tarihi geçti</span>`:""}</summary>
+      <div style="margin-top:8px">
+      ${x.gozlem?`<div class="txt">${esc(x.gozlem)}</div>`:""}
+      ${gl.length?`<div style="margin-top:8px"><b>Kararlar ve görevler</b>${gl.map((g,i)=>`<label class="done" style="display:flex;gap:6px;align-items:flex-start;margin:3px 0"><input type="checkbox" data-sngt="${x.id}|${i}" ${g.d?"checked":""}> <span${g.d?' style="text-decoration:line-through;color:var(--ink-3)"':""}>${esc(g.t)}</span></label>`).join("")}</div>`:""}
+      ${x.sonraki||x.sonTarih?`<div class="muted" style="margin-top:6px">Sonraki seans planı: ${esc(x.sonraki||"")}${x.sonTarih?" ("+trDate(x.sonTarih)+")":""}${gec?" · tarihi geçti":""}</div>
+      <label class="done"><input type="checkbox" data-sndone="${x.id}" ${x.bitti?"checked":""}> Tamamlandı</label>`:""}
+      <div class="actions" style="margin-top:8px"><label class="done" style="margin-right:auto"><input type="checkbox" data-snsec="${x.id}" ${SN_SEC.has(x.id)?"checked":""}> Çıktıya ekle</label><button class="btn small" data-snedit="${x.id}">Düzenle</button><button class="btn small" data-sndel="${x.id}">Sil</button></div></div></details>`;
   }).join("");
+  const onuz = snKapsam(L,C).length;
   $("panel").innerHTML = `
     <div class="colhead"><h2>${esc(s.ad)}: koçluk seansı notları</h2>
-      <span class="muted">Seans: ${L.length} · Son seans: ${list.length?trDate(list[0].tarih):"–"} · Bekleyen plan: ${bekleyen}</span></div>
+      <span class="muted">Seans: ${L.length} · Son seans: ${list.length?trDate(list[0].tarih):"–"} · Bekleyen plan: ${bekleyen} · Açık görev: ${ac.length}</span></div>
+    ${ac.length&&!ed?`<div class="box"><h3 style="margin:0 0 4px">☐ Önceki seanslardan açık görevler (${ac.length})</h3><p class="hint" style="margin:0 0 6px">Bu seansta yapılanları işaretleyin.</p>${ac.map(o=>`<label class="done" style="display:flex;gap:6px;align-items:flex-start;margin:3px 0"><input type="checkbox" data-sngt="${o.x.id}|${o.i}"> <span>${esc(o.g.t)} <span class="muted">(${trDate(o.x.tarih)})</span></span></label>`).join("")}</div>`:""}
     <div class="box"><h3>${ed?"Seans kaydını düzenle":"Yeni seans kaydı"}</h3>
       <div class="form">
         <div class="field"><label for="snTarih">Tarih</label><input id="snTarih" type="date" value="${esc(ed?ed.tarih||bugun:bugun)}"></div>
         <div class="field"><label for="snKanal">Şekil</label><select id="snKanal">${KANAL.map(k=>`<option ${ed&&k===ed.kanal?"selected":""}>${k}</option>`).join("")}</select></div>
-        <div class="field"><label for="snKonu">Seansın odağı</label><input id="snKonu" type="text" placeholder="Örnek: Haftalık plan gözden geçirme, deneme analizi" value="${esc(ed?ed.konu||"":"")}"></div>
+        <div class="field"><label for="snSure">Süre (dk)</label><input id="snSure" type="number" min="0" step="5" placeholder="Örnek: 40" value="${esc(ed?ed.sure||"":"")}"></div>
       </div>
-      <div class="field" style="margin-top:8px"><label for="snGozlem">Gözlem ve notlar</label><textarea id="snGozlem" rows="3" placeholder="Öğrencinin durumu, motivasyonu, konuşulanlar">${esc(ed?ed.gozlem||"":"")}</textarea></div>
+      <div class="field" style="margin-top:8px"><label for="snKonu">Seansın odağı</label><input id="snKonu" type="text" placeholder="Örnek: Haftalık plan gözden geçirme, deneme analizi" value="${esc(ed?ed.konu||"":"")}"></div>
+      <div class="field" style="margin-top:8px"><label for="snGozlem">Gözlem ve notlar</label><textarea id="snGozlem" rows="5" placeholder="Öğrencinin durumu, motivasyonu, konuşulanlar. Uzun metni olduğu gibi yapıştırabilirsiniz.">${esc(ed?ed.gozlem||"":"")}</textarea></div>
+      <div class="field" style="margin-top:8px"><label for="snGorev">Kararlar ve görevler <span class="muted">(her satır bir madde)</span></label><textarea id="snGorev" rows="3" placeholder="Örnek:&#10;Yanlış defterini her akşam 15 dk gözden geçir&#10;Pazartesiye kadar 2 deneme çöz">${esc(ed?snGorevMetni(ed):"")}</textarea></div>
       <div class="form" style="margin-top:8px">
         <div class="field"><label for="snSonraki">Sonraki seans planı</label><input id="snSonraki" type="text" placeholder="Örnek: Yanlış defterini birlikte gözden geçir" value="${esc(ed?ed.sonraki||"":"")}"></div>
         <div class="field"><label for="snSonTarih">Sonraki seans tarihi</label><input id="snSonTarih" type="date" value="${esc(ed?ed.sonTarih||"":"")}"></div>
       </div>
-      <div class="actions"><button class="btn primary" id="snSave">${ed?"Güncelle":"Seansı kaydet"}</button>${ed?`<button class="btn" id="snVazgec">Vazgeç</button>`:""}<button class="btn" id="snPrint">Seans günlüğünü yazdır</button></div>
+      <div class="actions"><button class="btn primary" id="snSave">${ed?"Güncelle":"Seansı kaydet"}</button>${ed?`<button class="btn" id="snVazgec">Vazgeç</button>`:""}</div>
     </div>
+    <div class="box"><h3 style="margin:0 0 4px">🖨️ A4 çıktı (antetli, logolu)</h3>
+      <div class="form">
+        <div class="field"><label for="snTur">Belge</label><select id="snTur"><option value="koc"${C.tur==="koc"?" selected":""}>Koç dosyası (tüm notlar)</option><option value="veli"${C.tur==="veli"?" selected":""}>Veli bilgilendirme özeti</option></select></div>
+        <div class="field"><label for="snKap">Kapsam</label><select id="snKap"><option value="tum"${C.kapsam==="tum"?" selected":""}>Tüm seanslar</option><option value="son3"${C.kapsam==="son3"?" selected":""}>Son 3 seans</option><option value="son5"${C.kapsam==="son5"?" selected":""}>Son 5 seans</option><option value="aralik"${C.kapsam==="aralik"?" selected":""}>Tarih aralığı</option><option value="secili"${C.kapsam==="secili"?" selected":""}>Seçtiklerim</option></select></div>
+        <div class="field" id="snAyr"${C.tur==="veli"?' style="display:none"':""}><label for="snAy">Ayrıntı</label><select id="snAy"><option value="tam"${C.ayrinti==="tam"?" selected":""}>Ayrıntılı (notlarla)</option><option value="ozet"${C.ayrinti==="ozet"?" selected":""}>Özet (odak, görevler, plan)</option></select></div>
+      </div>
+      <div class="form" id="snAral" style="${C.kapsam==="aralik"?"":"display:none;"}margin-top:6px"><div class="field"><label for="snBas">Başlangıç</label><input id="snBas" type="date" value="${esc(C.bas)}"></div><div class="field"><label for="snBit">Bitiş</label><input id="snBit" type="date" value="${esc(C.bit)}"></div></div>
+      <p class="hint" id="snHint" style="margin:6px 0 0">${C.tur==="veli"?"Veli özetinde ham gözlem notları yer almaz; odak, görevler ve sonraki plan gider. ":""}${C.kapsam==="secili"?"Aşağıdaki kartlarda “Çıktıya ekle” kutularını işaretleyin. ":""}Çıktıya girecek seans: <b id="snSay">${onuz}</b></p>
+      <div class="actions"><button class="btn primary" id="snPrint" type="button">Önizle ve yazdır</button></div></div>
     ${items||'<div class="empty">Bu öğrenci için henüz seans kaydı yok.</div>'}`;
   $("snSave").addEventListener('click',()=>{
-    const gozlem=$("snGozlem").value.trim(); if(!gozlem){ toast("Gözlem notunu yazın"); $("snGozlem").focus(); return; }
-    const veri={tarih:$("snTarih").value||bugun, kanal:$("snKanal").value, konu:$("snKonu").value.trim(), gozlem, sonraki:$("snSonraki").value.trim(), sonTarih:$("snSonTarih").value};
+    const gozlem=$("snGozlem").value.trim(), gorevMetin=$("snGorev").value.trim();
+    if(!gozlem && !gorevMetin && !$("snKonu").value.trim()){ toast("Odak, gözlem ya da görev yazın"); $("snGozlem").focus(); return; }
+    const veri={tarih:$("snTarih").value||bugun, kanal:$("snKanal").value, sure:$("snSure").value.trim(), konu:$("snKonu").value.trim(), gozlem, gorevler:snGorevParse(gorevMetin, ed&&ed.gorevler), sonraki:$("snSonraki").value.trim(), sonTarih:$("snSonTarih").value};
     if(ed){ Object.assign(ed, veri); SN_EDIT=null; save(); renderSeans(); toast("Seans kaydı güncellendi"); }
     else { L.push(Object.assign({id:yeniId("sn"), bitti:false}, veri)); save(); renderSeans(); toast("Seans kaydedildi"); }
   });
   if($("snVazgec")) $("snVazgec").addEventListener('click',()=>{ SN_EDIT=null; renderSeans(); });
-  $("snPrint").addEventListener('click', printSeans);
+  const cik = ()=>{ SN_CIKTI = {tur:$("snTur").value, kapsam:$("snKap").value, ayrinti:$("snAy").value, bas:$("snBas").value, bit:$("snBit").value}; $("snAyr").style.display = SN_CIKTI.tur==="veli"?"none":""; $("snAral").style.display = SN_CIKTI.kapsam==="aralik"?"":"none"; $("snSay").textContent = snKapsam(L,SN_CIKTI).length; };
+  ["snTur","snKap","snAy","snBas","snBit"].forEach(id=>$(id).addEventListener("change",()=>{ cik(); if(id==="snTur"||id==="snKap") renderSeans(); }));
+  document.querySelectorAll('[data-snsec]').forEach(x=>x.addEventListener('change',()=>{ if(x.checked) SN_SEC.add(x.dataset.snsec); else SN_SEC.delete(x.dataset.snsec); cik(); }));
+  $("snPrint").addEventListener('click', ()=>{ cik(); printSeans(); });
+  document.querySelectorAll('[data-sngt]').forEach(x=>x.addEventListener('change',()=>{ const [id,i] = x.dataset.sngt.split("|"); const g=L.find(y=>y.id===id); if(g && g.gorevler && g.gorevler[+i]){ g.gorevler[+i].d = x.checked; g._m = Date.now(); save(); renderSeans(); } }));
   document.querySelectorAll('[data-sndone]').forEach(x=>x.addEventListener('change',()=>{ const g=L.find(y=>y.id===x.dataset.sndone); if(g){ g.bitti=x.checked; save(); renderSeans(); } }));
-  document.querySelectorAll('[data-snedit]').forEach(b=>b.addEventListener('click',()=>{ SN_EDIT=b.dataset.snedit; renderSeans(); }));
+  document.querySelectorAll('[data-snedit]').forEach(b=>b.addEventListener('click',()=>{ SN_EDIT=b.dataset.snedit; renderSeans(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-sndel]').forEach(b=>b.addEventListener('click',()=>armDel(b,()=>{
-    DB.seans[s.id]=L.filter(y=>y.id!==b.dataset.sndel); if(SN_EDIT===b.dataset.sndel) SN_EDIT=null; save(); renderSeans(); toast("Kayıt silindi");
+    DB.seans[s.id]=L.filter(y=>y.id!==b.dataset.sndel); SN_SEC.delete(b.dataset.sndel); if(SN_EDIT===b.dataset.sndel) SN_EDIT=null; save(); renderSeans(); toast("Kayıt silindi");
   })));
 }
+
+/* ---- v3.25.0: seans günlüğü (bölünmüş form, görev takibi, A4 seans kartları) ---- */
+let SN_SEC = new Set(), SN_CIKTI = {tur:"koc", kapsam:"tum", ayrinti:"tam", bas:"", bit:""};
+function snGorevler(x){ return Array.isArray(x.gorevler) ? x.gorevler : []; }
+function snGorevMetni(x){ return snGorevler(x).map(g=>g.t).join("\n"); }
+function snGorevParse(metin, eski){
+  const m = {}; (eski||[]).forEach(g=>{ m[g.t] = g.d; });
+  return String(metin||"").split(/\n+/).map(t=>t.replace(/^\s*(?:[-•*☐☑✓]+|\d+[.)])\s*/,"").trim()).filter(Boolean).map(t=>({t, d:!!m[t]}));
+}
+function snAcikGorevler(L){ const o = []; L.forEach(x=>snGorevler(x).forEach((g,i)=>{ if(!g.d) o.push({x, i, g}); })); return o.sort((a,b)=>String(a.x.tarih).localeCompare(String(b.x.tarih))); }
+function snSirali(L){ return L.slice().sort((a,b)=>String(a.tarih||"").localeCompare(String(b.tarih||""))||String(a.id).localeCompare(String(b.id))); }
+function snKapsam(L, c){
+  const S = snSirali(L);
+  if(c.kapsam==="son3") return S.slice(-3); if(c.kapsam==="son5") return S.slice(-5);
+  if(c.kapsam==="aralik") return S.filter(x=>(!c.bas||x.tarih>=c.bas)&&(!c.bit||x.tarih<=c.bit));
+  if(c.kapsam==="secili") return S.filter(x=>SN_SEC.has(x.id));
+  return S;
+}
+function snParagraf(t){ return String(t||"").split(/\n{1,}/).map(p=>p.trim()).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join(""); }
+const SN_CSS = `<style>
+  .sg-ozet{display:flex;gap:6pt;margin:2pt 0 9pt}
+  .sg-ozet>div{flex:1;border:.6pt solid #c9d3dc;border-radius:3pt;padding:5pt 7pt;background:#f7f9fa}
+  .sg-ozet b{display:block;font-size:13pt;color:#14283a;line-height:1.15}
+  .sg-ozet span{font-size:7.6pt;color:#5d7082;text-transform:uppercase;letter-spacing:.03em}
+  .sg-giris{font-size:9.3pt;line-height:1.5;color:#34495c;margin:0 0 9pt}
+  .sk{border:.7pt solid #c9d3dc;border-left:3pt solid #2f6f5e;border-radius:3pt;margin:0 0 8pt;padding:0 0 6pt}
+  .sk-h{display:flex;align-items:baseline;gap:8pt;background:#f3f6f8;padding:4pt 8pt;border-bottom:.6pt solid #c9d3dc;break-after:avoid;page-break-after:avoid}
+  .sk-h b{font-size:10.2pt;color:#14283a}.sk-h .m{font-size:8.6pt;color:#34495c}.sk-h .no{margin-left:auto;font-size:8pt;color:#5d7082}
+  .sk-b{padding:5pt 8pt 0}
+  .sk-e{font-size:7.6pt;text-transform:uppercase;letter-spacing:.04em;color:#2f6f5e;font-weight:600;margin:5pt 0 1.5pt;break-after:avoid;page-break-after:avoid}
+  .sk-b p{margin:0 0 3pt;font-size:9.3pt;line-height:1.48;color:#14283a;orphans:3;widows:3;overflow-wrap:anywhere}
+  .sk-odak{font-size:10pt;font-weight:600;color:#14283a;margin:0}
+  .sk-g{list-style:none;margin:0;padding:0}.sk-g li{display:flex;gap:5pt;font-size:9.3pt;line-height:1.45;margin:0 0 2pt;break-inside:avoid;page-break-inside:avoid}
+  .sk-g .kt{flex:0 0 9pt;height:9pt;border:.8pt solid #34495c;border-radius:1.5pt;margin-top:2.2pt;position:relative}
+  .sk-g .kt.d{background:#2f6f5e;border-color:#2f6f5e}.sk-g .kt.d:after{content:"";position:absolute;left:2.4pt;top:.3pt;width:2.2pt;height:5pt;border:solid #fff;border-width:0 1pt 1pt 0;transform:rotate(40deg)}
+  .sk-g li.d span{color:#5d7082;text-decoration:line-through}
+  .sk-s{margin:5pt 8pt 0;padding:4pt 7pt;border:.6pt dashed #aebbc7;border-radius:3pt;font-size:9pt;color:#34495c;break-inside:avoid;page-break-inside:avoid}
+  .sk-s b{color:#14283a}
+  .sg-bos{font-size:9.5pt;color:#5d7082;padding:10pt 0}
+</style>`;
+function snBelge(s, L, c){
+  const S = snKapsam(L, c), veli = c.tur==="veli", tam = !veli && c.ayrinti==="tam";
+  const tum = snSirali(L), no = x=>tum.indexOf(x)+1;
+  const g = S.reduce((a,x)=>a.concat(snGorevler(x)),[]), gd = g.filter(y=>y.d).length;
+  const son = S.length?S[S.length-1]:null, ac = snAcikGorevler(S).length;
+  const aral = S.length ? trDate(S[0].tarih)+" – "+trDate(S[S.length-1].tarih) : "–";
+  const bekleyenPlan = tum.slice().reverse().find(x=>x.sonraki||x.sonTarih);
+  const kartlar = S.map(x=>{
+    const gl = snGorevler(x);
+    return `<div class="sk"><div class="sk-h"><b>${trDate(x.tarih)}</b><span class="m">${esc(x.kanal||"")}${x.sure?" · "+esc(String(x.sure))+" dk":""}</span><span class="no">${no(x)}. seans</span></div><div class="sk-b">
+      ${x.konu?`<div class="sk-e">Seansın odağı</div><div class="sk-odak">${esc(x.konu)}</div>`:""}
+      ${tam&&x.gozlem?`<div class="sk-e">Gözlem ve notlar</div>${snParagraf(x.gozlem)}`:""}
+      ${gl.length?`<div class="sk-e">${veli?"Çalışma görevleri":"Kararlar ve görevler"}</div><ul class="sk-g">${gl.map(y=>`<li class="${y.d?"d":""}"><i class="kt ${y.d?"d":""}"></i><span>${esc(y.t)}</span></li>`).join("")}</ul>`:""}
+    </div>${x.sonraki||x.sonTarih?`<div class="sk-s"><b>Sonraki seans:</b> ${esc(x.sonraki||"")}${x.sonTarih?" ("+trDate(x.sonTarih)+")":""}</div>`:""}</div>`;
+  }).join("");
+  const baslik = veli ? "Koçluk süreci bilgilendirme özeti" : "Koçluk seansı günlüğü";
+  const giris = veli ? `<p class="sg-giris">Sayın veli, ${esc(s.ad)} ile yaptığımız koçluk seanslarının özeti ve çalışma görevleri aşağıdadır. Sorularınız için bana ulaşabilirsiniz.</p>` : "";
+  return SN_CSS+`<div class="pg">${pHead(baslik, aral)}
+    <div class="sg-ozet"><div><b>${S.length}</b><span>Seans</span></div><div><b>${g.length?gd+" / "+g.length:"–"}</b><span>Görev tamamlandı</span></div><div><b>${son?trDate(son.tarih):"–"}</b><span>Son seans</span></div><div><b>${bekleyenPlan&&bekleyenPlan.sonTarih?trDate(bekleyenPlan.sonTarih):"–"}</b><span>Sonraki seans</span></div></div>
+    ${giris}${kartlar||'<div class="sg-bos">Seçilen kapsamda seans kaydı yok.</div>'}${pFoot()}</div>`;
+}
 function printSeans(){
-  const s=stu(); const L=(DB.seans[s.id]||[]).slice().sort((a,b)=>(a.tarih||"").localeCompare(b.tarih||""));
-  const rows=L.map(x=>`<tr><td>${trDate(x.tarih)}</td><td>${esc(x.kanal)}</td><td>${esc(x.konu||"")}</td><td>${esc(x.gozlem)}</td><td>${esc(x.sonraki||"")}${x.sonTarih?" ("+trDate(x.sonTarih)+")":""}${x.sonraki&&x.bitti?" ✓":""}</td></tr>`).join("");
-  doPrint(`<div class="pg">${pHead("Koçluk seansı günlüğü", GLABEL[s.sinif])}
-    <table class="pt"><tr><th style="width:10%">Tarih</th><th style="width:13%">Şekil</th><th style="width:18%">Odak</th><th>Gözlem</th><th style="width:22%">Sonraki plan</th></tr>${rows}</table>${pFoot()}</div>`, "portrait");
+  const s = stu(), L = DB.seans[s.id]||[]; const c = SN_CIKTI;
+  if(!snKapsam(L,c).length){ toast("Seçilen kapsamda seans yok"); return; }
+  PRINT_AD = null; doPrint(snBelge(s, L, c), "portrait", {sayfaNo:true});
 }
 
 /* ---------- Faz 11: koçluk formları (sözleşme, tanıma formu, taahhütname) ---------- */
@@ -8093,6 +8177,7 @@ function onayBagla(){
 
 /* ---------- Güvenlik arayüzü, yedek dosyası, sürüm geçmişi, giriş ekranı ---------- */
 const SURUM_NOTLARI = [
+  {v:"3.25.0", t:"24 Kasım 2026", n:"Seans günlüğü yenilendi: form bölündü (odak, gözlem, kararlar ve görevler, süre, sonraki plan); görev takibi (önceki seanslardan açık görevler işaretlenir); seanslar açılır kapanır kartlar; yeni A4 çıktı: antetli, logolu, seans kartları, sayfa numarası, Koç dosyası ve Veli bilgilendirme özeti, kapsam (tümü, son 3/5, tarih aralığı, seçtiklerim), ayrıntılı ya da özet."},
   {v:"3.24.0", t:"15 Kasım 2026", n:"Ödeme sıklığı: öğrenci kartında Haftalık ya da Toplu (2–6 haftada bir, varsayılan 4) seçilir. Toplu öğrencide dersler yine haftalık girilir; her 4 ders haftasında bir dönem tamamlanır, Bugün’de ‘Toplu ödeme talebi zamanı’ çıkar, açık dönemdeki haftalar gecikmiş sayılmaz. Ödeme takibinde dönem tablosu, tahsilatı en eski haftadan düşen ‘Tahsilatı kaydet’, Geri al ve veliye talep mesajı eklendi. Tahsilat kısmi olabilir, kalan borç devam eder."},
   {v:"3.23.3", t:"15 Kasım 2026", n:"is.gd yedeği kaldırıldı (Türkiye’de bazı ağlarda açılmıyordu). Kısaltma yalnızca TinyURL ile çalışır; kota dolarsa ya da TinyURL reddederse uzun bağlantı gönderilir (her zaman açılır). TinyURL kotası dolunca betik 6 saat boyunca denemez. Drive scriptini güncelleyip yeniden dağıtın."},
   {v:"3.23.2", t:"12 Kasım 2026", n:"Kısa bağlantı: TinyURL kotası dolu ya da reddederse Drive betiği otomatik olarak ücretsiz is.gd ile kısaltır (TinyURL anahtarı olmasa da çalışır); kota dolduğunda 6 saat boyunca TinyURL denenmez; test düğmesi artık her seferinde yeni bağlantı üretmez; kısaltma başarısız olursa bildirimde sebep yazar. Drive scriptini güncelleyip yeniden dağıtmanız gerekir."},
